@@ -1,7 +1,7 @@
 -- Photon is a World of Warcraft® user interface addon.
--- Copyright (c) 2026- Linus Olsson
 -- Copyright (c) 2017-2023 Britt W. Yazel
 -- Copyright (c) 2006-2014 Connor H. Chenoweth
+-- Copyright (c) 2026 Linus Olsson
 -- This code is licensed under the MIT license (see LICENSE for details)
 
 local _, addonTable = ...
@@ -67,9 +67,9 @@ addonTable.barConfigLayout = {
 				{
 					{ id = "horizontalPadding", width = "normal" },
 					{ id = "verticalPadding", width = "normal" },
-					{ id = "shapeBox", box = true, name = "", light = true, width = "normal", rows = {
+					{ id = "strataBox", box = true, name = "", light = true, width = "normal", rows = {
 						{
-							{ id = "shape", width = "normal" },
+							{ id = "strata", width = "normal" },
 						},
 					}},
 				},
@@ -83,17 +83,20 @@ addonTable.barConfigLayout = {
 					{ id = "alphaUpSpeed", width = "normal" },
 				},
 				{
-					{ id = "strataBox", box = true, name = "", light = true, width = "normal", rows = {
+					{ id = "shapeBox", box = true, name = "", light = true, width = "normal", rows = {
 						{
-							{ id = "strata", width = "normal" },
+							{ id = "shape", width = "normal" },
+						},
+					}},
+					{ id = "rotationBox", box = true, name = "", light = true, width = "normal", rows = {
+						{
+							{ id = "rotation", width = "normal" },
 						},
 					}},
 				},
 			}},
-			--the arrow keys nudge the bar while its tab is open, BarConfigWindow.lua finds it by the tab's id
 			{ id = "position", name = "Position", rows = {
 				{
-					--the lock under the dropdown, the point grids beside both
 					{ id = "anchorLeft", box = true, name = "", border = false, width = "normal", rows = {
 						{
 							{ id = "anchorTo", width = "normal" },
@@ -104,7 +107,6 @@ addonTable.barConfigLayout = {
 					}},
 					{ id = "anchorPoint", width = "half" },
 					{ id = "anchorRelativePoint", width = "half" },
-					--the offset sliders on the right, Y above X
 					{ id = "offsetRight", box = true, name = "", border = false, width = "double", rows = {
 						{
 							{ id = "offsetY", width = "double" },

@@ -237,6 +237,7 @@ local function barDefinitions()
 			{linear = L["Linear"], circle = L["Circle"], ["circle + one"] = L["Circle + One"]},
 			{"linear", "circle", "circle + one"},
 			"GetBarShape", "SetBarShape"),
+		rotation = barRange(L["Rotation"], 0, 359, 1, false, "GetArcStart", "SetArcStart"),
 		horizontalPadding = barRange(L["Horizontal Padding"], -200, 200, 1, false, "GetHorizontalPad", "SetHorizontalPad"),
 		verticalPadding = barRange(L["Vertical Padding"], -200, 200, 1, false, "GetVerticalPad", "SetVerticalPad"),
 		alpha = barRange(L["Opacity"], 0.01, 1, 0.01, true, "GetBarAlpha", "SetBarAlpha"),
@@ -299,6 +300,11 @@ local function barDefinitions()
 	for state, info in pairs(Photon.MANAGED_SECONDARY_STATES) do
 		local name = not gameBars[state] and Photon.STATES[state.."1"] or info.localizedName
 		definitions["state_"..state] = barStateToggle(state, name)
+	end
+
+	--a line has nothing to turn
+	definitions.rotation.disabled = function()
+		return bar():GetBarShape() == "linear"
 	end
 
 	positionDefinitions(definitions)
