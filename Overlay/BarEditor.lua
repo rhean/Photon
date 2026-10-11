@@ -85,6 +85,19 @@ end
 ---@param button string
 local function onDragStart(overlay, button)
 	overlay.frame.isDragging = true
+
+	--the overlay leaves the bar where it is, so the bar can follow it without the two pinned to each other
+	local left, bottom, width, height = overlay.frame:GetRect()
+	overlay.frame:ClearAllPoints()
+	overlay.frame:SetSize(width, height)
+	overlay.frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", left, bottom)
+
+	--the bar moves with the overlay while dragging. a secure bar can't be moved in combat, it jumps on drop then
+	if not InCombatLockdown() then
+		overlay.bar:ClearAllPoints()
+		overlay.bar:SetPoint("CENTER", overlay.frame, "CENTER")
+	end
+
 	overlay.frame:StartMoving()
 end
 
@@ -99,10 +112,12 @@ local function onDragStop(overlay)
 	overlay.bar:SetXAxis(x)
 	overlay.bar:SetYAxis(y)
 
+	--back on the screen, off the overlay
 	overlay.bar:SetPosition()
 	overlay.bar:UpdateBarStatus()
 
 	--re-attach the overlay to the bar at its new position
+	overlay.frame:ClearAllPoints()
 	updateAppearance(overlay)
 end
 
