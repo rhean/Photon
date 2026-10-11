@@ -684,6 +684,8 @@ function UI.Tabs(parent, onSelect)
 			end
 			previous = tab
 		end
+		--for something to sit after the tabs
+		self.lastTab = previous
 		self:Select(value)
 	end
 
