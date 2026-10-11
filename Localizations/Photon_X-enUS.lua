@@ -426,6 +426,14 @@ L["Action Bar Pages"] = true
 L["Last 5s"] = true
 L["Reload UI"] = true
 
+-- the position box, on the General Configuration tab
+L["Position"] = true
+L["Anchor To"] = true
+L["Screen"] = true
+L["Bar Point"] = true
+L["Target Point"] = true
+L["Lock Dragging"] = true
+
 L["Preset Action States"] = true
 L["Custom Action States"] = true
 
@@ -687,6 +695,14 @@ L["BarDesc_alpha"] = "How visible the bar normally is. Lower is more transparent
 L["BarDesc_alphaUp"] = "When the bar becomes fully visible: on mouseover, in combat, or both."
 L["BarDesc_alphaUpSpeed"] = "How fast the bar fades in and out."
 L["BarDesc_strata"] = "Which layer the bar is drawn on."
+
+-- Position
+L["BarDesc_anchorTo"] = "What the bar is attached to: the screen, or another bar it then moves with."
+L["BarDesc_anchorPoint"] = "The side or corner of this bar that is attached."
+L["BarDesc_anchorRelativePoint"] = "The side or corner of the screen or the other bar it is attached to."
+L["BarDesc_positionLocked"] = "Stops the bar from being dragged with the mouse. It can still be moved here."
+L["BarDesc_offsetX"] = "How far the bar is from its anchor, left or right. The arrows either side, and the left and right arrow keys while General Configuration is open, move it 1 pixel."
+L["BarDesc_offsetY"] = "How far the bar is from its anchor, up or down. The arrows either side, and the up and down arrow keys while General Configuration is open, move it 1 pixel."
 
 -- Visuals
 L["BarDesc_keybindLabel"] = "Shows the key bound to each button."

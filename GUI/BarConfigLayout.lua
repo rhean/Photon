@@ -90,6 +90,31 @@ addonTable.barConfigLayout = {
 					}},
 				},
 			}},
+			--the arrow keys nudge the bar while its tab is open, BarConfigWindow.lua finds it by the tab's id
+			{ id = "position", name = "Position", rows = {
+				{
+					--the lock under the dropdown, the point grids beside both
+					{ id = "anchorLeft", box = true, name = "", border = false, width = "normal", rows = {
+						{
+							{ id = "anchorTo", width = "normal" },
+						},
+						{
+							{ id = "positionLocked", width = "normal" },
+						},
+					}},
+					{ id = "anchorPoint", width = "half" },
+					{ id = "anchorRelativePoint", width = "half" },
+					--the offset sliders on the right, Y above X
+					{ id = "offsetRight", box = true, name = "", border = false, width = "double", rows = {
+						{
+							{ id = "offsetY", width = "double" },
+						},
+						{
+							{ id = "offsetX", width = "double" },
+						},
+					}},
+				},
+			}},
 			{ id = "visuals", name = "Visuals", rows = {
 				{
 					{ id = "visualsLeft", box = true, name = "", border = false, width = 1.5, rows = {

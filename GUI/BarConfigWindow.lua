@@ -220,6 +220,8 @@ CONTROLS.select = function(parent)
 
 		self.dropdown:SetItems(items)
 		self.dropdown:SetValue(option.get({}))
+		--an option's onHover gets the item under the mouse, nil when there is none
+		self.dropdown.onHover = option.onHover
 		self.dropdown:SetEnabled(not resolve(option.disabled))
 		self.onSelect = function(value)
 			option.set({}, value)
@@ -230,6 +232,55 @@ CONTROLS.select = function(parent)
 	--blizzard's dropdown is taller than the flat one
 	function control:Measure()
 		return self:CaptionHeight() + 3 + math.max(self.dropdown:GetHeight(), Style.rowHeight)
+	end
+
+	return control
+end
+
+--a side, corner or the center of a frame, picked on a 3x3 grid. the picked one is gold
+local GRID_CELL, GRID_GAP = 16, 2
+
+CONTROLS.point = function(parent)
+	local control = labelled(parent)
+	control.grid = CreateFrame("Frame", nil, control)
+	control.grid:SetSize(GRID_CELL * 3 + GRID_GAP * 2, GRID_CELL * 3 + GRID_GAP * 2)
+	control.grid:SetPoint("TOPLEFT", control.label, "BOTTOMLEFT", 0, -3)
+
+	control.cells = {}
+	for index, point in ipairs(Photon.Bar.ANCHOR_POINTS) do
+		local cell = CreateFrame("Button", nil, control.grid)
+		Style.Flat(cell, Style.strip)
+		cell:SetSize(GRID_CELL, GRID_CELL)
+		local column, row = (index - 1) % 3, math.floor((index - 1) / 3)
+		cell:SetPoint("TOPLEFT", column * (GRID_CELL + GRID_GAP), -row * (GRID_CELL + GRID_GAP))
+		local hover = cell:CreateTexture(nil, "HIGHLIGHT")
+		hover:SetAllPoints()
+		hover:SetColorTexture(unpack(Style.hover))
+		cell:SetScript("OnClick", function()
+			if control.onPick then
+				control.onPick(point)
+			end
+		end)
+		tooltip(cell, control)
+		control.cells[point] = cell
+	end
+
+	function control:Bind(option)
+		self.label:SetText(resolve(option.name))
+		local value = option.get({})
+		for point, cell in pairs(self.cells) do
+			cell.photonFlat.bg:SetColorTexture(unpack(point == value and Style.accent or Style.strip))
+		end
+		local disabled = resolve(option.disabled)
+		self.grid:SetAlpha(disabled and 0.5 or 1)
+		self.onPick = not disabled and function(point)
+			option.set({}, point)
+			self.changed()
+		end or nil
+	end
+
+	function control:Measure()
+		return self:CaptionHeight() + 3 + self.grid:GetHeight()
 	end
 
 	return control
@@ -280,6 +331,8 @@ CONTROLS.range = function(parent)
 	function control:Bind(option)
 		self:SetLabel(resolve(option.name))
 		self:SetRange(option.min or 0, option.max or 100, option.step, option.softMax, option.isPercent)
+		--nudge = true gives it arrows either side that step it, see UI.Slider
+		self:SetSteppers(option.nudge == true)
 		self:SetValue(option.get({}) or option.min or 0)
 		self:SetDisabled(resolve(option.disabled))
 		--the bar follows while dragging, both windows catch up once it is let go
@@ -730,6 +783,7 @@ local function createWindow()
 	end)
 	barDropdown:SetPoint("LEFT", barLabel, "RIGHT", Style.gap * 2, 0)
 	barDropdown:SetWidth(220)
+	barDropdown.onHover = addonTable.overlay.BarEditor.highlightBar
 	barRow:SetHeight(math.max(barDropdown:GetHeight(), Style.rowHeight))
 
 	-------------------------------- new bar --------------------------------
@@ -785,6 +839,31 @@ local function createWindow()
 	pageTabs = UI.Tabs(wrapper, function(value)
 		selected.page = value
 		render()
+	end)
+
+	-------------------------------- arrow keys --------------------------------
+	--on the tab with the position box the arrow keys nudge the selected bar a pixel.
+	local NUDGES = {LEFT = {-1, 0}, RIGHT = {1, 0}, UP = {0, 1}, DOWN = {0, -1}}
+	local keys = CreateFrame("Frame", nil, window)
+	keys:EnableKeyboard(true)
+	keys:SetPropagateKeyboardInput(true)
+	keys:SetScript("OnKeyDown", function(self, key)
+		if InCombatLockdown() then
+			return
+		end
+		local nudge = NUDGES[key]
+		if nudge and selected.tab == "bar:general" and Photon.currentBar then
+			self:SetPropagateKeyboardInput(false)
+			Photon.currentBar:Nudge(nudge[1], nudge[2])
+			requestRender()
+		else
+			self:SetPropagateKeyboardInput(true)
+		end
+	end)
+	keys:SetScript("OnKeyUp", function(self)
+		if not InCombatLockdown() then
+			self:SetPropagateKeyboardInput(true)
+		end
 	end)
 
 	scroll = UI.ScrollArea(wrapper)

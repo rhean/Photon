@@ -191,6 +191,9 @@ Photon.CreateNewBar = Bar.CreateNewBar --this is so the slash function works cor
 
 
 function Bar:DeleteBar()
+	--before the bar moves away, so bars anchored to it stay put, and while its place in the saved bars is known
+	self:ReleaseAnchors()
+
 	self.handler:SetAttribute("state-current", "homestate")
 	self.handler:SetAttribute("state-last", "homestate")
 	self.handler:SetAttribute("showstates", "homestate")
@@ -942,68 +945,6 @@ end
 -------------------------------------------------------
 
 
-function Bar:GetPosition(oFrame)
-	local relFrame, point
-
-	if oFrame then
-		relFrame = oFrame
-	else
-		relFrame = self:GetParent()
-	end
-
-	local s = self:GetScale()
-	local w, h = relFrame:GetWidth()/s, relFrame:GetHeight()/s
-	local x, y = self:GetCenter()
-	local vert = (y>h/1.5) and "TOP" or (y>h/3) and "CENTER" or "BOTTOM"
-	local horz = (x>w/1.5) and "RIGHT" or (x>w/3) and "CENTER" or "LEFT"
-
-	if vert == "CENTER" then
-		point = horz
-	elseif horz == "CENTER" then
-		point = vert
-	else
-		point = vert..horz
-	end
-
-	if vert:find("CENTER") then
-		y = y - h/2
-	end
-	if horz:find("CENTER") then
-		x = x - w/2
-	end
-	if point:find("RIGHT") then
-		x = x - w
-	end
-	if point:find("TOP") then
-		y = y - h
-	end
-
-	return point, x, y
-end
-
-
-function Bar:SetPosition()
-	local point, x, y = self.data.point, self:GetXAxis(), self:GetYAxis()
-
-	--bars saved while snapped by the old snapping have "SnapTo: TL" as their point
-	if point:find("SnapTo") then
-		self.data.point = "CENTER"
-		point = "CENTER"
-	end
-
-	self:SetUserPlaced(false)
-	self:ClearAllPoints()
-	self:SetPoint("CENTER", "UIParent", point, x, y)
-	self:SetUserPlaced(true)
-	self:SetFrameStrata(Photon.STRATAS[self:GetStrata()])
-
-	if self.Message then
-		self.Message:SetText(point:lower().."     x: "..format("%0.2f", x).."     y: "..format("%0.2f", y))
-		self.MessageBG:SetWidth(self.Message:GetWidth()*1.05)
-		self.MessageBG:SetHeight(self.Message:GetHeight()*1.1)
-	end
-end
-
 --Fakes a state change for a given bar, calls up the counterpart function in PhotonButton
 function Bar:FakeStateChange(state)
 	self.handler:SetAttribute("fauxstate", state)
@@ -1227,9 +1168,10 @@ end
 
 
 function Bar:SetSize()
+	--just the buttons, no margin, so a bar anchored by an edge or corner sits flush at 0
 	if self.right then
-		self:SetWidth(((self.right-self.left)+5) * self:GetBarScale())
-		self:SetHeight(((self.top-self.bottom)+5) * self:GetBarScale())
+		self:SetWidth((self.right-self.left) * self:GetBarScale())
+		self:SetHeight((self.top-self.bottom) * self:GetBarScale())
 	else
 		self:SetWidth(195)
 		self:SetHeight(36 * self:GetBarScale())
@@ -1250,9 +1192,7 @@ function Bar:OnClick(click, down)
 
 	Bar.ChangeSelectedBar(self)
 
-	if IsShiftKeyDown() then
-		BarEditor.microadjust(self.editFrame)
-	elseif click == "RightButton" then
+	if click == "RightButton" then
 		--opening it draws it
 		Photon.PhotonGUI:OpenBarConfig()
 		return

@@ -114,6 +114,74 @@ local FORM_WORDS = {
 	DEATHKNIGHT = "BarDesc_PresenceWord",
 }
 
+---the position box, see Bar_Position.lua.
+local function positionDefinitions(definitions)
+	local current = bar()
+	local data = current.data
+
+	local function outOfCombat(set)
+		return function(_, value)
+			if not InCombatLockdown() then
+				set(value)
+			end
+		end
+	end
+
+	--the screen, then every bar that doesn't follow this one already, which would make a loop
+	local targets, targetOrder = {screen = L["Screen"]}, {"screen"}
+	for _, other in ipairs(Photon.bars) do
+		local key = other ~= current and not other:IsAnchoredTo(current) and other:GetAnchorKey()
+		if key then
+			targets[key] = other:GetBarName()
+			table.insert(targetOrder, key)
+		end
+	end
+
+	--a 3x3 grid, see CONTROLS.point in BarConfigWindow.lua
+	local function pointSelect(name, get, set)
+		return {type = "point", name = name, get = get, set = outOfCombat(set)}
+	end
+
+	definitions.anchorTo = {
+		type = "select",
+		name = L["Anchor To"],
+		values = targets,
+		sorting = targetOrder,
+		get = function() return data.anchorTo or "screen" end,
+		set = outOfCombat(function(value)
+			current:SetAnchor(value ~= "screen" and value or nil, data.anchorPoint or "CENTER", data.point)
+		end),
+		onHover = function(key)
+			addonTable.overlay.BarEditor.highlightBar(key and Photon.Bar.FromAnchorKey(key))
+		end,
+	}
+	definitions.anchorPoint = pointSelect(L["Bar Point"],
+		function() return data.anchorPoint or "CENTER" end,
+		function(value) current:SetAnchor(data.anchorTo, value, data.point) end)
+	definitions.anchorRelativePoint = pointSelect(L["Target Point"],
+		function() return data.point end,
+		function(value) current:SetAnchor(data.anchorTo, data.anchorPoint or "CENTER", value) end)
+	definitions.positionLocked = {
+		type = "toggle",
+		name = L["Lock Dragging"],
+		get = function() return current:GetPositionLocked() end,
+		set = function(_, value) current:SetPositionLocked(value) end,
+	}
+
+	--a screen's width or height either way, in whole pixels
+	local width, height = math.floor(UIParent:GetWidth()), math.floor(UIParent:GetHeight())
+	definitions.offsetX = {
+		type = "range", name = L["X"], min = -width, max = width, step = 1, nudge = true,
+		get = function() return data.x end,
+		set = outOfCombat(function(value) current:SetOffset(value, data.y) end),
+	}
+	definitions.offsetY = {
+		type = "range", name = L["Y"], min = -height, max = height, step = 1, nudge = true,
+		get = function() return data.y end,
+		set = outOfCombat(function(value) current:SetOffset(data.x, value) end),
+	}
+end
+
 --built each time the options are shown, so ranges follow the current bar
 local function barDefinitions()
 	local numObjects = bar():GetNumObjects()
@@ -230,6 +298,8 @@ local function barDefinitions()
 		local name = not gameBars[state] and Photon.STATES[state.."1"] or info.localizedName
 		definitions["state_"..state] = barStateToggle(state, name)
 	end
+
+	positionDefinitions(definitions)
 
 	--the hover text, see the BarDesc_ entries in the locale
 	local formWord = L[FORM_WORDS[Photon.class] or "BarDesc_StanceWord"]
