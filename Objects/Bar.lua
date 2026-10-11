@@ -868,7 +868,7 @@ function Bar:CreateHandler()
 					end
 				end
 
-				if not self:IsShown() and not self:GetAttribute("vishide") then
+				if not self:IsShown() and not self:GetAttribute("vishide") and not self:GetAttribute("concealed") then
 					self:Show()
 				end
 			end
@@ -922,8 +922,19 @@ function Bar:UpdateBarStatus(show)
 		self.vischanged = false
 	end
 
-	-- the fix for github #362 goes here: SetHidden conceal concealed
-	-- possibly autohide is broken as well and that will go here as well
+	--a hidden bar stays hidden whatever its states, except while editing bars. its keybinds keep working
+	local wasConcealed = self.handler:GetAttribute("concealed")
+	self.handler:SetAttribute("concealed", self.data.conceal or nil)
+	if not self.handler:GetAttribute("editmode") then
+		if self.data.conceal then
+			self.handler:Hide()
+		--only shown again as it is unhidden, a pet battle or the hide conditions may have it hidden otherwise
+		elseif wasConcealed and not self.handler:GetAttribute("vishide") then
+			self.handler:Show()
+		end
+	end
+
+	-- possibly autohide is broken as well and that will go here
 	self.Text:SetText(self:GetBarName())
 	self.handler:SetAlpha(self:GetBarAlpha())
 end
@@ -1261,7 +1272,7 @@ end
 function Bar:OnHide()
 	self.handler:SetAttribute("editmode", nil)
 
-	if self.handler:GetAttribute("vishide") then
+	if self.handler:GetAttribute("vishide") or self.handler:GetAttribute("concealed") then
 		self.handler:Hide()
 	end
 
