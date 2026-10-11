@@ -62,8 +62,9 @@ StaticPopupDialogs["NEURON_REMOVE_MODIFIER"] = UI.RaisePopup{
 	preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
 }
 
+--forced blank counts as set, as in Button.lua
 local function hasMacro(data)
-	return data ~= nil and ((data.macro_Text ~= nil and data.macro_Text ~= "") or not not data.actionID)
+	return data ~= nil and (data.forceBlank or (data.macro_Text ~= nil and data.macro_Text ~= "") or not not data.actionID)
 end
 
 --a macro or a label
@@ -248,6 +249,19 @@ end
 
 -------------------------------- page editor --------------------------------
 
+---a title and a line of help on hover
+local function addTooltip(frame, title, desc)
+	frame:HookScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+		GameTooltip:SetText(title, 1, 1, 1)
+		GameTooltip:AddLine(desc, nil, nil, nil, true)
+		GameTooltip:Show()
+	end)
+	frame:HookScript("OnLeave", function()
+		GameTooltip:Hide()
+	end)
+end
+
 --the selected look, a light background with an accent line on the left, inset from the edge
 local function addSelection(frame, inset)
 	frame.selectedBg = frame:CreateTexture(nil, "BACKGROUND", nil, -7)
@@ -327,12 +341,14 @@ local function createPageEditor(parent)
 			editor.onIcon(icon)
 		end)
 	end)
+	addTooltip(editor.iconFrame, L["Icon"], L["ButtonEditor_IconDesc"])
 
 	editor.labelCaption = UI.Text(editor, Style.fontSmall, Style.dim)
-	editor.labelCaption:SetText("Edit Label")
+	editor.labelCaption:SetText(L["Edit Label"])
 	editor.labelBox = UI.EditBox(editor, function(text)
 		editor.onLabel(text)
 	end)
+	addTooltip(editor.labelBox, L["Edit Label"], L["ButtonEditor_LabelDesc"])
 
 	editor.macroCaption = UI.Text(editor, Style.fontSmall, Style.dim)
 	editor.macroCaption:SetText("Edit Macro")
@@ -340,15 +356,50 @@ local function createPageEditor(parent)
 		editor.onMacro(text)
 	end)
 
-	editor.resetIcon = UI.Button(editor, "Reset Icon", function()
+	editor.resetIcon = UI.Button(editor, L["Reset Icon"], function()
 		editor.onResetIcon()
+	end)
+	addTooltip(editor.resetIcon, L["Reset Icon"], L["ButtonEditor_ResetIconDesc"])
+
+	--empties the page, whatever it would fall back on
+	editor.forceBlank = UI.Checkbox(editor, function(checked)
+		editor.onForceBlank(checked)
+	end)
+	editor.forceBlank:SetLabel(L["Force Blank"])
+	editor.forceBlank:SetWidth(16 + Style.gap + editor.forceBlank.label:GetStringWidth() + 4)
+	editor.forceBlank:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+		GameTooltip:SetText(L["Force Blank"], 1, 1, 1)
+		GameTooltip:AddLine(L["ButtonEditor_ForceBlankDesc"], nil, nil, nil, true)
+		GameTooltip:Show()
+	end)
+	editor.forceBlank:SetScript("OnLeave", function()
+		GameTooltip:Hide()
 	end)
 
 	--everything under the title row
 	editor.parts = {
 		editor.notice, editor.iconFrame, editor.labelCaption, editor.labelBox,
+		editor.macroCaption, editor.macroBox, editor.forceBlank, editor.resetIcon,
+	}
+
+	--grayed out and locked while forced blank, all but the tickbox
+	editor.blankParts = {
+		editor.notice, editor.iconFrame, editor.labelCaption, editor.labelBox,
 		editor.macroCaption, editor.macroBox, editor.resetIcon,
 	}
+	function editor:SetBlank(blank)
+		self.forceBlank:SetChecked(blank)
+		for _, part in ipairs(self.blankParts) do
+			part:SetAlpha(blank and 0.4 or 1)
+		end
+		for _, control in ipairs({self.iconFrame, self.labelBox, self.macroBox.editBox, self.resetIcon}) do
+			if blank and control.ClearFocus then
+				control:ClearFocus()
+			end
+			control:SetEnabled(not blank)
+		end
+	end
 
 	---collapsible pages show + or - and fold on a click on their title
 	function editor:SetCollapsed(collapsible, collapsed)
@@ -412,8 +463,10 @@ local function layoutPageEditor(editor, width)
 	editor.macroBox:SetWidth(width - 2 * pad)
 	y = y + editor.macroBox:GetHeight() + gap
 
+	editor.forceBlank:ClearAllPoints()
+	editor.forceBlank:SetPoint("TOPLEFT", pad, -y)
 	editor.resetIcon:ClearAllPoints()
-	editor.resetIcon:SetPoint("TOPLEFT", pad, -y)
+	editor.resetIcon:SetPoint("LEFT", editor.forceBlank, "RIGHT", gap * 2, 0)
 	y = y + Style.rowHeight + pad
 
 	editor:SetHeight(y)
@@ -474,7 +527,8 @@ local function bindPageEditor(editor, button, specIndex, specName, page, collaps
 	end
 
 	local function refreshIcon()
-		editor.icon:SetTexture(button:GetAppearance(button:GetResolvedData(page, specData)) or "INTERFACE\\ICONS\\INV_MISC_QUESTIONMARK")
+		local data = button:GetResolvedData(page, specData)
+		editor.icon:SetTexture(not data.forceBlank and button:GetAppearance(data) or "INTERFACE\\ICONS\\INV_MISC_QUESTIONMARK")
 	end
 	refreshIcon()
 
@@ -484,8 +538,10 @@ local function bindPageEditor(editor, button, specIndex, specName, page, collaps
 	if editor.showNotice then
 		fallback = button:GetResolvedData(page, specData)
 		local source = hasMacro(fallback) and sourceName(button, specData, specName, fallback)
-		editor.notice:SetText(source and string.format(L["ButtonEditor_Inherits"], source) or L["ButtonEditor_Empty"])
-		if not source then
+		local notice = fallback.forceBlank and L["ButtonEditor_InheritsBlank"] or L["ButtonEditor_Inherits"]
+		editor.notice:SetText(source and string.format(notice, source) or L["ButtonEditor_Empty"])
+		--a blank one has nothing to show
+		if not source or fallback.forceBlank then
 			fallback = nil
 		end
 	end
@@ -509,6 +565,13 @@ local function bindPageEditor(editor, button, specIndex, specName, page, collaps
 	editor.onIcon = function(icon)
 		update{macro_Icon = icon}
 		refreshIcon()
+	end
+	--the page keeps its macro for when it is unticked. other pages may fall back on it, so all of them update
+	editor:SetBlank(own ~= nil and own.forceBlank == true)
+	editor.onForceBlank = function(checked)
+		specData[page].forceBlank = checked or nil
+		update{}
+		render()
 	end
 	--modifier pages fold, and start folded without text
 	local isExpanded = expanded[page]
@@ -735,7 +798,7 @@ local function createWindow()
 	specDropdown:SetPoint("LEFT", specLabel, "RIGHT", Style.gap * 2, 0)
 	specDropdown:SetWidth(220)
 
-	addButton = UI.MenuButton(specRow, L["Add bar for modifier"], function(root)
+	addButton = UI.MenuButton(specRow, L["Add page for condition"], function(root)
 		for _, modifier in ipairs(view.available) do
 			local entry = root:CreateButton(stateName(modifier), function()
 				view.addModifier(modifier)
@@ -752,10 +815,11 @@ local function createWindow()
 	end)
 
 	--removes the selected page's modifier
-	removeButton = UI.Button(specRow, L["Remove Modifier"], function()
+	removeButton = UI.Button(specRow, L["Remove page"], function()
 		view.editors[selected.page].onRemove()
 	end)
 	removeButton:SetPoint("RIGHT")
+	addTooltip(removeButton, L["Remove page"], L["ButtonEditor_RemovePageDesc"])
 
 	--how default works on hover, placed with the tabs, see placeBody
 	helpButton = CreateFrame("Button", nil, specRow)
@@ -789,7 +853,8 @@ local function createWindow()
 	helpButton:SetScript("OnEnter", function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
 		GameTooltip:SetText(L["Default"], 1, 1, 1)
-		for paragraph in L["ButtonEditor_DefaultHelp"]:gmatch("[^\n]+") do
+		local help = L["ButtonEditor_DefaultHelp"]:gsub("{form}", addonTable.optionDefinitions.formWord())
+		for paragraph in help:gmatch("[^\n]+") do
 			if GameTooltip:NumLines() > 1 then
 				GameTooltip:AddLine(" ")
 				local spacer = _G["GameTooltipTextLeft"..GameTooltip:NumLines()]

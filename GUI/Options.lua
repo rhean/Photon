@@ -130,16 +130,15 @@ local function barDefinitions()
 
 		autoHide = barToggle(L["Auto-Hide"], "GetAutoHide", "SetAutoHide", unlessOption("generalOptions", "AUTOHIDE")),
 		showGrid = barToggle(L["Show Grid"], "GetShowGrid", "SetShowGrid", unlessOption("generalOptions", "SHOWGRID")),
-		snapTo = barToggle(L["SnapTo"], "GetSnapTo", "SetSnapTo", unlessOption("generalOptions", "SNAPTO")),
 		multiSpec = barToggle(Photon.isWoWForever and L["Dual Spec"] or L["Multi Spec"], "GetMultiSpec", "SetMultiSpec", unlessOption("generalOptions", "MULTISPEC")),
-		pages = barStateToggle("paged", Photon.MANAGED_HOME_STATES.paged.localizedName),
+		pages = barStateToggle("paged", L["Action Bar Pages"]),
 		hidden = barToggle(L["Hidden"], "GetBarConceal", "SetBarConceal", unlessOption("generalOptions", "HIDDEN")),
 		lockActions = barSelect(L["Lock Actions"],
-			{none = L["None"], shift = L["Shift"], ctrl = L["Ctrl"], alt = L["Alt"]},
+			{none = L["Off"], shift = L["Shift"], ctrl = L["Ctrl"], alt = L["Alt"]},
 			{"none", "shift", "ctrl", "alt"},
 			"GetBarLock", "SetBarLock", "none", unlessOption("generalOptions", "LOCKBAR")),
 		clickMode = barSelect(L["Click Mode"],
-			{UpClick = L["On Release"], DownClick = L["On Click"]},
+			{UpClick = L["On Release"], DownClick = L["On Press"]},
 			{"UpClick", "DownClick"},
 			"GetClickMode", "SetClickMode", nil, unlessOption("generalOptions", "CLICKMODE")),
 
@@ -170,29 +169,29 @@ local function barDefinitions()
 			"GetBarShape", "SetBarShape"),
 		horizontalPadding = barRange(L["Horizontal Padding"], -200, 200, 1, false, "GetHorizontalPad", "SetHorizontalPad"),
 		verticalPadding = barRange(L["Vertical Padding"], -200, 200, 1, false, "GetVerticalPad", "SetVerticalPad"),
-		alpha = barRange(L["Alpha"], 0.01, 1, 0.01, true, "GetBarAlpha", "SetBarAlpha"),
-		alphaUp = barSelect(L["AlphaUp"],
+		alpha = barRange(L["Opacity"], 0.01, 1, 0.01, true, "GetBarAlpha", "SetBarAlpha"),
+		alphaUp = barSelect(L["Full Opacity On"],
 			{off = L["Off"], mouseover = L["Mouseover"], combat = L["Combat"], ["combat + mouseover"] = L["Combat + Mouseover"]},
 			{"off", "mouseover", "combat", "combat + mouseover"},
 			"GetAlphaUp", "SetAlphaUp"),
-		alphaUpSpeed = barRange(L["AlphaUp Speed"], 0.01, 1, 0.01, true, "GetAlphaUpSpeed", "SetAlphaUpSpeed"),
-		strata = barSelect(L["Strata"],
+		alphaUpSpeed = barRange(L["Fade Speed"], 0.01, 1, 0.01, true, "GetAlphaUpSpeed", "SetAlphaUpSpeed"),
+		strata = barSelect(L["Layer"],
 			{[2] = L["Low"], [3] = L["Medium"], [4] = L["High"], [5] = L["Dialog"], [6] = L["Tooltip"]},
 			{2, 3, 4, 5, 6},
 			"GetStrata", "SetStrata"),
 
 		keybindLabel = barToggle(L["Keybind Label"], "GetShowBindText", "SetShowBindText", unlessOption("visualOptions", "BINDTEXT")),
 		keybindColor = barColor(L["Color"], "GetBindColor", "SetBindColor", unlessOption("visualOptions", "BINDTEXT")),
-		buttonName = barToggle(L["Button Name"], "GetShowButtonText", "SetShowButtonText", unlessOption("visualOptions", "BUTTONTEXT")),
+		buttonName = barToggle(L["Button Label"], "GetShowButtonText", "SetShowButtonText", unlessOption("visualOptions", "BUTTONTEXT")),
 		buttonNameColor = barColor(L["Color"], "GetMacroColor", "SetMacroColor", unlessOption("visualOptions", "BUTTONTEXT")),
 		stackCharge = barToggle(L["Stack/Charge"], "GetShowCountText", "SetShowCountText", unlessOption("visualOptions", "COUNTTEXT")),
 		stackChargeColor = barColor(L["Color"], "GetCountColor", "SetCountColor", unlessOption("visualOptions", "COUNTTEXT")),
 		outOfRange = barToggle(L["Out-of-Range"], "GetShowRangeIndicator", "SetShowRangeIndicator", unlessOption("visualOptions", "RANGEIND")),
 		outOfRangeColor = barColor(L["Color"], "GetRangeColor", "SetRangeColor", unlessOption("visualOptions", "RANGEIND")),
 		cooldownCounter = barToggle(L["CD Counter"], "GetShowCooldownText", "SetShowCooldownText", unlessOption("visualOptions", "CDTEXT")),
-		cooldownColor1 = barColor(L["Color"].." 1", "GetCooldownColor1", "SetCooldownColor1", unlessOption("visualOptions", "CDTEXT")),
-		cooldownColor2 = barColor(L["Color"].." 2", "GetCooldownColor2", "SetCooldownColor2", unlessOption("visualOptions", "CDTEXT")),
-		cooldownAlpha = barToggle(L["Cooldown Alpha"], "GetShowCooldownAlpha", "SetShowCooldownAlpha", unlessOption("visualOptions", "CDALPHA")),
+		cooldownColor1 = barColor(L["Color"], "GetCooldownColor1", "SetCooldownColor1", unlessOption("visualOptions", "CDTEXT")),
+		cooldownColor2 = barColor(L["Last 5s"], "GetCooldownColor2", "SetCooldownColor2", unlessOption("visualOptions", "CDTEXT")),
+		cooldownAlpha = barToggle(L["Fade on Cooldown"], "GetShowCooldownAlpha", "SetShowCooldownAlpha", unlessOption("visualOptions", "CDALPHA")),
 		spellAlerts = barSelect(L["Spell Alerts"],
 			{none = L["None"], alternate = L["Subdued Alert"], default = L["Default Alert"]},
 			{"none", "alternate", "default"},
@@ -213,8 +212,7 @@ local function barDefinitions()
 
 		applyReload = {
 			type = "execute",
-			name = L["Apply"],
-			desc = L["ReloadUI"],
+			name = L["Reload UI"],
 			func = ReloadUI,
 		},
 	}
@@ -288,7 +286,7 @@ end
 local function statusDefinitions()
 	local textValues = Array.map(function(sbString) return sbString[1] end, button().sbStrings)
 
-	return {
+	local definitions = {
 		width = statusRange(L["Width"], 10, 1000, "width", "UpdateWidth"),
 		height = statusRange(L["Height"], 4, 200, "height", "UpdateHeight"),
 		orientation = statusSelect(L["Orientation"], Photon.BAR_ORIENTATIONS, "orientation", "UpdateOrientation"),
@@ -318,11 +316,17 @@ local function statusDefinitions()
 
 		applyReload = {
 			type = "execute",
-			name = L["Apply"],
-			desc = L["ReloadUI"],
+			name = L["Reload UI"],
 			func = ReloadUI,
 		},
 	}
+
+	--the hover text, the same BarDesc_ entries as the bar tab
+	for id, option in pairs(definitions) do
+		option.desc = option.desc or rawget(L, "BarDesc_"..id)
+	end
+
+	return definitions
 end
 
 -----------------------------------------------------------------------------
@@ -368,6 +372,10 @@ local PLACEHOLDER_TYPES = {toggle = true, select = true, range = true, input = t
 --the settings for the bar editor, see BarConfigWindow.lua
 addonTable.optionDefinitions = {
 	localized = localized,
+	---what the class calls the things on its stance bar, for {form} in text
+	formWord = function()
+		return L[FORM_WORDS[Photon.class] or "BarDesc_StanceWord"]
+	end,
 	isHidden = isHidden,
 	placeholder = placeholder,
 	PLACEHOLDER_TYPES = PLACEHOLDER_TYPES,

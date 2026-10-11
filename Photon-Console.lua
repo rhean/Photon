@@ -25,7 +25,6 @@ local slashFunctions = {
 	{L["Edit"], L["Edit_Description"], "ToggleButtonEditMode"},
 	{L["Bind"], L["Bind_Description"], "ToggleBindingMode"},
 	{L["Scale"], L["Scale_Description"], "SetBarScale"},
-	{L["SnapTo"], L["SnapTo_Description"], "SetSnapTo"},
 	{L["AutoHide"], L["AutoHide_Description"], "SetAutoHide"},
 	{L["Conceal"], L["Conceal_Description"], "SetBarConceal"},
 	{L["Shape"], L["Shape_Description"], "SetBarShape"},

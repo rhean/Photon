@@ -84,53 +84,40 @@ end
 ---@param overlay BarOverlay
 ---@param button string
 local function onDragStart(overlay, button)
-	overlay.bar.data.snapToPoint = false
-	overlay.bar.data.snapToFrame = false
-
 	overlay.frame.isDragging = true
+
+	--the overlay leaves the bar where it is, so the bar can follow it without the two pinned to each other
+	local left, bottom, width, height = overlay.frame:GetRect()
+	overlay.frame:ClearAllPoints()
+	overlay.frame:SetSize(width, height)
+	overlay.frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", left, bottom)
+
+	--the bar moves with the overlay while dragging. a secure bar can't be moved in combat, it jumps on drop then
+	if not InCombatLockdown() then
+		overlay.bar:ClearAllPoints()
+		overlay.bar:SetPoint("CENTER", overlay.frame, "CENTER")
+	end
+
 	overlay.frame:StartMoving()
 end
 
 
 ---@param overlay BarOverlay
 local function onDragStop(overlay)
-
-	local point
 	overlay.frame:StopMovingOrSizing()
 	overlay.frame.isDragging = false
 
-	for _,v in pairs(Photon.bars) do
-		if not point and overlay.bar:GetSnapTo() and v:GetSnapTo() and overlay.bar ~= v then
-			point = overlay.bar:Stick(v, Photon.SNAPTO_TOLERANCE, overlay.bar:GetHorizontalPad(), overlay.bar:GetVerticalPad())
+	local newPoint, x, y = overlay.bar.GetPosition(overlay.frame)
+	overlay.bar.data.point = newPoint
+	overlay.bar:SetXAxis(x)
+	overlay.bar:SetYAxis(y)
 
-			if point then
-				overlay.bar.data.snapToPoint = point
-				overlay.bar.data.snapToFrame = v:GetName()
-				overlay.bar.data.point = "SnapTo: "..point
-			end
-		end
-	end
-
-	if not point then
-		overlay.bar.data.snapToPoint = false
-		overlay.bar.data.snapToFrame = false
-
-		local newPoint, x, y = overlay.bar.GetPosition(overlay.frame)
-		overlay.bar.data.point = newPoint
-		overlay.bar:SetXAxis(x)
-		overlay.bar:SetYAxis(y)
-
-		overlay.bar:SetPosition()
-	end
-
-	if overlay.bar:GetSnapTo() and not overlay.bar.data.snapToPoint then
-		overlay.bar:StickToEdge()
-	end
-
+	--back on the screen, off the overlay
 	overlay.bar:SetPosition()
 	overlay.bar:UpdateBarStatus()
 
 	--re-attach the overlay to the bar at its new position
+	overlay.frame:ClearAllPoints()
 	updateAppearance(overlay)
 end
 
