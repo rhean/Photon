@@ -279,8 +279,12 @@ L["Specialization"] = true
 L["Modifiers"] = true
 L["ButtonEditor_Location"] = "Button %d - Row %d"
 L["ButtonEditor_Button"] = "Button %d"
-L["Add Modifier"] = true
+L["Add bar for modifier"] = true
 L["Remove Modifier"] = true
+L["ButtonEditor_DefaultDesc"] = "Default state when no other condition is true"
+L["ButtonEditor_DefaultHelp"] = "Default shows when no modifier or condition is active.\n"..
+	"Differnt pages each have their own Default and modifier pages, so holding Shift in a stance will show that stance's Shift page.\n"..
+	"An a macro is empty it uses the first with a macro in the following priority order: same modifier on the Default tab -> stance's Default -> Default on the Default tab."
 L["ButtonEditor_RemoveModifier"] = "Removing the modifier removes it from the whole bar and deletes its contents."
 L["ButtonEditor_RowOfSpec"] = "row %d of %s"
 L["ButtonEditor_Status"] = "|cffffd200%s|r|cFFFFFFFF button %d is selected. Click another button to edit it."

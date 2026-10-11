@@ -34,7 +34,7 @@ local view = {pages = {}, editors = {}, available = {}}
 local expanded, expandedFor = {}, nil
 
 --made with the window, see createWindow
-local specRow, specLabel, specDropdown, pageTabs, tabs, body, emptyText
+local specRow, specLabel, specDropdown, helpButton, pageTabs, tabs, body, emptyText
 local addButton, removeButton, rowPool
 local editors, editorPool
 
@@ -46,6 +46,9 @@ local HOME_STATE_ORDER = {paged = 1, stance = 2, pet = 3}
 local ALL_PAGES = {"paged1", "paged2", "paged3", "paged4", "paged5", "paged6"}
 
 local ICON_SIZE = 42
+
+--above and below the spec and modifier row
+local SPEC_ROW_SPACE = 12
 
 --data is what to do on yes
 StaticPopupDialogs["NEURON_REMOVE_MODIFIER"] = UI.RaisePopup{
@@ -124,6 +127,14 @@ local function stateName(state)
 		return L["Default"]
 	end
 	return Photon.STATES[state] or state
+end
+
+--the hover text, the same as the state's in the bar editor
+local function stateDesc(state)
+	if state == "homestate" then
+		return L["ButtonEditor_DefaultDesc"]
+	end
+	return rawget(L, "BarDesc_state_"..state:match("^%a+"))
 end
 
 --stance1_alt1, pet2_alt1, paged2_stance1_alt1
@@ -264,6 +275,18 @@ local function createRow(parent)
 	row.label:SetPoint("LEFT", 8, 0)
 	row.label:SetPoint("RIGHT", -4, 0)
 	row.label:SetWordWrap(false)
+
+	row:SetScript("OnEnter", function(self)
+		if self.desc then
+			GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+			GameTooltip:SetText(self.label:GetText(), 1, 1, 1)
+			GameTooltip:AddLine(self.desc, nil, nil, nil, true)
+			GameTooltip:Show()
+		end
+	end)
+	row:SetScript("OnLeave", function()
+		GameTooltip:Hide()
+	end)
 
 	row:SetScript("OnClick", function(self)
 		local editor = view.editors[self.page]
@@ -598,6 +621,7 @@ local function fillTab(button, specIndex, specName, forms, modifiers, actionPage
 		item.page = page
 		--the tab already names the form
 		item.label:SetText(modifierOf[page] and stateName(modifierOf[page]) or L["Default"])
+		item.desc = stateDesc(modifierOf[page] or "homestate")
 		if previous then
 			item:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, -2)
 			item:SetPoint("TOPRIGHT", previous, "BOTTOMRIGHT", 0, -2)
@@ -649,15 +673,28 @@ end
 local function placeBody()
 	local top = 0
 	if specRow:IsShown() then
-		top = top + specRow:GetHeight() + Style.gap
+		top = top + SPEC_ROW_SPACE + specRow:GetHeight() + SPEC_ROW_SPACE
 	end
+	local lastTabRow
 	for _, tabRow in ipairs({pageTabs, tabs}) do
 		if tabRow:IsShown() then
 			tabRow:ClearAllPoints()
 			tabRow:SetPoint("TOPLEFT", 0, -top)
 			tabRow:SetPoint("TOPRIGHT", 0, -top)
 			top = top + tabRow:GetHeight() + Style.gap
+			lastTabRow = tabRow
 		end
+	end
+	--the last tab on the tab row over the pages, or left of remove without tabs. it shows with what it sits on
+	helpButton:ClearAllPoints()
+	if lastTabRow then
+		helpButton:SetParent(lastTabRow)
+		helpButton:SetHeight(lastTabRow.lastTab:GetHeight())
+		helpButton:SetPoint("LEFT", lastTabRow.lastTab, "RIGHT", 2, 0)
+	else
+		helpButton:SetParent(specRow)
+		helpButton:SetHeight(Style.rowHeight)
+		helpButton:SetPoint("RIGHT", removeButton, "LEFT", -Style.gap, 0)
 	end
 	body:ClearAllPoints()
 	body:SetPoint("TOPLEFT", 0, -top)
@@ -683,8 +720,8 @@ local function createWindow()
 
 	-------------------------------- spec and modifiers --------------------------------
 	specRow = CreateFrame("Frame", nil, content)
-	specRow:SetPoint("TOPLEFT")
-	specRow:SetPoint("TOPRIGHT")
+	specRow:SetPoint("TOPLEFT", 0, -SPEC_ROW_SPACE)
+	specRow:SetPoint("TOPRIGHT", 0, -SPEC_ROW_SPACE)
 	specRow:SetHeight(Style.rowHeight)
 
 	specLabel = UI.Text(specRow, nil, Style.dim)
@@ -698,11 +735,19 @@ local function createWindow()
 	specDropdown:SetPoint("LEFT", specLabel, "RIGHT", Style.gap * 2, 0)
 	specDropdown:SetWidth(220)
 
-	addButton = UI.MenuButton(specRow, L["Add Modifier"], function(root)
+	addButton = UI.MenuButton(specRow, L["Add bar for modifier"], function(root)
 		for _, modifier in ipairs(view.available) do
-			root:CreateButton(stateName(modifier), function()
+			local entry = root:CreateButton(stateName(modifier), function()
 				view.addModifier(modifier)
 			end)
+			local desc = stateDesc(modifier)
+			--older menus have no tooltips
+			if desc and entry.SetTooltip then
+				entry:SetTooltip(function(tooltip)
+					GameTooltip_SetTitle(tooltip, stateName(modifier))
+					GameTooltip_AddNormalLine(tooltip, desc)
+				end)
+			end
 		end
 	end)
 
@@ -710,7 +755,58 @@ local function createWindow()
 	removeButton = UI.Button(specRow, L["Remove Modifier"], function()
 		view.editors[selected.page].onRemove()
 	end)
-	removeButton:SetPoint("LEFT", addButton, "RIGHT", Style.gap, 0)
+	removeButton:SetPoint("RIGHT")
+
+	--how default works on hover, placed with the tabs, see placeBody
+	helpButton = CreateFrame("Button", nil, specRow)
+	Style.Flat(helpButton, Style.strip)
+	--a tab that is not open, with a gold ? to stand out
+	local helpLabel = UI.Text(helpButton, nil, Style.accent)
+	helpLabel:SetPoint("CENTER", 0, 1)
+	helpLabel:SetText("?")
+	helpButton:SetWidth(helpLabel:GetStringWidth() + 24)
+	local helpHover = helpButton:CreateTexture(nil, "HIGHLIGHT")
+	helpHover:SetAllPoints()
+	helpHover:SetColorTexture(unpack(Style.hover))
+	--a short blank line between the text's lines, a full one is too much
+	local spacerFont = CreateFont("PhotonTooltipSpacerFont")
+	local fontPath, _, fontFlags = GameTooltipText:GetFont()
+	spacerFont:SetFont(fontPath, 4, fontFlags or "")
+
+	--the tooltip is shared, so its width and the spacer lines' font go back when it hides
+	local spacers, widened = {}, false
+	GameTooltip:HookScript("OnHide", function(tooltip)
+		for _, line in ipairs(spacers) do
+			line:SetFontObject(GameTooltipText)
+		end
+		wipe(spacers)
+		if widened then
+			tooltip:SetMinimumWidth(0)
+			widened = false
+		end
+	end)
+
+	helpButton:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
+		GameTooltip:SetText(L["Default"], 1, 1, 1)
+		for paragraph in L["ButtonEditor_DefaultHelp"]:gmatch("[^\n]+") do
+			if GameTooltip:NumLines() > 1 then
+				GameTooltip:AddLine(" ")
+				local spacer = _G["GameTooltipTextLeft"..GameTooltip:NumLines()]
+				spacer:SetFontObject(spacerFont)
+				table.insert(spacers, spacer)
+			end
+			GameTooltip:AddLine(paragraph, nil, nil, nil, true)
+		end
+		GameTooltip:Show()
+		--twice the usual width, so the long text wraps less
+		GameTooltip:SetMinimumWidth(GameTooltip:GetWidth() * 2)
+		widened = true
+		GameTooltip:Show()
+	end)
+	helpButton:SetScript("OnLeave", function()
+		GameTooltip:Hide()
+	end)
 
 	-------------------------------- action bar pages --------------------------------
 	pageTabs = UI.Tabs(content, function(value)
