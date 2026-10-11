@@ -45,9 +45,6 @@ L["Bind_Description"] = "Toggle binding mode for all buttons"
 L["Scale"] = true
 L["Scale_Description"] = "Scale a bar to the desired size"
 
-L["SnapTo"] = true
-L["SnapTo_Description"] = "Toggle SnapTo for current bar"
-
 L["AutoHide"] = true
 L["AutoHide_Description"] = "Toggle AutoHide for current bar"
 
@@ -418,7 +415,6 @@ L["Tooltips in Combat"] = true
 L["Show Border Style"] = true
 
 -- bar editor labels, apart from the console command names above
-L["Snap To"] = true
 L["On Press"] = true
 L["Opacity"] = true
 L["Full Opacity On"] = true
@@ -676,7 +672,6 @@ L["BarDesc_state_pet"] = "Gives the bar its own set of buttons for when you have
 L["BarDesc_autoHide"] = "Fades the bar out until you move the mouse over it."
 L["BarDesc_hidden"] = "Hides the bar completely. It still shows while editing bars."
 L["BarDesc_showGrid"] = "Shows the outline of empty buttons."
-L["BarDesc_snapTo"] = "Snaps the bar to nearby bars when you move it."
 L["BarDesc_lockActions"] = "Locks the buttons so abilities can only be dragged on or off them while the chosen key is held. Off leaves them unlocked."
 L["BarDesc_clickMode"] = "Whether a button fires when the mouse button is pressed or when it is released."
 L["BarDesc_applyReload"] = "Reloads the UI so every change takes full effect."

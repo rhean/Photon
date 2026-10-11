@@ -203,11 +203,6 @@ local genericBarData = {
 	arcStart = 0,
 	arcLength = 359,
 
-	snapTo = false,
-	snapToPad = 0,
-	snapToPoint = false,
-	snapToFrame = false,
-
 	autoHide = false,
 	showGrid = true,
 

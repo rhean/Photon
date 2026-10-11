@@ -52,7 +52,6 @@ addonTable.barConfigLayout = {
 				},
 				{
 					{ id = "showGrid", width = "normal" },
-					{ id = "snapTo", width = "normal" },
 				},
 				{
 					{ id = "lockActions", width = "normal" },

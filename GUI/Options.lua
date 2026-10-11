@@ -130,7 +130,6 @@ local function barDefinitions()
 
 		autoHide = barToggle(L["Auto-Hide"], "GetAutoHide", "SetAutoHide", unlessOption("generalOptions", "AUTOHIDE")),
 		showGrid = barToggle(L["Show Grid"], "GetShowGrid", "SetShowGrid", unlessOption("generalOptions", "SHOWGRID")),
-		snapTo = barToggle(L["Snap To"], "GetSnapTo", "SetSnapTo", unlessOption("generalOptions", "SNAPTO")),
 		multiSpec = barToggle(Photon.isWoWForever and L["Dual Spec"] or L["Multi Spec"], "GetMultiSpec", "SetMultiSpec", unlessOption("generalOptions", "MULTISPEC")),
 		pages = barStateToggle("paged", L["Action Bar Pages"]),
 		hidden = barToggle(L["Hidden"], "GetBarConceal", "SetBarConceal", unlessOption("generalOptions", "HIDDEN")),

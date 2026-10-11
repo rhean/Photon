@@ -14,7 +14,6 @@ function Photon:RegisterGUI()
 			generalOptions = {
 				AUTOHIDE = true,
 				SHOWGRID = true,
-				SNAPTO = true,
 				CLICKMODE = true,
 				MULTISPEC = true,
 				HIDDEN = true,
@@ -35,7 +34,6 @@ function Photon:RegisterGUI()
 			class = "BagBar",
 			generalOptions = {
 				AUTOHIDE = true,
-				SNAPTO = true,
 				HIDDEN = true,
 			}
 		},
@@ -43,7 +41,6 @@ function Photon:RegisterGUI()
 			class = "MenuBar",
 			generalOptions = {
 				AUTOHIDE = true,
-				SNAPTO = true,
 				HIDDEN = true,
 			}
 		},
@@ -52,7 +49,6 @@ function Photon:RegisterGUI()
 			generalOptions = {
 				AUTOHIDE  = true,
 				--SHOWGRID  = true,
-				SNAPTO    = true,
 				CLICKMODE = true,
 				HIDDEN    = true,
 				LOCKBAR   = true,
@@ -70,7 +66,6 @@ function Photon:RegisterGUI()
 			class = "XPBar",
 			generalOptions = {
 				AUTOHIDE = true,
-				SNAPTO = true,
 				HIDDEN = true,
 			},
 			visualOptions = {
@@ -81,7 +76,6 @@ function Photon:RegisterGUI()
 			class = "RepBar",
 			generalOptions = {
 				AUTOHIDE = true,
-				SNAPTO = true,
 				HIDDEN = true,
 			},
 			visualOptions = {
@@ -92,7 +86,6 @@ function Photon:RegisterGUI()
 			class = "CastBar",
 			generalOptions = {
 				AUTOHIDE = true,
-				SNAPTO = true,
 				HIDDEN = true,
 			},
 			visualOptions = {
@@ -103,7 +96,6 @@ function Photon:RegisterGUI()
 			class = "MirrorBar",
 			generalOptions = {
 				AUTOHIDE = true,
-				SNAPTO = true,
 				HIDDEN = true,
 			},
 			visualOptions = {
@@ -114,7 +106,6 @@ function Photon:RegisterGUI()
 			class = "ZoneAbilityBar",
 			generalOptions = {
 				AUTOHIDE = true,
-				SNAPTO = true,
 				CLICKMODE = true,
 				HIDDEN = true,
 			},
@@ -131,7 +122,6 @@ function Photon:RegisterGUI()
 			class = "ExtraBar",
 			generalOptions = {
 				AUTOHIDE = true,
-				SNAPTO = true,
 				CLICKMODE = true,
 				HIDDEN = true,
 			},
@@ -149,7 +139,6 @@ function Photon:RegisterGUI()
 			generalOptions = {
 				AUTOHIDE = true,
 				SHOWGRID = false,
-				SNAPTO = true,
 				CLICKMODE = true,
 				HIDDEN = true,
 				LOCKBAR = false,

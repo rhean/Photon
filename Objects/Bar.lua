@@ -972,28 +972,24 @@ end
 
 
 function Bar:SetPosition()
-	if self.data.snapToPoint and self.data.snapToFrame then
-		self:StickToPoint(_G[self.data.snapToFrame], self.data.snapToPoint,self:GetHorizontalPad(), self:GetVerticalPad())
-	else
+	local point, x, y = self.data.point, self:GetXAxis(), self:GetYAxis()
 
-		local point, x, y = self.data.point, self:GetXAxis(), self:GetYAxis()
+	--bars saved while snapped by the old snapping have "SnapTo: TL" as their point
+	if point:find("SnapTo") then
+		self.data.point = "CENTER"
+		point = "CENTER"
+	end
 
-		if point:find("SnapTo") then
-			self.data.point = "CENTER"
-			point = "CENTER"
-		end
+	self:SetUserPlaced(false)
+	self:ClearAllPoints()
+	self:SetPoint("CENTER", "UIParent", point, x, y)
+	self:SetUserPlaced(true)
+	self:SetFrameStrata(Photon.STRATAS[self:GetStrata()])
 
-		self:SetUserPlaced(false)
-		self:ClearAllPoints()
-		self:SetPoint("CENTER", "UIParent", point, x, y)
-		self:SetUserPlaced(true)
-		self:SetFrameStrata(Photon.STRATAS[self:GetStrata()])
-
-		if self.Message then
-			self.Message:SetText(point:lower().."     x: "..format("%0.2f", x).."     y: "..format("%0.2f", y))
-			self.MessageBG:SetWidth(self.Message:GetWidth()*1.05)
-			self.MessageBG:SetHeight(self.Message:GetHeight()*1.1)
-		end
+	if self.Message then
+		self.Message:SetText(point:lower().."     x: "..format("%0.2f", x).."     y: "..format("%0.2f", y))
+		self.MessageBG:SetWidth(self.Message:GetWidth()*1.05)
+		self.MessageBG:SetHeight(self.Message:GetHeight()*1.1)
 	end
 end
 
@@ -1572,33 +1568,6 @@ end
 
 function Bar:GetSpellGlow()
 	return self.data.spellGlow
-end
-
-
-function Bar:SetSnapTo(checked)
-	if checked then
-		self.data.snapTo = true
-	else
-		self.data.snapTo = false
-
-		self.data.snapToPoint = false
-		self.data.snapToFrame = false
-
-		self:SetUserPlaced(true)
-
-		local newPoint, x, y = self:GetPosition()
-
-		self.data.point = newPoint
-		self:SetXAxis(x)
-		self:SetYAxis(y)
-		self:SetPosition()
-	end
-
-	self:UpdateBarStatus()
-end
-
-function Bar:GetSnapTo()
-	return self.data.snapTo
 end
 
 

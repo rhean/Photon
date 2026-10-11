@@ -264,8 +264,7 @@ local function migrate1_5To1_6(profile)
 	return newProfile
 end
 
--- Neuron was renamed Photon: its keys in the profile, and the bar frame names a bar snaps to
--- (NeuronActionBar3 is now PhotonActionBar3). NeuronCDB and NeuronGDB above are older and stay as they were
+-- Neuron was renamed Photon: its keys in the profile. NeuronCDB and NeuronGDB above are older and stay as they were
 local function migrate1_6To1_7(profile)
 	local newProfile = CopyTable(profile)
 	for _, key in ipairs({"Icon", "ItemCache", "SpellCache"}) do
@@ -273,16 +272,6 @@ local function migrate1_6To1_7(profile)
 			newProfile["Photon"..key] = newProfile["Neuron"..key]
 		end
 		newProfile["Neuron"..key] = nil
-	end
-
-	for _, bars in pairs(newProfile) do
-		if type(bars) == "table" then
-			for _, bar in pairs(bars) do
-				if type(bar) == "table" and type(bar.snapToFrame) == "string" then
-					bar.snapToFrame = bar.snapToFrame:gsub("^Neuron", "Photon")
-				end
-			end
-		end
 	end
 
 	newProfile.DBVersion = 1.7

@@ -84,9 +84,6 @@ end
 ---@param overlay BarOverlay
 ---@param button string
 local function onDragStart(overlay, button)
-	overlay.bar.data.snapToPoint = false
-	overlay.bar.data.snapToFrame = false
-
 	overlay.frame.isDragging = true
 	overlay.frame:StartMoving()
 end
@@ -94,38 +91,13 @@ end
 
 ---@param overlay BarOverlay
 local function onDragStop(overlay)
-
-	local point
 	overlay.frame:StopMovingOrSizing()
 	overlay.frame.isDragging = false
 
-	for _,v in pairs(Photon.bars) do
-		if not point and overlay.bar:GetSnapTo() and v:GetSnapTo() and overlay.bar ~= v then
-			point = overlay.bar:Stick(v, Photon.SNAPTO_TOLERANCE, overlay.bar:GetHorizontalPad(), overlay.bar:GetVerticalPad())
-
-			if point then
-				overlay.bar.data.snapToPoint = point
-				overlay.bar.data.snapToFrame = v:GetName()
-				overlay.bar.data.point = "SnapTo: "..point
-			end
-		end
-	end
-
-	if not point then
-		overlay.bar.data.snapToPoint = false
-		overlay.bar.data.snapToFrame = false
-
-		local newPoint, x, y = overlay.bar.GetPosition(overlay.frame)
-		overlay.bar.data.point = newPoint
-		overlay.bar:SetXAxis(x)
-		overlay.bar:SetYAxis(y)
-
-		overlay.bar:SetPosition()
-	end
-
-	if overlay.bar:GetSnapTo() and not overlay.bar.data.snapToPoint then
-		overlay.bar:StickToEdge()
-	end
+	local newPoint, x, y = overlay.bar.GetPosition(overlay.frame)
+	overlay.bar.data.point = newPoint
+	overlay.bar:SetXAxis(x)
+	overlay.bar:SetYAxis(y)
 
 	overlay.bar:SetPosition()
 	overlay.bar:UpdateBarStatus()

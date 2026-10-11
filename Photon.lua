@@ -52,7 +52,6 @@ Photon.STRATAS = {
 }
 
 Photon.TIMERLIMIT = 4
-Photon.SNAPTO_TOLERANCE = 28
 
 Photon.DEBUG = true
 

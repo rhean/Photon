@@ -43,7 +43,6 @@ Objects\ExtraButton.lua
 Objects\MenuButton.lua
 Objects\PetButton.lua
 Objects\ZoneAbilityButton.lua
-Objects\Bar_SnapTo.lua
 Objects\StatusButton.lua
 Objects\ExpButton.lua
 Objects\RepButton.lua
