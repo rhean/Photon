@@ -166,8 +166,8 @@ addonTable.barConfigLayout = {
 				},
 			}},
 		}},
-		{ id = "visibility", name = "Bar Visibility", groups = {
-			{ id = "states", name = "Active Bar States", rows = {
+		{ id = "visibility", name = "Bar Conditions", groups = {
+			{ id = "states", name = "Activate a Page for these Conditions", rows = {
 				{
 					{ id = "statesBox1", box = true, name = "", light = true, width = "full", rows = {
 						{
@@ -225,7 +225,7 @@ addonTable.barConfigLayout = {
 					}},
 				},
 			}},
-			{ id = "visibility", name = "Hidden Bar States", rows = {
+			{ id = "visibility", name = "Hide bar for these conditions", rows = {
 				{
 					{ id = "pagedRow", box = true, name = "", light = true, width = "full", rows = {
 						{
@@ -244,17 +244,17 @@ addonTable.barConfigLayout = {
 						{
 							{ text = "Shift", width = "normal" },
 							{ id = "visibility_shift0", name = "Up", width = "half" },
-							{ id = "visibility_shift1", name = "Down", width = "half" },
+							{ id = "visibility_shift1", name = "Pressed", width = "half" },
 						},
 						{
 							{ text = "Control", width = "normal" },
 							{ id = "visibility_ctrl0", name = "Up", width = "half" },
-							{ id = "visibility_ctrl1", name = "Down", width = "half" },
+							{ id = "visibility_ctrl1", name = "Pressed", width = "half" },
 						},
 						{
 							{ text = "Alt", width = "normal" },
 							{ id = "visibility_alt0", name = "Up", width = "half" },
-							{ id = "visibility_alt1", name = "Down", width = "half" },
+							{ id = "visibility_alt1", name = "Pressed", width = "half" },
 						},
 					}},
 				},

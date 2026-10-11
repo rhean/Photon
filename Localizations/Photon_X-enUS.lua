@@ -384,7 +384,7 @@ L["Color"] = true
 L["Delete Bar"] = true
 L["DeleteBar_Confirm"] = "Warning, will permanently delete the bar and all stored data"
 L["General Configuration"] = true
-L["Bar Visibility"] = true
+L["Bar Conditions"] = true
 L["Secondary States"] = true
 L["Text"] = true
 L["Dangerous"] = true
@@ -680,7 +680,7 @@ L["BarDesc_tooltipsInCombat"] = "Also shows button tooltips while you are in com
 L["BarDesc_spellAlerts"] = "The glow shown on a button when its ability procs or is highlighted by the game."
 L["BarDesc_borderStyle"] = "Shows the game's decorative border art around the button (extra action and zone ability buttons)."
 
--- Active Bar States: the bar gets a page for the state, set its abilities in the button editor
+-- Activate a Page for these Conditions: the bar gets a page for the state, set its abilities in the button editor
 L["BarDesc_state_shift"] = "Gives the bar a page for when Shift is held."
 L["BarDesc_state_ctrl"] = "Gives the bar a page for when Control is held."
 L["BarDesc_state_alt"] = "Gives the bar a page for when Alt is held."
@@ -702,7 +702,7 @@ L["BarDesc_state_indoors"] = "Gives the bar a page for when you are indoors."
 L["BarDesc_state_outdoors"] = "Gives the bar a page for when you are outdoors."
 L["BarDesc_state_fishing"] = "Gives the bar a page for when you have a fishing pole equipped."
 
--- Hidden Bar States: checked hides the bar in that state
+-- Hide bar for these conditions: checked hides the bar in that state
 L["BarDesc_visibility_paged1"] = "Hides the bar on action bar page 1."
 L["BarDesc_visibility_paged2"] = "Hides the bar on action bar page 2."
 L["BarDesc_visibility_paged3"] = "Hides the bar on action bar page 3."

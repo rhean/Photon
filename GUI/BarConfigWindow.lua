@@ -487,7 +487,7 @@ local function buildRows(container, rows, entry)
 				if option then
 					--the layout can give a setting a shorter label for where it sits
 					if item.name then
-						--the hover title keeps the full name, "Down" alone doesn't say what is down
+						--the hover title keeps the full name, "Pressed" alone doesn't say what is pressed
 						option.title = option.title or option.name
 						option.name = defs.localized(item.name)
 					end
