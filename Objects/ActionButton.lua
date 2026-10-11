@@ -212,7 +212,7 @@ function ActionButton:InitializeButton()
 
 							--see GetResolvedData
 							local macroText = self:GetAttribute(msg.."-macro_Text")
-							if not macroText or #macroText == 0 then
+							if (not macroText or #macroText == 0) and not self:GetAttribute(msg.."-blank") then
 								macroText = self:GetAttribute("fallback-macro_Text")
 							end
 							self:SetAttribute("*macrotext*", macroText)

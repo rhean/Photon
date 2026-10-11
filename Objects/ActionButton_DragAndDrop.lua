@@ -93,6 +93,8 @@ function ActionButton:OnReceiveDrag()
 		self:SetMouseCursor()
 	end
 
+	self.data.forceBlank = nil
+
 	if #macroDrag > 0 then --checks to see if the thing we are placing is a Photon created macro vs something from the spellbook
 		self:PlaceMacro()
 	elseif cursorType == "spell" then

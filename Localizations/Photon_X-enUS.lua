@@ -291,6 +291,9 @@ L["ButtonEditor_Status"] = "|cffffd200%s|r|cFFFFFFFF button %d is selected. Clic
 L["ButtonEditor_SelectButton"] = "Click an action button to edit it."
 L["ButtonEditor_Inherits"] = "No macro of its own, this page uses %s. Type a macro to give it one."
 L["ButtonEditor_Empty"] = "No macro yet. Type one below."
+L["ButtonEditor_InheritsBlank"] = "No macro of its own, this page uses %s, which is forced blank."
+L["Force Blank"] = true
+L["ButtonEditor_ForceBlankDesc"] = "Forces the button to be empty and not use fallbacks"
 
 L["Toggle Keybind Mode"] = true
 L["Open the Interface Menu"] = true

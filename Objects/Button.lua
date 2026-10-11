@@ -20,10 +20,22 @@ LibStub("AceHook-3.0"):Embed(Button)
 
 local ButtonEditor = addonTable.overlay.ButtonEditor
 
---a state's data counts as set once it has a macro or a fixed action
+--a state's data counts as set once it has a macro or a fixed action, or is forced blank
 local function hasMacro(data)
-	return data ~= nil and ((data.macro_Text ~= nil and data.macro_Text ~= "") or not not data.actionID)
+	return data ~= nil and (data.forceBlank or (data.macro_Text ~= nil and data.macro_Text ~= "") or not not data.actionID)
 end
+
+--what a forced blank state shows, it keeps its own macro for when it is unticked. read only
+local BLANK_DATA = {
+	actionID = false,
+	macro_Text = "",
+	macro_Icon = false,
+	macro_Name = "",
+	macro_Note = "",
+	macro_UseNote = false,
+	macro_BlizzMacro = false,
+	macro_EquipmentSet = false,
+}
 
 --in combat the client hands tainted code "secret" numbers that can't be compared or used in arithmetic
 local issecretvalue = issecretvalue or function() return false end
@@ -315,6 +327,7 @@ function Button:LoadDataFromDatabase(curSpec, curState)
 			self:SetAttribute(state.."-macro_Text", nil)
 			self:SetAttribute(state.."-actionID", nil)
 			self:SetAttribute(state.."-own", nil)
+			self:SetAttribute(state.."-blank", nil)
 		end
 
 		self.macroStates = {}
@@ -326,14 +339,16 @@ function Button:LoadDataFromDatabase(curSpec, curState)
 
 		for state in pairs(self.macroStates) do
 			local data = self:GetResolvedData(state)
-			self:SetAttribute(state.."-macro_Text", data.macro_Text)
-			self:SetAttribute(state.."-actionID", data.actionID)
+			--a blank state's "" still counts as set in the fallbacks, see ActionButton _childupdate
+			self:SetAttribute(state.."-macro_Text", data.forceBlank and "" or data.macro_Text)
+			self:SetAttribute(state.."-actionID", not data.forceBlank and data.actionID or nil)
 			self:SetAttribute(state.."-own", hasMacro(rawget(self.statedata, state)) or nil)
+			self:SetAttribute(state.."-blank", data.forceBlank or nil)
 		end
 
 		--for states with no data anywhere
 		local fallback = self:GetResolvedData("homestate")
-		self:SetAttribute("fallback-macro_Text", hasMacro(fallback) and fallback.macro_Text or nil)
+		self:SetAttribute("fallback-macro_Text", hasMacro(fallback) and not fallback.forceBlank and fallback.macro_Text or nil)
 	end
 end
 
@@ -468,7 +483,8 @@ end
 ---@return GenericSpecData
 function Button:GetActiveData()
 	if self.statedata and self.activeState then
-		return self:GetResolvedData(self.activeState)
+		local data = self:GetResolvedData(self.activeState)
+		return data.forceBlank and BLANK_DATA or data
 	end
 	return self.data
 end
