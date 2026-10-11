@@ -94,9 +94,19 @@ StaticPopupDialogs["NEURON_BARCONFIG_CONFIRM"] = UI.RaisePopup{
 	preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
 }
 
---the option's desc on hover
-local function tooltip(widget, control)
-	widget:HookScript("OnEnter", function(self)
+--the option's desc on hover, only over its label text. text gets no mouse, so a frame over it takes the hover.
+--FitLabel sizes it after the text changes
+local function labelTooltip(control)
+	local hover = CreateFrame("Frame", nil, control)
+	hover:SetPoint("TOPLEFT", control.label)
+	hover:SetPoint("BOTTOMLEFT", control.label)
+	--motion only, so a click on a checkbox's label still ticks it. older clients have no motion only
+	if hover.EnableMouseMotion then
+		hover:EnableMouseMotion(true)
+	else
+		hover:EnableMouse(true)
+	end
+	hover:SetScript("OnEnter", function(self)
 		local desc = control.option and resolve(control.option.desc)
 		if desc and desc ~= "" then
 			GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
@@ -105,9 +115,14 @@ local function tooltip(widget, control)
 			GameTooltip:Show()
 		end
 	end)
-	widget:HookScript("OnLeave", function()
+	hover:SetScript("OnLeave", function()
 		GameTooltip:Hide()
 	end)
+	control.labelHover = hover
+
+	function control:FitLabel()
+		self.labelHover:SetWidth(math.max(1, self.label:GetStringWidth()))
+	end
 end
 
 --a caption above a widget, in the same font as a slider's or checkbox's name
@@ -140,10 +155,11 @@ local CONTROLS = {}
 
 CONTROLS.toggle = function(parent)
 	local control = UI.Checkbox(parent)
-	tooltip(control, control)
+	labelTooltip(control)
 
 	function control:Bind(option)
 		self:SetLabel(resolve(option.name))
+		self:FitLabel()
 		self:SetChecked(option.get({}))
 		self:SetDisabled(resolve(option.disabled))
 		self.onChange = function(value)
@@ -161,7 +177,6 @@ end
 
 CONTROLS.color = function(parent)
 	local control = UI.ColorSwatch(parent)
-	tooltip(control, control)
 
 	function control:Bind(option)
 		self:SetLabel(resolve(option.name))
@@ -191,10 +206,11 @@ CONTROLS.select = function(parent)
 		control.onSelect(value)
 	end)
 	placeUnder(control.dropdown, control)
-	tooltip(control.dropdown, control)
+	labelTooltip(control)
 
 	function control:Bind(option)
 		self.label:SetText(resolve(option.name))
+		self:FitLabel()
 
 		--without a sorting, lists keep their order and the rest go by name
 		local values = resolve(option.values) or {}
@@ -242,6 +258,7 @@ local GRID_CELL, GRID_GAP = 16, 2
 
 CONTROLS.point = function(parent)
 	local control = labelled(parent)
+	labelTooltip(control)
 	control.grid = CreateFrame("Frame", nil, control)
 	control.grid:SetSize(GRID_CELL * 3 + GRID_GAP * 2, GRID_CELL * 3 + GRID_GAP * 2)
 	control.grid:SetPoint("TOPLEFT", control.label, "BOTTOMLEFT", 0, -3)
@@ -261,12 +278,12 @@ CONTROLS.point = function(parent)
 				control.onPick(point)
 			end
 		end)
-		tooltip(cell, control)
 		control.cells[point] = cell
 	end
 
 	function control:Bind(option)
 		self.label:SetText(resolve(option.name))
+		self:FitLabel()
 		local value = option.get({})
 		for point, cell in pairs(self.cells) do
 			cell.photonFlat.bg:SetColorTexture(unpack(point == value and Style.accent or Style.strip))
@@ -290,7 +307,7 @@ CONTROLS.input = function(parent)
 	local control = labelled(parent)
 	local box = UI.EditBox(control)
 	placeUnder(box, control)
-	tooltip(box, control)
+	labelTooltip(control)
 	control.box = box
 
 	--saved on enter or when leaving the box, escape puts it back
@@ -307,6 +324,7 @@ CONTROLS.input = function(parent)
 
 	function control:Bind(option)
 		self.label:SetText(resolve(option.name))
+		self:FitLabel()
 		self.commit = nil
 		self.committed = option.get({}) or ""
 		box:SetText(self.committed)
@@ -326,10 +344,11 @@ end
 
 CONTROLS.range = function(parent)
 	local control = UI.Slider(parent)
-	tooltip(control.valueBox, control)
+	labelTooltip(control)
 
 	function control:Bind(option)
 		self:SetLabel(resolve(option.name))
+		self:FitLabel()
 		self:SetRange(option.min or 0, option.max or 100, option.step, option.softMax, option.isPercent)
 		--nudge = true gives it arrows either side that step it, see UI.Slider
 		self:SetSteppers(option.nudge == true)
@@ -367,7 +386,6 @@ CONTROLS.execute = function(parent)
 			run()
 		end
 	end)
-	tooltip(control, control)
 
 	function control:Bind(option)
 		self.option = option
