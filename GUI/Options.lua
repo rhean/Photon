@@ -74,6 +74,7 @@ local function barRange(name, min, max, step, isPercent, getter, setter)
 		max = max,
 		step = step,
 		isPercent = isPercent,
+		nudge = true,
 		get = function() return bar()[getter](bar()) end,
 		set = function(_, value) bar()[setter](bar(), value) end,
 	}
@@ -217,6 +218,7 @@ local function barDefinitions()
 			max = bar().objMax or 132,
 			softMax = math.min(bar().objMax or 132, 24),
 			step = allOrNothing and (bar().objMax or 1) or 1,
+			nudge = true,
 			get = function() return bar():GetNumObjects() end,
 			set = function(_, value)
 				while bar():GetNumObjects() < value do
