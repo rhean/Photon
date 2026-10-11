@@ -124,7 +124,7 @@ L["CDText"] = true
 L["CDText_Description"] = "Toggle cooldown counts text on the current bar"
 
 L["CDAlpha"] = true
-L["CDAlpha_Description"] = "Toggle a button's transparancy while on cooldown"
+L["CDAlpha_Description"] = "Toggle a button's transparency while on cooldown"
 
 L["UpClick"] = true
 L["UpClick_Description"] = "Toggle if buttons on the current bar respond to up clicks"
@@ -211,12 +211,9 @@ L["Page 6"] = true
 L["No Pet"] = true
 L["Pet Exists"] = true
 
-L["Alt Up"] = true
-L["Alt Down"] = true
-L["Control Up"] = true
-L["Control Down"] = true
-L["Shift Up"] = true
-L["Shift Down"] = true
+L["Alt Released"] = true
+L["Control Released"] = true
+L["Shift Released"] = true
 L["Alt Pressed"] = true
 L["Control Pressed"] = true
 L["Shift Pressed"] = true
@@ -239,8 +236,8 @@ L["Group: Party"] = true
 L["No Fishing Pole"] = true
 L["Fishing Pole"] = true
 
-L["No Dragon Riding"] = true
-L["Dragon Riding"] = true
+L["No Skyriding"] = true
+L["Skyriding"] = true
 L["No Vehicle"] = true
 L["Vehicle"] = true
 L["No Possess"] = true
@@ -279,13 +276,14 @@ L["Specialization"] = true
 L["Modifiers"] = true
 L["ButtonEditor_Location"] = "Button %d - Row %d"
 L["ButtonEditor_Button"] = "Button %d"
-L["Add bar for modifier"] = true
-L["Remove Modifier"] = true
-L["ButtonEditor_DefaultDesc"] = "Default state when no other condition is true"
-L["ButtonEditor_DefaultHelp"] = "Default shows when no modifier or condition is active.\n"..
-	"Differnt pages each have their own Default and modifier pages, so holding Shift in a stance will show that stance's Shift page.\n"..
-	"An a macro is empty it uses the first with a macro in the following priority order: same modifier on the Default tab -> stance's Default -> Default on the Default tab."
-L["ButtonEditor_RemoveModifier"] = "Removing the modifier removes it from the whole bar and deletes its contents."
+L["Add page for condition"] = true
+L["Remove page"] = true
+L["ButtonEditor_DefaultDesc"] = "Default state when no other condition is true."
+-- the button editor: action bar pages (1-6) and {form} tabs at the top, each with a Default page and condition pages
+L["ButtonEditor_DefaultHelp"] = "Default shows when no condition is active.\n"..
+	"Each {form} tab and each action bar page has its own Default and condition pages, so holding Shift in a {form} shows that {form} tab's Shift page.\n"..
+	"When a page has no macro, it uses the first page that has one: the same condition on the Default tab -> the {form} tab's Default -> this action bar page's Default -> action bar page 1's Default."
+L["ButtonEditor_RemoveModifier"] = "Remove the %s page from %s? Its macros are deleted from every button in that row, on every tab and action bar page."
 L["ButtonEditor_RowOfSpec"] = "row %d of %s"
 L["ButtonEditor_Status"] = "|cffffd200%s|r|cFFFFFFFF button %d is selected. Click another button to edit it."
 L["ButtonEditor_SelectButton"] = "Click an action button to edit it."
@@ -293,7 +291,14 @@ L["ButtonEditor_Inherits"] = "No macro of its own, this page uses %s. Type a mac
 L["ButtonEditor_Empty"] = "No macro yet. Type one below."
 L["ButtonEditor_InheritsBlank"] = "No macro of its own, this page uses %s, which is forced blank."
 L["Force Blank"] = true
-L["ButtonEditor_ForceBlankDesc"] = "Forces the button to be empty and not use fallbacks"
+L["ButtonEditor_ForceBlankDesc"] = "Makes this page empty instead of using another page's macro. Pages that would use this one are empty too."
+L["Icon"] = true
+L["Edit Label"] = true
+L["Reset Icon"] = true
+L["ButtonEditor_IconDesc"] = "Click to choose an icon for this page."
+L["ButtonEditor_LabelDesc"] = "Text shown on the button when the bar's Button Label option is on."
+L["ButtonEditor_ResetIconDesc"] = "Goes back to the macro's own icon instead of the one you picked."
+L["ButtonEditor_RemovePageDesc"] = "Removes the selected condition page from this row of buttons."
 
 L["Toggle Keybind Mode"] = true
 L["Open the Interface Menu"] = true
@@ -389,7 +394,7 @@ L["Dual Spec"] = true
 -- New for the updated GUI
 L["Color"] = true
 L["Delete Bar"] = true
-L["DeleteBar_Confirm"] = "Warning, will permanently delete the bar and all stored data"
+L["DeleteBar_Confirm"] = "Warning: this will permanently delete the bar and all of its stored data."
 L["General Configuration"] = true
 L["Bar Conditions"] = true
 L["Secondary States"] = true
@@ -411,6 +416,19 @@ L["Normal"] = true
 L["Minimal"] = true
 L["Tooltips in Combat"] = true
 L["Show Border Style"] = true
+
+-- bar editor labels, apart from the console command names above
+L["Snap To"] = true
+L["On Press"] = true
+L["Opacity"] = true
+L["Full Opacity On"] = true
+L["Fade Speed"] = true
+L["Layer"] = true
+L["Fade on Cooldown"] = true
+L["Button Label"] = true
+L["Action Bar Pages"] = true
+L["Last 5s"] = true
+L["Reload UI"] = true
 
 L["Preset Action States"] = true
 L["Custom Action States"] = true
@@ -627,7 +645,7 @@ L["Experimental_Options_Warning"] = [[
 
 Warning:
 
-Here you will fill find experimental and potentially dangerous options.
+Here you will find experimental and potentially dangerous options.
 
 Use at your own risk.
 
@@ -649,51 +667,59 @@ L["BarDesc_StanceWord"] = "stance" --warrior, monk and the rest
 L["BarDesc_deleteBar"] = "Permanently deletes this bar and all the buttons on it."
 
 -- Enabled Functions
-L["BarDesc_multiSpec"] = "Gives the bar a page for each specialization."
-L["BarDesc_pages"] = "Gives the bar a page for each of the base games pages."
-L["BarDesc_state_stance"] = "Gives the bar a page for each {form}."
-L["BarDesc_state_pet"] = "Gives the bar a page for when you have a pet out."
+L["BarDesc_multiSpec"] = "Gives each specialization its own set of buttons."
+L["BarDesc_pages"] = "Gives each of the game's action bar pages (1-6) its own set of buttons."
+L["BarDesc_state_stance"] = "Gives each {form} its own set of buttons."
+L["BarDesc_state_pet"] = "Gives the bar its own set of buttons for when you have a pet out."
 
 -- General Options
 L["BarDesc_autoHide"] = "Fades the bar out until you move the mouse over it."
 L["BarDesc_hidden"] = "Hides the bar completely. It still shows while editing bars."
 L["BarDesc_showGrid"] = "Shows the outline of empty buttons."
-L["BarDesc_lockActions"] = "Locks the buttons so abilities can't be dragged on or off them, pick a key to unlock them."
-L["BarDesc_clickMode"] = "Whether a button fires when the mouse button is pressed down or when it is released."
+L["BarDesc_snapTo"] = "Snaps the bar to nearby bars when you move it."
+L["BarDesc_lockActions"] = "Locks the buttons so abilities can only be dragged on or off them while the chosen key is held. Off leaves them unlocked."
+L["BarDesc_clickMode"] = "Whether a button fires when the mouse button is pressed or when it is released."
+L["BarDesc_applyReload"] = "Reloads the UI so every change takes full effect."
 
 -- Size and Shape
 L["BarDesc_numButtons"] = "How many buttons the bar has."
-L["BarDesc_columns"] = "How many buttons per row."
+L["BarDesc_columns"] = "How many buttons per row. 0 puts them all in one row."
 L["BarDesc_scale"] = "The size of the bar and its buttons."
 L["BarDesc_horizontalPadding"] = "The space between buttons side by side."
 L["BarDesc_verticalPadding"] = "The space between rows of buttons."
 L["BarDesc_shape"] = "How the buttons are laid out."
-L["BarDesc_alpha"] = "How transparent the bar is normally."
+L["BarDesc_alpha"] = "How visible the bar normally is. Lower is more transparent."
 L["BarDesc_alphaUp"] = "When the bar becomes fully visible: on mouseover, in combat, or both."
 L["BarDesc_alphaUpSpeed"] = "How fast the bar fades in and out."
 L["BarDesc_strata"] = "Which layer the bar is drawn on."
 
 -- Visuals
 L["BarDesc_keybindLabel"] = "Shows the key bound to each button."
-L["BarDesc_buttonName"] = "Shows the macro name on each button."
+L["BarDesc_buttonName"] = "Shows each button's label, set in the button editor."
 L["BarDesc_stackCharge"] = "Shows item stack counts and ability charges on each button."
 L["BarDesc_outOfRange"] = "Tints the button when your target is out of range."
 L["BarDesc_cooldownCounter"] = "Shows the time left on cooldowns as numbers on the button."
 L["BarDesc_cooldownColor1"] = "The color of the cooldown counter."
 L["BarDesc_cooldownColor2"] = "The color of the cooldown counter in the last 5 seconds."
 L["BarDesc_cooldownAlpha"] = "Fades the button while its ability is on cooldown."
-L["BarDesc_tooltips"] = "Which tooltip to show when hovering a button: none, a short, or the full tooltip."
+L["BarDesc_tooltips"] = "Which tooltip to show when hovering a button: Off, Minimal (short) or Normal (the full tooltip)."
 L["BarDesc_tooltipsInCombat"] = "Also shows button tooltips while you are in combat."
 L["BarDesc_spellAlerts"] = "The glow shown on a button when its ability procs or is highlighted by the game."
 L["BarDesc_borderStyle"] = "Shows the game's decorative border art around the button (extra action and zone ability buttons)."
 
--- Activate a Page for these Conditions: the bar gets a page for the state, set its abilities in the button editor
+-- Configure Appearance (status bars)
+L["BarDesc_mouseoverText"] = "Text shown in place of the other texts while you hover the bar."
+L["BarDesc_tooltipText"] = "Text shown in a tooltip when you hover the bar. Uses the bar's tooltip settings."
+L["BarDesc_castUnit"] = "Whose casts this bar shows."
+L["BarDesc_castIcon"] = "Shows the icon of the spell being cast."
+
+-- Activate a page for these conditions: the bar gets a page for the state, set its abilities in the button editor
 L["BarDesc_state_shift"] = "Gives the bar a page for when Shift is held."
 L["BarDesc_state_ctrl"] = "Gives the bar a page for when Control is held."
 L["BarDesc_state_alt"] = "Gives the bar a page for when Alt is held."
 L["BarDesc_state_target"] = "Gives the bar a page for when you have a target."
-L["BarDesc_state_harm"] = "Gives the bar a page for when your target is hostile."
-L["BarDesc_state_help"] = "Gives the bar a page for when your target is friendly."
+L["BarDesc_state_harm"] = "Gives the bar a page for when you can attack your target."
+L["BarDesc_state_help"] = "Gives the bar a page for when you can help your target."
 L["BarDesc_state_stealth"] = "Gives the bar a page for when you are stealthed."
 L["BarDesc_state_combat"] = "Gives the bar a page for when you are in combat."
 L["BarDesc_state_party"] = "Gives the bar a page for when you are in a party."
@@ -724,8 +750,8 @@ L["BarDesc_visibility_alt0"] = "Hides the bar while Alt is not held."
 L["BarDesc_visibility_alt1"] = "Hides the bar while Alt is held."
 L["BarDesc_visibility_target0"] = "Hides the bar when you have no target."
 L["BarDesc_visibility_target1"] = "Hides the bar when you have a target."
-L["BarDesc_visibility_harm1"] = "Hides the bar when your target is one you can attack."
-L["BarDesc_visibility_help1"] = "Hides the bar when your target is one you can help."
+L["BarDesc_visibility_harm1"] = "Hides the bar when you can attack your target."
+L["BarDesc_visibility_help1"] = "Hides the bar when you can help your target."
 L["BarDesc_visibility_reaction0"] = "Hides the bar when your target is friendly."
 L["BarDesc_visibility_reaction1"] = "Hides the bar when your target is hostile."
 L["BarDesc_visibility_stealth0"] = "Hides the bar when you are not stealthed."
@@ -744,8 +770,8 @@ L["BarDesc_visibility_swimming0"] = "Hides the bar when you are not swimming."
 L["BarDesc_visibility_swimming1"] = "Hides the bar when you are swimming."
 L["BarDesc_visibility_vehicle0"] = "Hides the bar when you are not in a vehicle."
 L["BarDesc_visibility_vehicle1"] = "Hides the bar when you are in a vehicle."
-L["BarDesc_visibility_extrabar0"] = "Hides the bar when there is no extra action button."
-L["BarDesc_visibility_extrabar1"] = "Hides the bar when there is an extra action button."
+L["BarDesc_visibility_extrabar0"] = "Hides the bar when the game's extra action bar is not shown."
+L["BarDesc_visibility_extrabar1"] = "Hides the bar when the game's extra action bar is shown."
 L["BarDesc_visibility_possess0"] = "Hides the bar when you are not possessing anything."
 L["BarDesc_visibility_possess1"] = "Hides the bar when you are possessing something."
 L["BarDesc_visibility_override0"] = "Hides the bar when there is no override bar."

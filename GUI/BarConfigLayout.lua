@@ -167,7 +167,7 @@ addonTable.barConfigLayout = {
 			}},
 		}},
 		{ id = "visibility", name = "Bar Conditions", groups = {
-			{ id = "states", name = "Activate a Page for these Conditions", rows = {
+			{ id = "states", name = "Activate a page for these conditions", rows = {
 				{
 					{ id = "statesBox1", box = true, name = "", light = true, width = "full", rows = {
 						{
@@ -243,17 +243,17 @@ addonTable.barConfigLayout = {
 					{ id = "shiftRow", box = true, name = "", light = true, width = "full", rows = {
 						{
 							{ text = "Shift", width = "normal" },
-							{ id = "visibility_shift0", name = "Up", width = "half" },
+							{ id = "visibility_shift0", name = "Released", width = "half" },
 							{ id = "visibility_shift1", name = "Pressed", width = "half" },
 						},
 						{
 							{ text = "Control", width = "normal" },
-							{ id = "visibility_ctrl0", name = "Up", width = "half" },
+							{ id = "visibility_ctrl0", name = "Released", width = "half" },
 							{ id = "visibility_ctrl1", name = "Pressed", width = "half" },
 						},
 						{
 							{ text = "Alt", width = "normal" },
-							{ id = "visibility_alt0", name = "Up", width = "half" },
+							{ id = "visibility_alt0", name = "Released", width = "half" },
 							{ id = "visibility_alt1", name = "Pressed", width = "half" },
 						},
 					}},
@@ -263,7 +263,7 @@ addonTable.barConfigLayout = {
 						{
 							{ text = "Target", width = "normal" },
 							{ id = "visibility_target0", name = "None", width = "half" },
-							{ id = "visibility_target1", name = "Has", width = "half" },
+							{ id = "visibility_target1", name = "Any", width = "half" },
 						},
 						{
 							{ text = "Target Type", width = "normal" },
@@ -286,7 +286,7 @@ addonTable.barConfigLayout = {
 						},
 						{
 							{ text = "Stance", width = "normal" },
-							{ id = "visibility_stance0", name = "Default", width = "half" },
+							{ id = "visibility_stance0", name = "None", width = "half" },
 						},
 						{
 							{ text = "Combat", width = "normal" },
@@ -343,7 +343,7 @@ addonTable.barConfigLayout = {
 							{ id = "visibility_override1", name = "Yes", width = "half" },
 						},
 						{
-							{ text = "Dragon Riding", width = "normal" },
+							{ text = "Skyriding", width = "normal" },
 							{ id = "visibility_dragonriding0", name = "No", width = "half" },
 							{ id = "visibility_dragonriding1", name = "Yes", width = "half" },
 						},

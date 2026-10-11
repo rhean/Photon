@@ -249,6 +249,19 @@ end
 
 -------------------------------- page editor --------------------------------
 
+---a title and a line of help on hover
+local function addTooltip(frame, title, desc)
+	frame:HookScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+		GameTooltip:SetText(title, 1, 1, 1)
+		GameTooltip:AddLine(desc, nil, nil, nil, true)
+		GameTooltip:Show()
+	end)
+	frame:HookScript("OnLeave", function()
+		GameTooltip:Hide()
+	end)
+end
+
 --the selected look, a light background with an accent line on the left, inset from the edge
 local function addSelection(frame, inset)
 	frame.selectedBg = frame:CreateTexture(nil, "BACKGROUND", nil, -7)
@@ -328,12 +341,14 @@ local function createPageEditor(parent)
 			editor.onIcon(icon)
 		end)
 	end)
+	addTooltip(editor.iconFrame, L["Icon"], L["ButtonEditor_IconDesc"])
 
 	editor.labelCaption = UI.Text(editor, Style.fontSmall, Style.dim)
-	editor.labelCaption:SetText("Edit Label")
+	editor.labelCaption:SetText(L["Edit Label"])
 	editor.labelBox = UI.EditBox(editor, function(text)
 		editor.onLabel(text)
 	end)
+	addTooltip(editor.labelBox, L["Edit Label"], L["ButtonEditor_LabelDesc"])
 
 	editor.macroCaption = UI.Text(editor, Style.fontSmall, Style.dim)
 	editor.macroCaption:SetText("Edit Macro")
@@ -341,9 +356,10 @@ local function createPageEditor(parent)
 		editor.onMacro(text)
 	end)
 
-	editor.resetIcon = UI.Button(editor, "Reset Icon", function()
+	editor.resetIcon = UI.Button(editor, L["Reset Icon"], function()
 		editor.onResetIcon()
 	end)
+	addTooltip(editor.resetIcon, L["Reset Icon"], L["ButtonEditor_ResetIconDesc"])
 
 	--empties the page, whatever it would fall back on
 	editor.forceBlank = UI.Checkbox(editor, function(checked)
@@ -782,7 +798,7 @@ local function createWindow()
 	specDropdown:SetPoint("LEFT", specLabel, "RIGHT", Style.gap * 2, 0)
 	specDropdown:SetWidth(220)
 
-	addButton = UI.MenuButton(specRow, L["Add bar for modifier"], function(root)
+	addButton = UI.MenuButton(specRow, L["Add page for condition"], function(root)
 		for _, modifier in ipairs(view.available) do
 			local entry = root:CreateButton(stateName(modifier), function()
 				view.addModifier(modifier)
@@ -799,10 +815,11 @@ local function createWindow()
 	end)
 
 	--removes the selected page's modifier
-	removeButton = UI.Button(specRow, L["Remove Modifier"], function()
+	removeButton = UI.Button(specRow, L["Remove page"], function()
 		view.editors[selected.page].onRemove()
 	end)
 	removeButton:SetPoint("RIGHT")
+	addTooltip(removeButton, L["Remove page"], L["ButtonEditor_RemovePageDesc"])
 
 	--how default works on hover, placed with the tabs, see placeBody
 	helpButton = CreateFrame("Button", nil, specRow)
@@ -836,7 +853,8 @@ local function createWindow()
 	helpButton:SetScript("OnEnter", function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
 		GameTooltip:SetText(L["Default"], 1, 1, 1)
-		for paragraph in L["ButtonEditor_DefaultHelp"]:gmatch("[^\n]+") do
+		local help = L["ButtonEditor_DefaultHelp"]:gsub("{form}", addonTable.optionDefinitions.formWord())
+		for paragraph in help:gmatch("[^\n]+") do
 			if GameTooltip:NumLines() > 1 then
 				GameTooltip:AddLine(" ")
 				local spacer = _G["GameTooltipTextLeft"..GameTooltip:NumLines()]
