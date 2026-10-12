@@ -885,7 +885,7 @@ function Button:UpdateUsableAction()
 	if notEnoughMana and self.bar:GetManaColor() then
 		self.Icon:SetVertexColor(self.bar:GetManaColor()[1], self.bar:GetManaColor()[2], self.bar:GetManaColor()[3])
 	elseif isUsable then
-		if self.bar:GetShowRangeIndicator() and IsActionInRange(self.spell, self.unit) == 0 then
+		if self.bar:GetShowRangeIndicator() and C_ActionBar.IsActionInRange(self.actionID, self.unit) == false then -- [retail port 2026-10-12] was IsActionInRange(self.spell, ...) == 0: wrong arg, retail errors
 			self.Icon:SetVertexColor(self.bar:GetRangeColor()[1], self.bar:GetRangeColor()[2], self.bar:GetRangeColor()[3])
 		else
 			self.Icon:SetVertexColor(1.0, 1.0, 1.0)
