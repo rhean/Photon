@@ -694,6 +694,12 @@ end
 
 ---Updates the buttons "count", i.e. the spell charges
 function Button:UpdateSpellCount()
+	--retail hands back a text ready count, which a secret value in combat can still be shown through
+	if C_Spell.GetSpellDisplayCount then
+		self.Count:SetText(C_Spell.GetSpellDisplayCount(self.spellID or self.spell))
+		return
+	end
+
 	local chargeInfo = C_Spell.GetSpellCharges(self.spell)
 	local count = C_Spell.GetSpellCastCount(self.spell)
 
@@ -725,6 +731,11 @@ end
 
 
 function Button:UpdateActionCount()
+	if C_ActionBar and C_ActionBar.GetActionDisplayCount then
+		self.Count:SetText(C_ActionBar.GetActionDisplayCount(self.actionID))
+		return
+	end
+
 	local count = GetActionCount(self.actionID)
 
 	if count and count > 0 then
