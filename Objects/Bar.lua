@@ -1001,26 +1001,7 @@ function Bar:SetObjectLoc()
 	local shape, padH, padV, arcStart, arcLength = self:GetBarShape(), self:GetHorizontalPad(), self:GetVerticalPad(), self:GetArcStart(), self:GetArcLength()
 	local cAdjust, rAdjust = 0.5, 1
 	local columns, rows
-
-
-	--This is just for the flyout bar, it should be cleaned in the future
-	local count
-	if self.class ~= "FlyoutBar" then
-		count = #self.buttons
-	else
-		count = #self.data.objectList
-	end
-
-	local buttons = {}
-	if self.class ~= "FlyoutBar" then
-		buttons = self.buttons
-	else
-		for k,v in pairs (self.data.objectList) do
-			table.insert(buttons, Photon.FOBTNIndex[v])
-		end
-	end
-
-	--------------------------------------------------------------------------
+	local count = #self.buttons
 
 	if origCol == 0 then
 		origCol = count
@@ -1029,7 +1010,7 @@ function Bar:SetObjectLoc()
 		rows = (round(ceil(count/self:GetColumns()), 1)/2)+0.5
 	end
 
-	for i, object in ipairs(buttons) do --once the flyout bars are fixed, this can be changed to ipairs(self.buttons)
+	for i, object in ipairs(self.buttons) do
 
 		if num < count then
 			object:ClearAllPoints()
@@ -1107,28 +1088,11 @@ end
 
 function Bar:SetPerimeter()
 	local num = 0
-
-	--This is just for the flyout bar, it should be cleaned in the future
-	local count
-	if self.class ~= "FlyoutBar" then
-		count = #self.buttons
-	else
-		count = #self.data.objectList
-	end
-
-	local buttons = {}
-	if self.class ~= "FlyoutBar" then
-		buttons = self.buttons
-	else
-		for k,v in pairs (self.data.objectList) do
-			table.insert(buttons, Photon.FOBTNIndex[v])
-		end
-	end
-	-----------------------------------------------
+	local count = #self.buttons
 
 	self.top = nil; self.bottom = nil; self.left = nil; self.right = nil
 
-	for i, object in ipairs(buttons) do --once the flyout bars are fixed, this can be changed to ipairs(self.buttons)
+	for i, object in ipairs(self.buttons) do
 
 		if num < count then
 			local objTop, objBottom, objLeft, objRight = object:GetTop(), object:GetBottom(), object:GetLeft(), object:GetRight()

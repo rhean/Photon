@@ -523,8 +523,9 @@ function Button:SetSkinned(flyout)
 			Disabled = self:GetDisabledTexture(),
 			Highlight = self.Highlight,
 		}
+		--the flyout popup is shared by every bar
 		if flyout then
-			Skin:Group("Photon", self.anchor.bar.data.name):AddButton(self, btnData, "Action")
+			Skin:Group("Photon", "Flyout"):AddButton(self, btnData, "Action")
 		else
 			Skin:Group("Photon", self.bar.data.name):AddButton(self, btnData, "Action")
 		end
@@ -540,7 +541,7 @@ function Button:HasAction()
 		elseif self.class == "PetBar" and GetPetActionInfo(self.actionID) then
 			return true
 		end
-	elseif self.spell or self.item then
+	elseif self.spell or self.item or self.flyoutID then
 		return true
 	else
 		return false
@@ -1000,6 +1001,8 @@ function Button:UpdateTooltip()
 			self:UpdateSpellTooltip()
 		elseif self.item then
 			self:UpdateItemTooltip()
+		elseif self.flyoutID then
+			self:UpdateFlyoutTooltip()
 	-- macro must go after spells and items, for blizz macro #showtooltip to work
 		 elseif self:GetMacroBlizzMacro() then
 		 	GameTooltip:SetText(self:GetMacroName())

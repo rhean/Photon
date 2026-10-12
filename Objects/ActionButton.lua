@@ -73,9 +73,8 @@ function ActionButton:InitializeButton()
 
 	SecureHandler_OnLoad(self)
 
-	if self.class ~= "flyout" then
-		self:SetupEvents()
-	end
+	self:SetupEvents()
+	self:SetupFlyoutClick()
 
 	self:SetAttribute("type", "macro")
 	self:SetAttribute("*macrotext*", self.SanitizedMacro(self:GetMacroText()))
@@ -242,7 +241,6 @@ function ActionButton:InitializeButton()
 	end
 
 	self:UpdateAll()
-	self:UpdateFlyout(true)
 
 	self:InitializeButtonSettings()
 end
@@ -283,6 +281,9 @@ function ActionButton:InitializeButtonSettings()
 
 	self:RegisterForDrag("LeftButton", "RightButton")
 	self:SetSkinned()
+
+	--the bar was laid out again, the popup may open another way
+	self:UpdateFlyout()
 end
 
 
@@ -401,10 +402,6 @@ end
 
 function ActionButton:OnLeave(...)
 	GameTooltip:Hide()
-
-	if self.flyout and self.flyout.arrow then
-		self.flyout.arrow:SetPoint(self.flyout.arrowPoint, self.flyout.arrowX, self.flyout.arrowY)
-	end
 end
 
 ------------------------------------------------------------
@@ -420,6 +417,7 @@ function ActionButton:ClearButton(clearAttributes)
 	self.spellID = nil
 	self.item = nil
 	self.unit = nil
+	self.flyoutID = nil
 
 	if not InCombatLockdown() and clearAttributes then
 		self:SetAttribute("unit", nil)
@@ -527,7 +525,6 @@ function ActionButton:UpdateButtonSpec()
 
 	self:LoadDataFromDatabase(spec, self.bar.handler:GetAttribute("activestate") or "homestate")
 	self:InitializeButtonSettings()
-	self:UpdateFlyout()
 	self:UpdateAll()
 end
 
@@ -789,9 +786,10 @@ function ActionButton:UpdateAll()
 	Photon.Button.UpdateAll(self)
 
 	self:UpdateGlow()
+	self:UpdateFlyout()
 end
 
----@return {}|{spell: string, spellID: number, unit:string}|{item:string, unit:string}
+---@return {}|{spell: string, spellID: number, unit:string}|{item:string, unit:string}|{flyoutID:number}
 function ActionButton.ExtractMacroData(macro)
 	if not macro then
 		return {}
@@ -852,7 +850,10 @@ function ActionButton.ExtractMacroData(macro)
 		end
 	end
 
-	return {spell = spell, spellID = spellID, unit = unit, item = item}
+	--a Blizzard flyout, see ActionButton_Flyout.lua
+	local flyoutID = tonumber(macro:match(ActionButton.FLYOUT_PATTERN))
+
+	return {spell = spell, spellID = spellID, unit = unit, item = item, flyoutID = flyoutID}
 end
 
 --overwrite function in parent class Button
@@ -873,6 +874,7 @@ function ActionButton:UpdateData()
 	self.spellID = spellItemUnit.spellID
 	self.item = spellItemUnit.item
 	self.unit = spellItemUnit.unit
+	self.flyoutID = spellItemUnit.flyoutID
 end
 
 --overwrite function in parent class Button
@@ -943,6 +945,8 @@ function ActionButton:GetAppearance(data)
 		texture, border = self.GetSpellAppearance(spell)
 	elseif item then
 		texture, border = self.GetItemAppearance(item)
+	elseif spellItem.flyoutID then
+		texture = self.GetFlyoutIcon(spellItem.flyoutID)
 	end
 
 	-- a picked icon wins over the macro's spell or item, as on blizzard's macros.

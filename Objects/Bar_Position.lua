@@ -103,6 +103,13 @@ function Bar:SetPosition()
 	self:SetPoint(self.data.anchorPoint or "CENTER", self:GetAnchorFrame(), self.data.point, self:GetXAxis(), self:GetYAxis())
 	self:SetUserPlaced(true)
 	self:SetFrameStrata(Photon.STRATAS[self:GetStrata()])
+
+	--a flyout opens away from the screen edge, which may now be another one
+	for _, button in ipairs(self.buttons or {}) do
+		if button.UpdateFlyout then
+			button:UpdateFlyout()
+		end
+	end
 end
 
 ---the offset that puts the bar where frame is now, on its current anchor, in whole pixels.
