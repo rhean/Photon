@@ -583,7 +583,16 @@ local function bindPageEditor(editor, button, specIndex, specName, page, collaps
 	editor.labelBox:SetText(own and own.macro_Name or "")
 	editor.labelBox:SetPlaceholder(fallback and fallback.macro_Name)
 	editor.macroBox:SetText(own and type(own.macro_Text) == "string" and own.macro_Text or "")
-	editor.macroBox:SetPlaceholder(fallback and type(fallback.macro_Text) == "string" and fallback.macro_Text)
+
+	--with a macro of its own, what it falls back on once that is deleted, grayed as soon as the box is empty
+	local macroFallback = fallback
+	if not editor.showNotice and not own.forceBlank then
+		rawset(specData, page, nil)
+		local data = button:GetResolvedData(page, specData)
+		rawset(specData, page, own)
+		macroFallback = hasMacro(data) and not data.forceBlank and data or nil
+	end
+	editor.macroBox:SetPlaceholder(macroFallback and type(macroFallback.macro_Text) == "string" and macroFallback.macro_Text)
 
 	editor.onLabel = function(text)
 		update{macro_Name = text}
