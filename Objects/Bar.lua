@@ -191,6 +191,9 @@ Photon.CreateNewBar = Bar.CreateNewBar --this is so the slash function works cor
 
 
 function Bar:DeleteBar()
+	--before the bar moves away, so bars anchored to it stay put, and while its place in the saved bars is known
+	self:ReleaseAnchors()
+
 	self.handler:SetAttribute("state-current", "homestate")
 	self.handler:SetAttribute("state-last", "homestate")
 	self.handler:SetAttribute("showstates", "homestate")
@@ -942,68 +945,6 @@ end
 -------------------------------------------------------
 
 
-function Bar:GetPosition(oFrame)
-	local relFrame, point
-
-	if oFrame then
-		relFrame = oFrame
-	else
-		relFrame = self:GetParent()
-	end
-
-	local s = self:GetScale()
-	local w, h = relFrame:GetWidth()/s, relFrame:GetHeight()/s
-	local x, y = self:GetCenter()
-	local vert = (y>h/1.5) and "TOP" or (y>h/3) and "CENTER" or "BOTTOM"
-	local horz = (x>w/1.5) and "RIGHT" or (x>w/3) and "CENTER" or "LEFT"
-
-	if vert == "CENTER" then
-		point = horz
-	elseif horz == "CENTER" then
-		point = vert
-	else
-		point = vert..horz
-	end
-
-	if vert:find("CENTER") then
-		y = y - h/2
-	end
-	if horz:find("CENTER") then
-		x = x - w/2
-	end
-	if point:find("RIGHT") then
-		x = x - w
-	end
-	if point:find("TOP") then
-		y = y - h
-	end
-
-	return point, x, y
-end
-
-
-function Bar:SetPosition()
-	local point, x, y = self.data.point, self:GetXAxis(), self:GetYAxis()
-
-	--bars saved while snapped by the old snapping have "SnapTo: TL" as their point
-	if point:find("SnapTo") then
-		self.data.point = "CENTER"
-		point = "CENTER"
-	end
-
-	self:SetUserPlaced(false)
-	self:ClearAllPoints()
-	self:SetPoint("CENTER", "UIParent", point, x, y)
-	self:SetUserPlaced(true)
-	self:SetFrameStrata(Photon.STRATAS[self:GetStrata()])
-
-	if self.Message then
-		self.Message:SetText(point:lower().."     x: "..format("%0.2f", x).."     y: "..format("%0.2f", y))
-		self.MessageBG:SetWidth(self.Message:GetWidth()*1.05)
-		self.MessageBG:SetHeight(self.Message:GetHeight()*1.1)
-	end
-end
-
 --Fakes a state change for a given bar, calls up the counterpart function in PhotonButton
 function Bar:FakeStateChange(state)
 	self.handler:SetAttribute("fauxstate", state)
@@ -1026,6 +967,33 @@ function Bar:LoadObjects()
 	end
 end
 
+
+--the first four go at the corners (square) or tips (diamond) clockwise, the rest one per side going around
+local RING_DIRECTIONS = {
+	square = {{1, 0}, {0, -1}, {-1, 0}, {0, 1}},
+	diamond = {{1, -1}, {-1, -1}, {-1, 1}, {1, 1}},
+}
+
+---a square or diamond button's place in grid steps from the bar's center
+---@return number, number
+local function ringPosition(shape, index, count)
+	local starts
+	if shape == "square" then
+		local h = (math.max(0, math.ceil((count-4)/4)) + 1)/2
+		starts = {{-h, h}, {h, h}, {h, -h}, {-h, -h}}
+	else
+		local k = math.max(1, math.ceil(count/4))
+		starts = {{0, k}, {k, 0}, {0, -k}, {-k, 0}}
+	end
+
+	if index <= 4 then
+		return starts[index][1], starts[index][2]
+	end
+
+	local side, slot = (index-5) % 4 + 1, math.floor((index-5)/4) + 1
+	local dir = RING_DIRECTIONS[shape][side]
+	return starts[side][1] + slot*dir[1], starts[side][2] + slot*dir[2]
+end
 
 function Bar:SetObjectLoc()
 	local width, height, num, origCol = 0, 0, 0, self:GetColumns()
@@ -1102,6 +1070,15 @@ function Bar:SetObjectLoc()
 					object:SetPoint("CENTER", self, "CENTER", x, y)
 					placed = placed - (arcLength/(count-1))
 				end
+			elseif shape == "square" or shape == "diamond" then
+				local cx, cy = ringPosition(shape, num+1, count)
+				cx, cy = cx*(width+padH), cy*(height+padV)
+
+				--turned around the middle like the circles, counterclockwise in degrees
+				x = cx*cos(arcStart) - cy*sin(arcStart)
+				y = cx*sin(arcStart) + cy*cos(arcStart)
+
+				object:SetPoint("CENTER", self, "CENTER", x, y)
 			else
 				if not placed then
 					placed = 0
@@ -1227,9 +1204,10 @@ end
 
 
 function Bar:SetSize()
+	--just the buttons, no margin, so a bar anchored by an edge or corner sits flush at 0
 	if self.right then
-		self:SetWidth(((self.right-self.left)+5) * self:GetBarScale())
-		self:SetHeight(((self.top-self.bottom)+5) * self:GetBarScale())
+		self:SetWidth((self.right-self.left) * self:GetBarScale())
+		self:SetHeight((self.top-self.bottom) * self:GetBarScale())
 	else
 		self:SetWidth(195)
 		self:SetHeight(36 * self:GetBarScale())
@@ -1250,9 +1228,7 @@ function Bar:OnClick(click, down)
 
 	Bar.ChangeSelectedBar(self)
 
-	if IsShiftKeyDown() then
-		BarEditor.microadjust(self.editFrame)
-	elseif click == "RightButton" then
+	if click == "RightButton" then
 		--opening it draws it
 		Photon.PhotonGUI:OpenBarConfig()
 		return
@@ -1686,7 +1662,7 @@ end
 
 function Bar:SetBarShape(option)
 	if option then
-		if option == "linear" or option == "circle" or option == "circle + one" then
+		if option == "linear" or option == "circle" or option == "circle + one" or option == "square" or option == "diamond" then
 			self.data.shape = option
 		else
 			self.data.shape = "linear"

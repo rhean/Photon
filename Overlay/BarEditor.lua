@@ -20,7 +20,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
 ---@field active boolean
 ---@field bar Bar
 ---@field frame PhotonBarFrame
----@field microadjust number
 ---@field onClick fun(overlay: BarOverlay, button:string, down: boolean):nil
 
 ---@type PhotonBarFrame[]
@@ -31,34 +30,23 @@ local function updateAppearance(overlay)
 	local concealed = overlay.bar:GetBarConceal()
 	if concealed and overlay.active then
 		overlay.frame:SetBackdropColor(1,0,0,0.6)
-		overlay.frame.Text:Show()
 	elseif not concealed and overlay.active then
 		overlay.frame:SetBackdropColor(0,0,1,0.5)
-		overlay.frame.Text:Show()
 	elseif concealed and not overlay.active then
 		overlay.frame:SetBackdropColor(1,0,0,0.4)
-		overlay.frame.Text:Hide()
 	elseif not concealed and not overlay.active then
 		overlay.frame:SetBackdropColor(0,0,0,0.4)
-		overlay.frame.Text:Hide()
 	end
 
-	if overlay.microadjust == 0 then
-		overlay.frame.Message:Hide()
-		overlay.frame.MessageBG:Hide()
-		overlay.frame:SetFrameStrata(Photon.STRATAS[overlay.bar:GetStrata()])
-	else
-		-- overlay never gets keyboard events unless a high strata
-		-- this hack doesn't work if there is a tooltip level bar
-		-- until you choose that bar and then it starts working for others
-		overlay.frame:SetFrameStrata(Photon.STRATAS[#Photon.STRATAS])
-		overlay.frame:SetBackdropColor(1,1,0,0.6)
-		overlay.frame.Message:Show()
-		overlay.frame.Message:SetText(overlay.bar.data.point:lower().."     x: "..format("%0.2f", overlay.bar:GetXAxis()).."     y: "..format("%0.2f", overlay.bar:GetYAxis()))
-		overlay.frame.MessageBG:Show()
-		overlay.frame.MessageBG:SetWidth(overlay.frame.Message:GetWidth()*1.05)
-		overlay.frame.MessageBG:SetHeight(overlay.frame.Message:GetHeight()*1.1)
+	--gold while its name is under the mouse in a list of bars, see BarEditor.highlightBar
+	if overlay.frame.highlighted then
+		overlay.frame:SetBackdropColor(1,0.82,0,0.6)
 	end
+
+	--the name only shows on mouseover, for the selected bar too
+	overlay.frame.Text:SetShown(overlay.frame.hovered == true or overlay.frame.highlighted == true)
+
+	overlay.frame:SetFrameStrata(Photon.STRATAS[overlay.bar:GetStrata()])
 
 	--don't re-anchor to the bar mid-drag (OnEnter/OnLeave fire when the cursor crosses the edge),
 	--it pins the overlay back to the bar while StartMoving drags one corner and stretches it
@@ -72,6 +60,8 @@ local BarEditor
 
 ---@param overlay BarOverlay
 local function onEnter(overlay)
+	overlay.frame.hovered = true
+
 	-- we don't want to mutate the real overlay
 	local fakeOverlay = CopyTable(overlay, true --[[shallow copy]])
 
@@ -84,19 +74,20 @@ end
 ---@param overlay BarOverlay
 ---@param button string
 local function onDragStart(overlay, button)
+	if overlay.bar:GetPositionLocked() or InCombatLockdown() then
+		return
+	end
 	overlay.frame.isDragging = true
 
-	--the overlay leaves the bar where it is, so the bar can follow it without the two pinned to each other
+	--off the bar first, so the bar can follow the overlay without the two pinned to each other
 	local left, bottom, width, height = overlay.frame:GetRect()
 	overlay.frame:ClearAllPoints()
 	overlay.frame:SetSize(width, height)
 	overlay.frame:SetPoint("BOTTOMLEFT", UIParent, "BOTTOMLEFT", left, bottom)
 
-	--the bar moves with the overlay while dragging. a secure bar can't be moved in combat, it jumps on drop then
-	if not InCombatLockdown() then
-		overlay.bar:ClearAllPoints()
-		overlay.bar:SetPoint("CENTER", overlay.frame, "CENTER")
-	end
+	--bars anchored to this one follow too
+	overlay.bar:ClearAllPoints()
+	overlay.bar:SetPoint("CENTER", overlay.frame, "CENTER")
 
 	overlay.frame:StartMoving()
 end
@@ -104,58 +95,26 @@ end
 
 ---@param overlay BarOverlay
 local function onDragStop(overlay)
+	if not overlay.frame.isDragging then
+		return
+	end
 	overlay.frame:StopMovingOrSizing()
 	overlay.frame.isDragging = false
 
-	local newPoint, x, y = overlay.bar.GetPosition(overlay.frame)
-	overlay.bar.data.point = newPoint
-	overlay.bar:SetXAxis(x)
-	overlay.bar:SetYAxis(y)
-
-	--back on the screen, off the overlay
-	overlay.bar:SetPosition()
-	overlay.bar:UpdateBarStatus()
+	--the bar keeps its anchor, only the offset changes. this also takes it off the overlay
+	overlay.bar:SetOffset(overlay.bar:OffsetFor(overlay.frame))
 
 	--re-attach the overlay to the bar at its new position
 	overlay.frame:ClearAllPoints()
 	updateAppearance(overlay)
-end
 
----@param overlay BarOverlay
----@param key string
-local function onKeyDown(overlay, key)
-	if overlay.microadjust == 0 then
-		return
-	end
-		local newPoint, x, y = overlay.bar:GetPosition()
-		overlay.bar.data.point = newPoint
-		overlay.bar:SetXAxis(x)
-		overlay.bar:SetYAxis(y)
-
-		overlay.bar:SetUserPlaced(false)
-		overlay.bar:ClearAllPoints()
-
-		if key == "UP" then
-			overlay.bar:SetYAxis(overlay.bar:GetYAxis() + .1 * overlay.microadjust)
-		elseif key == "DOWN" then
-			overlay.bar:SetYAxis(overlay.bar:GetYAxis() - .1 * overlay.microadjust)
-		elseif key == "LEFT" then
-			overlay.bar:SetXAxis(overlay.bar:GetXAxis() - .1 * overlay.microadjust)
-		elseif key == "RIGHT" then
-			overlay.bar:SetXAxis(overlay.bar:GetXAxis() + .1 * overlay.microadjust)
-		else
-			BarEditor.microadjust(overlay, 0)
-		end
-
-		overlay.bar:SetPosition()
-		overlay.bar:UpdateBarStatus()
-
-		updateAppearance(overlay)
+	Photon.PhotonGUI:RefreshBarConfig()
 end
 
 
 ---@param overlay BarOverlay
 local function onLeave(overlay)
+	overlay.frame.hovered = nil
 	updateAppearance(overlay)
 end
 
@@ -178,7 +137,6 @@ BarEditor = {
 			frame = -- try to pop a frame off the stack, otherwise make a new one
 				table.remove(framePool) or
 				CreateFrame("CheckButton", nil, UIParent, "PhotonBarTemplate") --[[@as PhotonBarFrame]],
-			microadjust = 0,
 			onClick = onClickCallback,
 		}
 		overlay.frame:SetBackdrop({
@@ -194,14 +152,10 @@ BarEditor = {
 		overlay.frame:RegisterForDrag("LeftButton")
 		overlay.frame:SetScript("OnDragStart", function(_, button) onDragStart(overlay, button) end)
 		overlay.frame:SetScript("OnDragStop", function(_) onDragStop(overlay) end)
-		overlay.frame:SetScript("OnKeyDown", function(_, key) onKeyDown(overlay, key) end)
 		overlay.frame:SetScript("OnEnter", function() onEnter(overlay) end)
 		overlay.frame:SetScript("OnLeave", function() onLeave(overlay) end)
 		overlay.frame:SetScript("OnClick", function(_, button, down) onClick(overlay, button, down) end)
-		--setting OnKeyDown turns the keyboard on, it is only on while nudging, see microadjust
-		overlay.frame:EnableKeyboard(false)
 
-		overlay.frame.Text:Show()
 		overlay.frame:Show()
 		updateAppearance(overlay)
 
@@ -211,15 +165,12 @@ BarEditor = {
 	---@param overlay BarOverlay
 	activate = function(overlay)
 		overlay.active = true
-		BarEditor.microadjust(overlay, overlay.microadjust)
 		updateAppearance(overlay)
 	end,
 
 	---@param overlay BarOverlay
 	deactivate = function(overlay)
 		overlay.active = false
-		BarEditor.microadjust(overlay, 0)
-
 		updateAppearance(overlay)
 	end,
 
@@ -230,7 +181,8 @@ BarEditor = {
 		overlay.frame:SetScript("OnEnter", nil)
 		overlay.frame:SetScript("OnLeave", nil)
 		overlay.frame:SetScript("OnClick", nil)
-		overlay.frame:EnableKeyboard(false)
+		overlay.frame.hovered = nil
+		overlay.frame.highlighted = nil
 		overlay.frame:RegisterForDrag()
 		overlay.frame:RegisterForClicks()
 		overlay.frame:Hide()
@@ -241,21 +193,16 @@ BarEditor = {
 		overlay.frame = nil
 	end,
 
-	---if no value is passed in for microadjust then make it a toggle
-	---@param overlay BarOverlay
-	---@param microadjust number|nil
-	microadjust = function(overlay, microadjust)
-		if microadjust ~= nil then
-			overlay.microadjust = microadjust
-		elseif overlay.microadjust == 0 then
-			overlay.microadjust = 1
-		else
-			overlay.microadjust = 0
+	---lights up one bar's overlay and no other, for a bar named under the mouse in a list. nil lights none
+	---@param bar Bar|nil
+	highlightBar = function(bar)
+		for _, other in ipairs(Photon.bars) do
+			local overlay = other.editFrame
+			if overlay then
+				overlay.frame.highlighted = other == bar or nil
+				updateAppearance(overlay)
+			end
 		end
-
-		overlay.frame:EnableKeyboard(overlay.microadjust ~= 0)
-
-		updateAppearance(overlay)
 	end,
 }
 

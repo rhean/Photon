@@ -321,21 +321,45 @@ function UI.Dropdown(parent, onSelect)
 		dropdown:SetText(text)
 	end
 
+	--onHover gets an item's value as the mouse goes over it and nil as it leaves or the menu closes
+	local function hover(value)
+		if dropdown.onHover then
+			dropdown.onHover(value)
+		end
+	end
+
 	--blizzard's builds the menu once while it is made, before there are items
 	dropdown = UI.MenuButton(parent, "", function(root)
 		for _, item in ipairs(dropdown and dropdown.items or {}) do
-			root:CreateRadio(item.text, function()
+			local radio = root:CreateRadio(item.text, function()
 				return item.value == dropdown.value
 			end, function()
+				hover(nil)
 				dropdown.value = item.value
 				if not dropdown.GenerateMenu then
 					showValue()
 				end
 				onSelect(item.value)
 			end)
+			--older menus have no hover
+			if radio.SetOnEnter then
+				radio:SetOnEnter(function()
+					hover(item.value)
+				end)
+				radio:SetOnLeave(function()
+					hover(nil)
+				end)
+			end
 		end
 	end)
 	dropdown.items = {}
+
+	--a menu closed with the mouse on an item doesn't leave it
+	if dropdown.RegisterCallback and DropdownButtonMixin and DropdownButtonMixin.Event and DropdownButtonMixin.Event.OnMenuClose then
+		dropdown:RegisterCallback(DropdownButtonMixin.Event.OnMenuClose, function()
+			hover(nil)
+		end, dropdown)
+	end
 
 	---@param items {value: any, text: string}[]
 	function dropdown:SetItems(items)
@@ -541,9 +565,54 @@ function UI.Slider(parent, onChange)
 		valueBox:SetText(format(value))
 	end
 
+	--small arrow buttons either side of the track, a step down on the left and up on the right
+	local steppers
+	local STEPPER_SIZE, STEPPER_GAP = 20, 2
+	local STEPPER_SIDES = {
+		{point = "RIGHT", relativePoint = "LEFT", x = -STEPPER_GAP, direction = -1, texture = "PrevPage"},
+		{point = "LEFT", relativePoint = "RIGHT", x = STEPPER_GAP, direction = 1, texture = "NextPage"},
+	}
+
+	local function createSteppers()
+		steppers = {}
+		for _, side in ipairs(STEPPER_SIDES) do
+			local button = CreateFrame("Button", nil, frame)
+			button:SetSize(STEPPER_SIZE, STEPPER_SIZE)
+			button:SetPoint(side.point, track, side.relativePoint, side.x, 0)
+			button:SetNormalTexture("Interface\\Buttons\\UI-SpellbookIcon-"..side.texture.."-Up")
+			button:SetPushedTexture("Interface\\Buttons\\UI-SpellbookIcon-"..side.texture.."-Down")
+			button:SetDisabledTexture("Interface\\Buttons\\UI-SpellbookIcon-"..side.texture.."-Disabled")
+			button:SetHighlightTexture("Interface\\Buttons\\UI-Common-MouseHilight", "ADD")
+			button:SetScript("OnClick", function()
+				local value = snap((frame.value or min) + side.direction * (step > 0 and step or 1))
+				if value ~= frame.value then
+					frame:SetValue(value)
+					changed(value)
+				end
+			end)
+			table.insert(steppers, button)
+		end
+	end
+
+	---shows or hides the arrow buttons, the track makes room for them
+	function frame:SetSteppers(shown)
+		if shown and not steppers then
+			createSteppers()
+		end
+		for _, button in ipairs(steppers or {}) do
+			button:SetShown(shown)
+		end
+		local room = shown and STEPPER_SIZE + STEPPER_GAP or 0
+		track:SetPoint("BOTTOMLEFT", inset.left + room, inset.bottom)
+		track:SetPoint("BOTTOMRIGHT", -inset.right - room, inset.bottom)
+	end
+
 	function frame:SetDisabled(disabled)
 		track:EnableMouse(not disabled)
 		valueBox:SetEnabled(not disabled)
+		for _, button in ipairs(steppers or {}) do
+			button:SetEnabled(not disabled)
+		end
 		self:SetAlpha(disabled and 0.5 or 1)
 	end
 
