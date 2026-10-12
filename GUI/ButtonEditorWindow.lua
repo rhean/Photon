@@ -43,6 +43,33 @@ local ACTION_BAR_STATES = {vehicle = true, dragonriding = true, possess = true, 
 
 local HOME_STATE_ORDER = {paged = 1, stance = 2, pet = 3}
 
+--the conditions in the bar config's order, see BarConfigLayout.lua. section is the box they are in there
+local CONDITION_ORDER = {}
+do
+	local count = 0
+	local function collect(rows, section)
+		for _, row in ipairs(rows) do
+			for _, item in ipairs(row) do
+				if item.rows then
+					collect(item.rows, section)
+				elseif item.id and item.id:find("^state_") then
+					count = count + 1
+					CONDITION_ORDER[item.id:sub(7)] = {order = count, section = section}
+				end
+			end
+		end
+	end
+	for _, tab in ipairs(addonTable.barConfigLayout.bar) do
+		for _, group in ipairs(tab.groups or {}) do
+			if group.id == "states" then
+				for section, row in ipairs(group.rows or {}) do
+					collect({row}, section)
+				end
+			end
+		end
+	end
+end
+
 local ALL_PAGES = {"paged1", "paged2", "paged3", "paged4", "paged5", "paged6"}
 
 local ICON_SIZE = 42
@@ -111,6 +138,13 @@ local function getStateList(bar)
 		if orderA ~= orderB then
 			return orderA < orderB
 		elseif a.barState ~= b.barState then
+			--conditions as in the bar config, any it doesn't list after them
+			local conditionA, conditionB = CONDITION_ORDER[a.barState], CONDITION_ORDER[b.barState]
+			if conditionA and conditionB then
+				return conditionA.order < conditionB.order
+			elseif conditionA or conditionB then
+				return conditionA ~= nil
+			end
 			return a.barState < b.barState
 		end
 		return a.num < b.num
@@ -799,7 +833,16 @@ local function createWindow()
 	specDropdown:SetWidth(220)
 
 	addButton = UI.MenuButton(specRow, L["Add page for condition"], function(root)
+		local lastSection
 		for _, modifier in ipairs(view.available) do
+			--a gap between the bar config's boxes
+			local condition = CONDITION_ORDER[modifier:match("^%a+")]
+			local section = condition and condition.section
+			if lastSection and section ~= lastSection and root.CreateSpacer then
+				root:CreateSpacer()
+			end
+			lastSection = section
+
 			local entry = root:CreateButton(stateName(modifier), function()
 				view.addModifier(modifier)
 			end)
