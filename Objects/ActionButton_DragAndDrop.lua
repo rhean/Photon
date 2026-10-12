@@ -392,7 +392,7 @@ function ActionButton:PlaceMount(action1, action2)
 	else
 		self:SetMacroText(self:AutoWriteMacro(mountSpell))
 		self:SetMacroIcon() --will pull icon automatically unless explicitly overridden
-		self:SetMacroName(mountName)
+		self:SetMacroName() --no label, as for spells
 	end
 	self:SetMacroNote()
 	self:SetMacroUseNote()
