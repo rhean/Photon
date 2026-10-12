@@ -968,6 +968,33 @@ function Bar:LoadObjects()
 end
 
 
+--the first four go at the corners (square) or tips (diamond) clockwise, the rest one per side going around
+local RING_DIRECTIONS = {
+	square = {{1, 0}, {0, -1}, {-1, 0}, {0, 1}},
+	diamond = {{1, -1}, {-1, -1}, {-1, 1}, {1, 1}},
+}
+
+---a square or diamond button's place in grid steps from the bar's center
+---@return number, number
+local function ringPosition(shape, index, count)
+	local starts
+	if shape == "square" then
+		local h = (math.max(0, math.ceil((count-4)/4)) + 1)/2
+		starts = {{-h, h}, {h, h}, {h, -h}, {-h, -h}}
+	else
+		local k = math.max(1, math.ceil(count/4))
+		starts = {{0, k}, {k, 0}, {0, -k}, {-k, 0}}
+	end
+
+	if index <= 4 then
+		return starts[index][1], starts[index][2]
+	end
+
+	local side, slot = (index-5) % 4 + 1, math.floor((index-5)/4) + 1
+	local dir = RING_DIRECTIONS[shape][side]
+	return starts[side][1] + slot*dir[1], starts[side][2] + slot*dir[2]
+end
+
 function Bar:SetObjectLoc()
 	local width, height, num, origCol = 0, 0, 0, self:GetColumns()
 	local x, y, placed
@@ -1043,6 +1070,15 @@ function Bar:SetObjectLoc()
 					object:SetPoint("CENTER", self, "CENTER", x, y)
 					placed = placed - (arcLength/(count-1))
 				end
+			elseif shape == "square" or shape == "diamond" then
+				local cx, cy = ringPosition(shape, num+1, count)
+				cx, cy = cx*(width+padH), cy*(height+padV)
+
+				--turned around the middle like the circles, counterclockwise in degrees
+				x = cx*cos(arcStart) - cy*sin(arcStart)
+				y = cx*sin(arcStart) + cy*cos(arcStart)
+
+				object:SetPoint("CENTER", self, "CENTER", x, y)
 			else
 				if not placed then
 					placed = 0
@@ -1626,7 +1662,7 @@ end
 
 function Bar:SetBarShape(option)
 	if option then
-		if option == "linear" or option == "circle" or option == "circle + one" then
+		if option == "linear" or option == "circle" or option == "circle + one" or option == "square" or option == "diamond" then
 			self.data.shape = option
 		else
 			self.data.shape = "linear"

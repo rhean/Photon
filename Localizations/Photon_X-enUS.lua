@@ -320,10 +320,12 @@ L["Combat"] = true
 L["Mouseover"] = true
 L["Combat + Mouseover"] = true
 
-L["Bar_Shapes_List"] = "\n1=Linear\n2=Circle\n3=Circle + One"
+L["Bar_Shapes_List"] = "\n1=Linear\n2=Circle\n3=Circle + One\n4=Square\n5=Diamond"
 L["Linear"] = true
 L["Circle"] = true
 L["Circle + One"] = true
+L["Square"] = true
+L["Diamond"] = true
 L["Bar_Strata_List"] = "\n1=BACKGROUND\n2=LOW\n3=MEDIUM\n4=HIGH\n5=DIALOG"
 L["Bar_Alpha_Instructions"] = "Alpha value must be between zero(0) and one(1)"
 L["Bar_ArcStart_Instructions"] = "Arc start must be between 0 and 359"
@@ -692,7 +694,7 @@ L["BarDesc_scale"] = "The size of the bar and its buttons."
 L["BarDesc_horizontalPadding"] = "The space between buttons side by side."
 L["BarDesc_verticalPadding"] = "The space between rows of buttons."
 L["BarDesc_shape"] = "How the buttons are laid out."
-L["BarDesc_rotation"] = "Turns a circle's buttons around its middle, in degrees. Only for the circle shapes."
+L["BarDesc_rotation"] = "Turns the buttons around the bar's middle, in degrees. Not for the linear shape."
 L["BarDesc_alpha"] = "How visible the bar normally is. Lower is more transparent."
 L["BarDesc_alphaUp"] = "When the bar becomes fully visible: on mouseover, in combat, or both."
 L["BarDesc_alphaUpSpeed"] = "How fast the bar fades in and out."

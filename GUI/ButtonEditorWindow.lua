@@ -178,13 +178,13 @@ local function getSpecs(bar)
 end
 
 ---place in the row and row, from the top. the top row holds the leftovers, see Bar:SetObjectLoc.
----circle shapes have no rows
+---only linear bars have rows
 ---@return number, number|nil
 local function buttonPosition(button)
 	local bar = button.bar
 	local count, columns = #bar.buttons, bar:GetColumns() or 0
 
-	if bar:GetBarShape():find("circle") then
+	if bar:GetBarShape() ~= "linear" then
 		return button.id, nil
 	elseif columns == 0 or columns >= count then
 		return button.id, 1
