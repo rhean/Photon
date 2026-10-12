@@ -307,6 +307,11 @@ local function barDefinitions()
 		return bar():GetBarShape() == "linear"
 	end
 
+	--only a line has rows
+	definitions.columns.disabled = function()
+		return bar():GetBarShape() ~= "linear"
+	end
+
 	positionDefinitions(definitions)
 
 	--the hover text, see the BarDesc_ entries in the locale

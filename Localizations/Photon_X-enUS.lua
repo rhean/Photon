@@ -320,7 +320,6 @@ L["Combat"] = true
 L["Mouseover"] = true
 L["Combat + Mouseover"] = true
 
-L["Bar_Shapes_List"] = "\n1=Linear\n2=Circle\n3=Circle + One\n4=Square\n5=Diamond"
 L["Linear"] = true
 L["Circle"] = true
 L["Circle + One"] = true
@@ -689,7 +688,7 @@ L["BarDesc_applyReload"] = "Reloads the UI so every change takes full effect."
 
 -- Size and Shape
 L["BarDesc_numButtons"] = "How many buttons the bar has."
-L["BarDesc_columns"] = "How many buttons per row. 0 puts them all in one row."
+L["BarDesc_columns"] = "How many buttons per row. 0 puts them all in one row. Only for the linear shape."
 L["BarDesc_scale"] = "The size of the bar and its buttons."
 L["BarDesc_horizontalPadding"] = "The space between buttons side by side."
 L["BarDesc_verticalPadding"] = "The space between rows of buttons."
