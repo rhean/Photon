@@ -271,7 +271,7 @@ function ActionButton:PlacePetAbility(action1, action2)
 
 		self:SetMacroText(self:AutoWriteMacro(spellInfoName))
 		self:SetMacroIcon() --will pull icon automatically unless explicitly overridden
-		self:SetMacroName(spellInfoName)
+		self:SetMacroName()
 		self:SetMacroNote()
 		self:SetMacroUseNote()
 		self:SetMacroBlizzMacro()
@@ -316,7 +316,7 @@ function ActionButton:PlaceBlizzMacro(action1)
 
 	if body then
 		self:SetMacroText(body)
-		self:SetMacroName(name)
+		self:SetMacroName()
 		self:SetMacroIcon(texture)
 		self:SetMacroBlizzMacro(name)
 	else
@@ -354,7 +354,7 @@ function ActionButton:PlaceBlizzEquipSet(equipmentSetName)
 
 	if texture then
 		self:SetMacroText("/equipset "..equipmentSetName)
-		self:SetMacroName(name)
+		self:SetMacroName()
 		self:SetMacroIcon(texture)
 		self:SetMacroEquipmentSet(equipmentSetName)
 	else
@@ -388,7 +388,7 @@ function ActionButton:PlaceMount(action1, action2)
 	if action1 == 268435455 then
 		self:SetMacroText("#autowrite\n/run C_MountJournal.SummonByID(0);")
 		self:SetMacroIcon("Interface\\ICONS\\ACHIEVEMENT_GUILDPERK_MOUNTUP")
-		self:SetMacroName("Random Mount")
+		self:SetMacroName()
 	else
 		self:SetMacroText(self:AutoWriteMacro(mountSpell))
 		self:SetMacroIcon() --will pull icon automatically unless explicitly overridden
@@ -410,7 +410,7 @@ function ActionButton:PlaceCompanion(action1, action2)
 	local name = C_Spell.GetSpellName(spellID)
 
 	if name then
-		self:SetMacroName(name)
+		self:SetMacroName()
 		self:SetMacroText(self:AutoWriteMacro(name))
 	else
 		self:SetMacroName()
@@ -433,7 +433,7 @@ function ActionButton:PlaceBattlePet(action1, action2)
 
 	self:SetMacroText("#autowrite\n/summonpet "..petName)
 	self:SetMacroIcon(petIcon) --need to set icon here, it won't pull it automatically
-	self:SetMacroName(petName)
+	self:SetMacroName()
 	self:SetMacroNote()
 	self:SetMacroUseNote()
 	self:SetMacroBlizzMacro()
@@ -449,7 +449,7 @@ function ActionButton:PlaceFlyout(action1, action2)
 
 	self:SetMacroText("/flyout blizz:"..action1)
 	self:SetMacroIcon()
-	self:SetMacroName((GetFlyoutInfo(action1)))
+	self:SetMacroName()
 	self:SetMacroNote()
 	self:SetMacroUseNote()
 	self:SetMacroBlizzMacro()

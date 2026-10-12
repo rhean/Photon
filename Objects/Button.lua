@@ -1005,7 +1005,9 @@ function Button:UpdateTooltip()
 			self:UpdateFlyoutTooltip()
 	-- macro must go after spells and items, for blizz macro #showtooltip to work
 		 elseif self:GetMacroBlizzMacro() then
-		 	GameTooltip:SetText(self:GetMacroName())
+		 	--a label wins, else the macro's own name
+		 	local label = self:GetMacroName()
+		 	GameTooltip:SetText(label and #label > 0 and label or self:GetMacroBlizzMacro())
 		elseif self:GetMacroText() and #self:GetMacroText() > 0 then
 			GameTooltip:SetText(self:GetMacroName())
 		end
