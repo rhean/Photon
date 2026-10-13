@@ -81,10 +81,6 @@ function Photon:HideBlizzardUI(profileDatabase)
 		disableBarFrame(OverrideActionBar)
 		disableFrameSlidingAnimation(OverrideActionBar)
 
-		-- i think this is the shaman bar, it seems like it was deprecated in cata
-		-- just leave it on always https://github.com/brittyazel/Photon/issues/444
-		-- disableBarFrame(MultiCastActionBarFrame)
-
 		--disable the ActionBarController to avoid potential for taint
 		ActionBarController:UnregisterAllEvents()
 
