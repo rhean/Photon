@@ -15,15 +15,17 @@ local ButtonEditor = addonTable.overlay.ButtonEditor
 local BarEditor = addonTable.overlay.BarEditor
 
 ---@class Photon : AceAddon-3.0 @define The main addon object for the Photon Action Bar addon
-addonTable.Photon = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", nil, UIParent), "Photon", "AceConsole-3.0", "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0", "AceSerializer-3.0")
+addonTable.Photon = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", nil, UIParent), "Photon", "AceConsole-3.0", "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0")
 local Photon = addonTable.Photon
 
 local DB
 
-local LibDeflate = LibStub:GetLibrary("LibDeflate")
 local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
 
-local LATEST_VERSION_NUM = "1.4.1" --this variable is set to popup a welcome message upon updating/installing. Only change it if you want to pop up a message after the users next update
+--the What's New popup, shown once per account when LATEST_VERSION_NUM changes, see Photon:LoginMessage
+local LATEST_VERSION_NUM = "0.1" --change it with WhatsNew_Text in the locale, everyone sees the new release notes once
+local SHOW_WHATS_NEW = true --false for a version that shouldn't pop up, like a small fix
+local WHATS_NEW_TEXT = "WhatsNew_Text" --the locale key it shows. another key, like "WhatsNew_Override", shows that text instead
 
 --prepare the Photon table with some sub-tables that will be used down the road
 Photon.bars = {} --this table will be our main handle for all of our bars.
@@ -53,7 +55,7 @@ Photon.STRATAS = {
 
 Photon.TIMERLIMIT = 4
 
-Photon.DEBUG = true
+Photon.DEBUG = false
 
 -------------------------------------------------------------------------
 --------------------Start of Functions-----------------------------------
@@ -122,7 +124,7 @@ function Photon:OnInitialize()
 	Photon:Minimap_IconInitialize()
 
 	--Initialize the chat commands (i.e. /photon)
-	--Photon:RegisterChatCommand("photon", "slashHandler")
+	Photon:RegisterChatCommand("photon", "slashHandler")
 
 	--build all bar and button frames and run initial setup
 	Photon.registeredBarData = Photon:RegisterBars(DB)
@@ -199,6 +201,10 @@ end
 -------------------------------------------------
 
 function Photon:PLAYER_REGEN_DISABLED()
+	--bars and buttons can't be changed in combat, so the editors close
+	Photon.PhotonGUI:CloseButtonEditor()
+	Photon.PhotonGUI:CloseBarConfig()
+
 	if Photon.buttonEditMode then
 		Photon:ToggleButtonEditMode(false)
 	end
@@ -277,18 +283,19 @@ end
 
 
 function Photon:LoginMessage()
-	--displays a info window on login for either fresh installs or updates
-	if not DB.updateWarning or DB.updateWarning ~= LATEST_VERSION_NUM  then
-		if not C_AddOns.IsAddOnLoaded("Masque") then
-			print(" ")
-			print("    You do not currently have Masque installed or enabled.")
-			print("    Please consider using Masque for enhancing the visual appearance of Photon's action buttons.")
-			print("    We recommend using Masque: Photon, the theme made by Soyier for use with Photon.")
-			print(" ")
-		end
+	--the release notes, once per account for each new version, fresh installs included.
+	--this runs under the loading screen, and entering the world closes windows, so it waits until after
+	if SHOW_WHATS_NEW and Photon.db.global.whatsNewSeen ~= LATEST_VERSION_NUM then
+		local waiter = CreateFrame("Frame")
+		waiter:RegisterEvent("PLAYER_ENTERING_WORLD")
+		waiter:SetScript("OnEvent", function(self)
+			self:UnregisterAllEvents()
+			C_Timer.After(2, function()
+				Photon.PhotonGUI:ShowWhatsNew(LATEST_VERSION_NUM, WHATS_NEW_TEXT)
+				Photon.db.global.whatsNewSeen = LATEST_VERSION_NUM
+			end)
+		end)
 	end
-
-	DB.updateWarning = LATEST_VERSION_NUM
 
 
 	--Shadowlands warning that will show as long as a player has one button on their ZoneAbilityBar for Shadowlands content
@@ -413,6 +420,27 @@ end
 
 function Photon:ToggleMainMenu()
 	Settings.OpenToCategory(Photon.optionsCategoryID)
+end
+
+---/photon opens the interface menu, /photon bar and /photon button open the editors, /photon bind starts keybind mode
+function Photon:slashHandler(input)
+	if InCombatLockdown() then
+		Photon:Print(ERR_NOT_IN_COMBAT)
+		return
+	end
+
+	local command = Photon:GetArgs(input, 1)
+	command = command and command:lower()
+
+	if command == "bar" then
+		Photon.PhotonGUI:OpenBarConfig()
+	elseif command == "button" then
+		Photon.PhotonGUI:OpenButtonEditor()
+	elseif command == "bind" then
+		Photon:ToggleBindingMode(true)
+	else
+		Photon:ToggleMainMenu()
+	end
 end
 
 function Photon:ToggleBarEditMode(show)
@@ -640,50 +668,5 @@ function Photon:ToggleBindingMode(show)
 			bar:UpdateObjectStatus()
 			bar:UpdateObjectUsability()
 		end
-	end
-end
-
-function Photon:GetSerializedAndCompressedProfile()
-	local uncompressed = Photon:Serialize(Photon.db.profile) --serialize the database into a string value
-	local compressed = LibDeflate:CompressZlib(uncompressed) --compress the data
-	local encoded = LibDeflate:EncodeForPrint(compressed) --encode the data for print for copy+paste
-	return encoded
-end
-
-function Photon:SetSerializedAndCompressedProfile(input)
-	--check if the input is empty
-	if input == "" then
-		Photon:Print(L["No data to import."].." "..L["Aborting."])
-		return
-	end
-
-	--decode and check if decoding worked properly
-	local decoded = LibDeflate:DecodeForPrint(input)
-	if decoded == nil then
-		Photon:Print(L["Decoding failed."].." "..L["Aborting."])
-		return
-	end
-
-	--uncompress and check if uncompresion worked properly
-	local uncompressed = LibDeflate:DecompressZlib(decoded)
-	if uncompressed == nil then
-		Photon:Print(L["Decompression failed."].." "..L["Aborting."])
-		return
-	end
-
-	--deserialize the data and return it back into a table format
-	local result, newProfile = Photon:Deserialize(uncompressed)
-
-	if result == true and newProfile then --if we successfully deserialize, load the new table and reload
-		for k,v in pairs(newProfile) do
-			if type(v) == "table" then
-				Photon.db.profile[k] = CopyTable(v)
-			else
-				Photon.db.profile[k] = v
-			end
-		end
-		ReloadUI()
-	else
-		Photon:Print(L["Data import Failed."].." "..L["Aborting."])
 	end
 end

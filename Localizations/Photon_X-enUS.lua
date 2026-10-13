@@ -13,136 +13,15 @@ L["Size and Shape"] = true
 L["Visuals"] = true
 
 
-L["Command List"] = true
-
-L["Menu"] = true
-L["Menu_Description"] = "Open the main menu"
-
 L["Create"] = true
-L["Create_Description"] = "Create a blank bar of the given type"
-
-L["Select"] = true
-L["Select_Description"] = "Switch the currently selected bar"
-
-L["Delete"] = true
-L["Delete_Description"] = "Delete the currently selected bar"
-
-L["Config"] = true
-L["Config_Description"] = "Toggle configuration mode for all bars"
-
-L["Add"] = true
-L["Add_Description"] = "Adds buttons to the currently selected bar"
-
-L["Remove"] = true
-L["Remove_Description"] = "Removes buttons from the currently selected bar"
-
 L["Edit"] = true
-L["Edit_Description"] = "Toggle edit mode for all buttons"
-
 L["Bind"] = true
-L["Bind_Description"] = "Toggle binding mode for all buttons"
-
 L["Scale"] = true
-L["Scale_Description"] = "Scale a bar to the desired size"
-
-L["AutoHide"] = true
-L["AutoHide_Description"] = "Toggle AutoHide for current bar"
-
-L["Conceal"] = true
-L["Conceal_Description"] = "Toggle if current bar is shown or concealed at all times"
-
 L["Shape"] = true
-L["Shape_Description"] = "Change current bar's shape"
-
 L["Name"] = true
-L["Name_Description"] = "Change current bar's name"
-
-L["Strata"] = true
-L["Strata_Description"] = "Change current bar's frame strata"
-
-L["Alpha"] = true
-L["Alpha_Description"] = "Change current bar's alpha (transparency)"
-
-L["AlphaUp"] = true
-L["AlphaUp_Description"] = "Set current bar's conditions to 'alpha up'"
-
-L["ArcStart"] = true
-L["ArcStart_Description"] = "Set current bar's starting arc location (in degrees)"
-
-L["ArcLen"] = true
-L["ArcLen_Description"] = "Set current bar's arc length (in degrees)"
-
 L["Columns"] = true
-L["Columns_Description"] = "Set the number of columns for the current bar (for shape Multi-Column)"
-
-L["PadH"] = true
-L["PadH_Description"] = "Set current bar's horizontal padding"
-
-L["PadV"] = true
-L["PadV_Description"] = "Set current bar's vertical padding"
-
-L["PadHV"] = true
-L["PadHV_Description"] = "Adjust both horizontal and vertical padding of the current bar incrementally"
-
 L["X"] = true
-L["X_Description"] = "Change current bar's horizontal axis position"
-
 L["Y"] = true
-L["Y_Description"] = "Change current bar's vertical axis position"
-
-L["State"] = true
-L["State_Description"] = "Toggle an action state for the current bar"
-
-L["Vis"] = true
-L["Vis_Description"] = "Toggle visibility states for the current bar"
-
-L["ShowGrid"] = true
-L["ShowGrid_Description"] = "Toggle the current bar's showgrid flag"
-
-L["Lock"] = true
-L["Lock_Description"] = "Toggle bar lock."
-
-L["Tooltips"] = true
-L["Tooltips_Description"] = "Toggle tooltips for the current bar's action buttons"
-
-L["SpellGlow"] = true
-L["SpellGlow_Description"] = "Toggle spell activation animations on the current bar"
-
-L["BindText"] = true
-L["BindText_Description"] = "Toggle keybind text on the current bar"
-
-L["MacroText"] = true
-L["MacroText_Description"] = "Toggle macro name text on the current bar"
-
-L["CountText"] = true
-L["CountText_Description"] = "Toggle spell/item count text on the current bar"
-
-L["CDText"] = true
-L["CDText_Description"] = "Toggle cooldown counts text on the current bar"
-
-L["CDAlpha"] = true
-L["CDAlpha_Description"] = "Toggle a button's transparency while on cooldown"
-
-L["UpClick"] = true
-L["UpClick_Description"] = "Toggle if buttons on the current bar respond to up clicks"
-
-L["DownClick"] = true
-L["DownClick_Description"] = "Toggle if buttons on the current bar respond to down clicks"
-
-L["TimerLimit"] = true
-L["TimerLimit_Description"] = "Sets the minimum time in seconds to begin showing text timers"
-
-L["StateList"] = true
-L["StateList_Description"] = "Print a list of valid states"
-
-L["BarTypes"] = true
-L["BarTypes_Description"] = "Print a list of available bar types to make"
-
-L["BlizzUI"] = true
-L["BlizzUI_Description"] = "Toggle Blizzard's DefaultUI"
-
-L["MoveSpecButtons"] = true
-L["MoveSpecButtons_Description"] = "Copies the buttons from one spec to a second"
 
 
 
@@ -151,10 +30,7 @@ L["MoveSpecButtons_Description"] = "Copies the buttons from one spec to a second
 -----------------------------------------------
 
 L["How to use"] = true
-L["Command"] = true
 L["Option"] = true
-
-L["No bar selected or command invalid"] = true
 
 L["Custom_Option"] = "For custom states, add a desired state string (/photon state custom <state string>) where <state string> is a semicolon seperated list of state conditions"
 
@@ -619,45 +495,6 @@ L["Copy and Paste the text below"] = true
 L["Pet Actions can not be added to Photon bars at this time."] = true
 
 
-L["Profile"] = true
-L["Import"] = true
-L["Export"] = true
-L["Import or Export the current profile:"] = true
-L["ImportExport_Desc"] = [[
-
-Below you will find a text representation of your Photon profile.
-
-To export this profile, select and copy all of the text below and paste it somewhere safe.
-
-To import a profile, replace all of the text below with the text from a previously exported profile.
-
-]]
-L["ImportExport_WarningDesc"] = [[
-
-Copying and pasting profile data can be a time consuming experience. It may stall your game for multiple seconds.
-
-WARNING: This will overwrite the current profile, and any changes you have made will be lost.
-]]
-L["ImportWarning"] = "Are you absolutely certain you wish to import this profile? The current profile will be overwritten."
-L["No data to import."] = true
-L["Decoding failed."] = true
-L["Decompression failed."] = true
-L["Data import Failed."] = true
-L["Aborting."] = true
-
-L["Experimental"] = true
-L["Experimental Options"] = true
-L["Experimental_Options_Warning"] = [[
-
-Warning:
-
-Here you will find experimental and potentially dangerous options.
-
-Use at your own risk.
-
-]]
-
-
 -----------------------------------------------
 ---------------Bar Settings Tooltips-----------
 -----------------------------------------------
@@ -798,3 +635,15 @@ L["BarDesc_visibility_indoors1"] = "Hides the bar when you are indoors."
 L["BarDesc_visibility_outdoors1"] = "Hides the bar when you are outdoors."
 L["BarDesc_visibility_fishing0"] = "Hides the bar when you have no fishing pole equipped."
 L["BarDesc_visibility_fishing1"] = "Hides the bar when you have a fishing pole equipped."
+
+
+-----------------------------------------------
+---------------What's New----------------------
+-----------------------------------------------
+-- shown once per account when LATEST_VERSION_NUM in Photon.lua changes, see GUI/WhatsNewWindow.lua.
+-- to show another text for a version, add it here under a new key and set WHATS_NEW_TEXT in Photon.lua to that key
+L["WhatsNew_Title"] = "Photon %s"
+L["WhatsNew_Text"] = [[
+Welcome to the beta release of Photon!
+Please help out by posting any bugs and suggestions over at github.com/rhean/Photon
+]]

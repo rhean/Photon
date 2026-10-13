@@ -12,9 +12,9 @@
 ## X-Credits-Maintainer: Linus Olsson
 ## X-Email: rhean@gaffapower.com
 ## X-License: MIT
-## X-Curse-Project-ID: TODO 
-## X-Wago-ID: TODO
-## X-WoWI-ID: TODO
+## X-Curse-Project-ID: 1743006
+## X-Wago-ID: rN4rDYKD
+## X-WoWI-ID: 27259
 
 Libs\embeds.xml
 Localizations\Photon_Localizations.xml
