@@ -22,7 +22,10 @@ local DB
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
 
-local LATEST_VERSION_NUM = "1.4.1" --this variable is set to popup a welcome message upon updating/installing. Only change it if you want to pop up a message after the users next update
+--the What's New popup, shown once per account when LATEST_VERSION_NUM changes, see Photon:LoginMessage
+local LATEST_VERSION_NUM = "0.1" --change it with WhatsNew_Text in the locale, everyone sees the new release notes once
+local SHOW_WHATS_NEW = true --false for a version that shouldn't pop up, like a small fix
+local WHATS_NEW_TEXT = "WhatsNew_Text" --the locale key it shows. another key, like "WhatsNew_Override", shows that text instead
 
 --prepare the Photon table with some sub-tables that will be used down the road
 Photon.bars = {} --this table will be our main handle for all of our bars.
@@ -276,18 +279,19 @@ end
 
 
 function Photon:LoginMessage()
-	--displays a info window on login for either fresh installs or updates
-	if not DB.updateWarning or DB.updateWarning ~= LATEST_VERSION_NUM  then
-		if not C_AddOns.IsAddOnLoaded("Masque") then
-			print(" ")
-			print("    You do not currently have Masque installed or enabled.")
-			print("    Please consider using Masque for enhancing the visual appearance of Photon's action buttons.")
-			print("    We recommend using Masque: Photon, the theme made by Soyier for use with Photon.")
-			print(" ")
-		end
+	--the release notes, once per account for each new version, fresh installs included.
+	--this runs under the loading screen, and entering the world closes windows, so it waits until after
+	if SHOW_WHATS_NEW and Photon.db.global.whatsNewSeen ~= LATEST_VERSION_NUM then
+		local waiter = CreateFrame("Frame")
+		waiter:RegisterEvent("PLAYER_ENTERING_WORLD")
+		waiter:SetScript("OnEvent", function(self)
+			self:UnregisterAllEvents()
+			C_Timer.After(2, function()
+				Photon.PhotonGUI:ShowWhatsNew(LATEST_VERSION_NUM, WHATS_NEW_TEXT)
+				Photon.db.global.whatsNewSeen = LATEST_VERSION_NUM
+			end)
+		end)
 	end
-
-	DB.updateWarning = LATEST_VERSION_NUM
 
 
 	--Shadowlands warning that will show as long as a player has one button on their ZoneAbilityBar for Shadowlands content

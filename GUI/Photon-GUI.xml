@@ -18,4 +18,5 @@ https://raw.githubusercontent.com/Gethe/wow-ui-source/live/Interface/FrameXML/UI
 	<Script file="Options.lua"/>
 	<Script file="ButtonEditorWindow.lua"/>
 	<Script file="IconSelectorPanel.lua"/>
+	<Script file="WhatsNewWindow.lua"/>
 </Ui>
