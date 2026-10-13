@@ -24,6 +24,7 @@ Localizations\Photon_Localizations.xml
 Utilities\Array.lua
 Utilities\Spec.lua
 Utilities\SpellBook.lua
+Utilities\Reputation.lua
 Utilities\DB-Fixer.lua
 
 Overlay\ButtonBinder.lua
