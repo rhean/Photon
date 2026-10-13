@@ -3,6 +3,10 @@ package-as: Photon
 enable-nolib-creation: no
 enable-toc-creation: yes
 
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
 optional-dependencies:
   - masque
 
