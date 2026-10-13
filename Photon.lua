@@ -422,7 +422,7 @@ function Photon:ToggleMainMenu()
 	Settings.OpenToCategory(Photon.optionsCategoryID)
 end
 
----/photon opens the interface menu, /photon bar and /photon button open the editors
+---/photon opens the interface menu, /photon bar and /photon button open the editors, /photon bind starts keybind mode
 function Photon:slashHandler(input)
 	if InCombatLockdown() then
 		Photon:Print(ERR_NOT_IN_COMBAT)
@@ -436,6 +436,8 @@ function Photon:slashHandler(input)
 		Photon.PhotonGUI:OpenBarConfig()
 	elseif command == "button" then
 		Photon.PhotonGUI:OpenButtonEditor()
+	elseif command == "bind" then
+		Photon:ToggleBindingMode(true)
 	else
 		Photon:ToggleMainMenu()
 	end
