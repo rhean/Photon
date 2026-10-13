@@ -12,7 +12,6 @@ embedded-libraries:
   - LibDBIcon-1-0
   - LibCustomGlow-1-0
 
-# theoretically we can get rid of the ignore files now that we have the makefile
 ignore:
   - README.md
   - dist
