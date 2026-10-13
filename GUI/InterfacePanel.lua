@@ -36,63 +36,6 @@ local function profileOptions()
 	return options
 end
 
-local function experimentalOptions()
-	return {
-		name = L["Experimental"],
-		desc = L["Experimental Options"],
-		type = "group",
-		order = 1001,
-		args = {
-
-			Header = {
-				order = 1,
-				name = L["Experimental Options"],
-				type = "header",
-			},
-
-			Warning = {
-				order = 2,
-				type = "description",
-				name = DIM_RED_FONT_COLOR:WrapTextInColorCode(L["Experimental_Options_Warning"]),
-				fontSize = "large",
-			},
-			importexport={
-				name = L["Profile"].." "..L["Import"].."/"..L["Export"],
-				type = "group",
-				order = 1,
-				args={
-
-					Header = {
-						order = 1,
-						name = L["Profile"].." "..L["Import"].."/"..L["Export"],
-						type = "header",
-					},
-
-					Instructions = {
-						order = 2,
-						name = L["ImportExport_Desc"],
-						type = "description",
-						fontSize = "medium",
-					},
-
-					TextBox = {
-						order = 3,
-						name = L["Import or Export the current profile:"],
-						desc = DIM_RED_FONT_COLOR:WrapTextInColorCode(L["ImportExport_WarningDesc"]),
-						type = "input",
-						multiline = 22,
-						confirm = function() return L["ImportWarning"] end,
-						validate = false,
-						set = function(self, input) Photon:SetSerializedAndCompressedProfile(input) end,
-						get = function() return Photon:GetSerializedAndCompressedProfile() end,
-						width = "full",
-					},
-				},
-			},
-		},
-	}
-end
-
 local function guiOptions()
 	local DB = Photon.db.profile
 	local changes = CopyTable(DB.blizzBars)
@@ -470,7 +413,6 @@ function PhotonGUI:LoadInterfaceOptions()
 	--keep the category ID so Photon:ToggleMainMenu() can open the panel with Settings.OpenToCategory
 	Photon.optionsCategoryID = category.ID
 
-	for _, options in ipairs({profileOptions(), experimentalOptions()}) do
-		Settings.RegisterCanvasLayoutSubcategory(category, createPanel(options), options.name)
-	end
+	local profiles = profileOptions()
+	Settings.RegisterCanvasLayoutSubcategory(category, createPanel(profiles), profiles.name)
 end
