@@ -53,7 +53,7 @@ Photon.STRATAS = {
 
 Photon.TIMERLIMIT = 4
 
-Photon.DEBUG = true
+Photon.DEBUG = false
 
 -------------------------------------------------------------------------
 --------------------Start of Functions-----------------------------------
@@ -640,50 +640,5 @@ function Photon:ToggleBindingMode(show)
 			bar:UpdateObjectStatus()
 			bar:UpdateObjectUsability()
 		end
-	end
-end
-
-function Photon:GetSerializedAndCompressedProfile()
-	local uncompressed = Photon:Serialize(Photon.db.profile) --serialize the database into a string value
-	local compressed = LibDeflate:CompressZlib(uncompressed) --compress the data
-	local encoded = LibDeflate:EncodeForPrint(compressed) --encode the data for print for copy+paste
-	return encoded
-end
-
-function Photon:SetSerializedAndCompressedProfile(input)
-	--check if the input is empty
-	if input == "" then
-		Photon:Print(L["No data to import."].." "..L["Aborting."])
-		return
-	end
-
-	--decode and check if decoding worked properly
-	local decoded = LibDeflate:DecodeForPrint(input)
-	if decoded == nil then
-		Photon:Print(L["Decoding failed."].." "..L["Aborting."])
-		return
-	end
-
-	--uncompress and check if uncompresion worked properly
-	local uncompressed = LibDeflate:DecompressZlib(decoded)
-	if uncompressed == nil then
-		Photon:Print(L["Decompression failed."].." "..L["Aborting."])
-		return
-	end
-
-	--deserialize the data and return it back into a table format
-	local result, newProfile = Photon:Deserialize(uncompressed)
-
-	if result == true and newProfile then --if we successfully deserialize, load the new table and reload
-		for k,v in pairs(newProfile) do
-			if type(v) == "table" then
-				Photon.db.profile[k] = CopyTable(v)
-			else
-				Photon.db.profile[k] = v
-			end
-		end
-		ReloadUI()
-	else
-		Photon:Print(L["Data import Failed."].." "..L["Aborting."])
 	end
 end
