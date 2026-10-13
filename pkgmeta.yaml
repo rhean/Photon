@@ -5,7 +5,6 @@ enable-toc-creation: yes
 
 optional-dependencies:
   - masque
-  - masque-neuron
 
 embedded-libraries:
   - Ace3

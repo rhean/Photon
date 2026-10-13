@@ -1,11 +1,13 @@
 # Photon
-Photon is a marco driven actionbar addon that is built around flexibility and configuability, do what you want without the limits of the default bars.
-Instead of buttons you have macros, write whatever commnands you want anywhere but you can still pull over a spell like you would on the regular bars.
-Many built in conditionals, you can choose by bar if you want it to show based on most of the available conditions in the game. You can also configure buttons to have differnt macros in the button config UI, which can help to keep things clear.
+Photon is a macro-driven action bar addon built around flexibility and configurability. Do what you want without the limits of the default bars.
+Instead of buttons, you have macros. Write whatever commands you want, anywhere, but you can still drag over a spell like you would on the regular bars.
+Photon has many built-in conditionals: for each bar, you can choose to show it based on most of the conditions available in the game. You can also give buttons different macros in the button config UI, which helps keep things clear.
 
 ## Download:
 The addon can be downloaded at these places:
 * **[Curse](https://www.curseforge.com/wow/addons/)** 
+* **[Wow Interface](https://www.wowinterface.com/)** 
+* **[Wago](https://addons.wago.io/addons/)** 
 
 ## Credit:
 Photon is a continuation of Neuron by Britt W. Yazel and Ion by Connor H. Chenoweth, fantastic work by both of them.

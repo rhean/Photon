@@ -766,11 +766,11 @@ L["BarDesc_visibility_fishing1"] = "Hides the bar when you have a fishing pole e
 -----------------------------------------------
 -- shown once per account when LATEST_VERSION_NUM in Photon.lua changes, see GUI/WhatsNewWindow.lua.
 -- to show another text for a version, add it here under a new key and set WHATS_NEW_TEXT in Photon.lua to that key
-L["WhatsNew_Title"] = "What's new in Photon %s"
+L["WhatsNew_Title"] = "Photon %s Beta"
 L["WhatsNew_Text"] = [[
-Welcome to Photon, the continuation of Neuron.
+Welcome to Photons beta.
 
-|cffffd100Bars|r
+|cffffd100|r
 - New bar shapes: Square and Diamond, which can be rotated like the circles.
 - Move bars with the nudge buttons, or by dragging them.
 
