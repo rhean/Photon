@@ -642,25 +642,8 @@ L["BarDesc_visibility_fishing1"] = "Hides the bar when you have a fishing pole e
 -----------------------------------------------
 -- shown once per account when LATEST_VERSION_NUM in Photon.lua changes, see GUI/WhatsNewWindow.lua.
 -- to show another text for a version, add it here under a new key and set WHATS_NEW_TEXT in Photon.lua to that key
-L["WhatsNew_Title"] = "Photon %s Beta"
+L["WhatsNew_Title"] = "Photon %s"
 L["WhatsNew_Text"] = [[
-Welcome to Photons beta.
-
-|cffffd100|r
-- New bar shapes: Square and Diamond, which can be rotated like the circles.
-- Move bars with the nudge buttons, or by dragging them.
-
-|cffffd100Buttons|r
-- Blizzard spell flyouts work again (teleports, portals, Call Pet and others).
-- Spells that turn into another spell, like Voidform into Void Volley, now show and cast the right spell, in combat too.
-- Spell charges count down properly in combat.
-- Dropping a spell, mount, macro or item on a button no longer adds a label. Type one in the button editor if you want one.
-- Equipped items get a border that fits the button.
-
-|cffffd100Button editor|r
-- The conditions list is in the same order as the bar config.
-- Clearing a macro shows what the button falls back on right away.
-
-|cffffd100Removed|r
-- The experimental profile import/export.
+Welcome to the beta release of Photon!
+Please help out by posting any bugs and suggestions over at github.com/rhean/Photon
 ]]
