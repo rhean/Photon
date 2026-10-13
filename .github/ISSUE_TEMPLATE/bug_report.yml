@@ -1,0 +1,82 @@
+name: Bug report
+description: Report something that doesn't work as it should
+labels: [bug]
+assignees: [rhean]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before writing a report, run the game with only Photon enabled, unless you are reporting a problem between Photon and another addon. The more detail you give, the easier it is to fix.
+
+  - type: checkboxes
+    id: only-photon
+    attributes:
+      label: Tested alone
+      options:
+        - label: I tested with only Photon enabled (or named the other addon below)
+          required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What went wrong, and what you expected to happen instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: The exact steps leading up to the problem.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: input
+    id: photon-version
+    attributes:
+      label: Photon version
+      description: Shown in the AddOns list.
+      placeholder: e.g. 0.1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: client
+    attributes:
+      label: Client
+      options:
+        - Retail
+        - Forever
+    validations:
+      required: true
+
+  - type: input
+    id: game-version
+    attributes:
+      label: Game version
+      description: Shown on the login screen.
+      placeholder: e.g. 12.0.1
+
+  - type: input
+    id: other-addons
+    attributes:
+      label: Other addons involved
+      description: If the problem is between Photon and another addon.
+
+  - type: textarea
+    id: lua-errors
+    attributes:
+      label: Lua errors
+      description: Turn errors on with /console scriptErrors 1, or use BugSack, and paste the full error.
+      render: text
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots and anything else
+      description: Screenshots can be dragged in here.

@@ -1,0 +1,26 @@
+name: Feature request
+description: Suggest an idea for this project
+labels: [enhancement]
+assignees: [rhean]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: A description of what the problem is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: How would you like it addressed?
+      description: A clear description of what you would like done to fix it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Relevant screenshots or other media to help describe your idea. Screenshots can be dragged in here.
