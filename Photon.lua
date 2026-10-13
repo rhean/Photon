@@ -15,12 +15,11 @@ local ButtonEditor = addonTable.overlay.ButtonEditor
 local BarEditor = addonTable.overlay.BarEditor
 
 ---@class Photon : AceAddon-3.0 @define The main addon object for the Photon Action Bar addon
-addonTable.Photon = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", nil, UIParent), "Photon", "AceConsole-3.0", "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0", "AceSerializer-3.0")
+addonTable.Photon = LibStub("AceAddon-3.0"):NewAddon(CreateFrame("Frame", nil, UIParent), "Photon", "AceConsole-3.0", "AceEvent-3.0", "AceHook-3.0", "AceTimer-3.0")
 local Photon = addonTable.Photon
 
 local DB
 
-local LibDeflate = LibStub:GetLibrary("LibDeflate")
 local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
 
 local LATEST_VERSION_NUM = "1.4.1" --this variable is set to popup a welcome message upon updating/installing. Only change it if you want to pop up a message after the users next update
