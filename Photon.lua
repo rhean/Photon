@@ -124,7 +124,7 @@ function Photon:OnInitialize()
 	Photon:Minimap_IconInitialize()
 
 	--Initialize the chat commands (i.e. /photon)
-	--Photon:RegisterChatCommand("photon", "slashHandler")
+	Photon:RegisterChatCommand("photon", "slashHandler")
 
 	--build all bar and button frames and run initial setup
 	Photon.registeredBarData = Photon:RegisterBars(DB)
@@ -416,6 +416,25 @@ end
 
 function Photon:ToggleMainMenu()
 	Settings.OpenToCategory(Photon.optionsCategoryID)
+end
+
+---/photon opens the interface menu, /photon bar and /photon button open the editors
+function Photon:slashHandler(input)
+	if InCombatLockdown() then
+		Photon:Print(ERR_NOT_IN_COMBAT)
+		return
+	end
+
+	local command = Photon:GetArgs(input, 1)
+	command = command and command:lower()
+
+	if command == "bar" then
+		Photon.PhotonGUI:OpenBarConfig()
+	elseif command == "button" then
+		Photon.PhotonGUI:OpenButtonEditor()
+	else
+		Photon:ToggleMainMenu()
+	end
 end
 
 function Photon:ToggleBarEditMode(show)

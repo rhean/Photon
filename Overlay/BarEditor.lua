@@ -46,7 +46,7 @@ local function updateAppearance(overlay)
 	--the name only shows on mouseover, for the selected bar too
 	overlay.frame.Text:SetShown(overlay.frame.hovered == true or overlay.frame.highlighted == true)
 
-	overlay.frame:SetFrameStrata(Photon.STRATAS[overlay.bar:GetStrata()])
+	overlay.frame:SetFrameStrata(addonTable.Photon.STRATAS[overlay.bar:GetStrata()])
 
 	--don't re-anchor to the bar mid-drag (OnEnter/OnLeave fire when the cursor crosses the edge),
 	--it pins the overlay back to the bar while StartMoving drags one corner and stretches it
@@ -108,7 +108,7 @@ local function onDragStop(overlay)
 	overlay.frame:ClearAllPoints()
 	updateAppearance(overlay)
 
-	Photon.PhotonGUI:RefreshBarConfig()
+	addonTable.Photon.PhotonGUI:RefreshBarConfig()
 end
 
 
@@ -196,7 +196,7 @@ BarEditor = {
 	---lights up one bar's overlay and no other, for a bar named under the mouse in a list. nil lights none
 	---@param bar Bar|nil
 	highlightBar = function(bar)
-		for _, other in ipairs(Photon.bars) do
+		for _, other in ipairs(addonTable.Photon.bars) do
 			local overlay = other.editFrame
 			if overlay then
 				overlay.frame.highlighted = other == bar or nil
