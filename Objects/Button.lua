@@ -325,6 +325,7 @@ function Button:LoadDataFromDatabase(curSpec, curState)
 		--clear attributes left over from a previously loaded spec
 		for state in pairs(self.macroStates or {}) do
 			self:SetAttribute(state.."-macro_Text", nil)
+			self:SetAttribute(state.."-spell", nil)
 			self:SetAttribute(state.."-actionID", nil)
 			self:SetAttribute(state.."-own", nil)
 			self:SetAttribute(state.."-blank", nil)
@@ -341,6 +342,8 @@ function Button:LoadDataFromDatabase(curSpec, curState)
 			local data = self:GetResolvedData(state)
 			--a blank state's "" still counts as set in the fallbacks, see ActionButton _childupdate
 			self:SetAttribute(state.."-macro_Text", data.forceBlank and "" or data.macro_Text)
+			--a plain /cast is cast by its spell's ID, see ActionButton.PlainCastSpellID
+			self:SetAttribute(state.."-spell", not data.forceBlank and self.PlainCastSpellID(data.macro_Text) or nil)
 			self:SetAttribute(state.."-actionID", not data.forceBlank and data.actionID or nil)
 			self:SetAttribute(state.."-own", hasMacro(rawget(self.statedata, state)) or nil)
 			self:SetAttribute(state.."-blank", data.forceBlank or nil)
@@ -349,6 +352,7 @@ function Button:LoadDataFromDatabase(curSpec, curState)
 		--for states with no data anywhere
 		local fallback = self:GetResolvedData("homestate")
 		self:SetAttribute("fallback-macro_Text", hasMacro(fallback) and not fallback.forceBlank and fallback.macro_Text or nil)
+		self:SetAttribute("fallback-spell", hasMacro(fallback) and not fallback.forceBlank and self.PlainCastSpellID(fallback.macro_Text) or nil)
 	end
 end
 
@@ -692,8 +696,22 @@ function Button:UpdateCount()
 end
 
 
+---what the button's spell is right now, like Void Volley for Voidform while in Voidform
+function Button:GetCurrentSpell()
+	if self.spellID and C_Spell.GetOverrideSpell then
+		return C_Spell.GetOverrideSpell(self.spellID)
+	end
+	return self.spellID or self.spell
+end
+
 ---Updates the buttons "count", i.e. the spell charges
 function Button:UpdateSpellCount()
+	--retail hands back a text ready count, which a secret value in combat can still be shown through
+	if C_Spell.GetSpellDisplayCount then
+		self.Count:SetText(C_Spell.GetSpellDisplayCount(self:GetCurrentSpell()))
+		return
+	end
+
 	local chargeInfo = C_Spell.GetSpellCharges(self.spell)
 	local count = C_Spell.GetSpellCastCount(self.spell)
 
@@ -725,6 +743,11 @@ end
 
 
 function Button:UpdateActionCount()
+	if C_ActionBar and C_ActionBar.GetActionDisplayCount then
+		self.Count:SetText(C_ActionBar.GetActionDisplayCount(self.actionID))
+		return
+	end
+
 	local count = GetActionCount(self.actionID)
 
 	if count and count > 0 then
@@ -753,13 +776,14 @@ end
 
 function Button:UpdateSpellCooldown()
 	if self.spell and self.isShown then
-		local cooldownInfo = C_Spell.GetSpellCooldown(self.spell)
-		local chargeInfo = C_Spell.GetSpellCharges(self.spell)
+		local spell = self:GetCurrentSpell()
+		local cooldownInfo = C_Spell.GetSpellCooldown(spell)
+		local chargeInfo = C_Spell.GetSpellCharges(spell)
 
 		if not cooldownInfo then
 			self:CancelCooldownTimer(true)
 		elseif issecretvalue(cooldownInfo.startTime) then
-			self:SetSecretCooldown(C_Spell.GetSpellCooldownDuration(self.spell))
+			self:SetSecretCooldown(C_Spell.GetSpellCooldownDuration(spell))
 		elseif chargeInfo and not issecretvalue(chargeInfo.maxCharges) and chargeInfo.maxCharges > 0 and chargeInfo.currentCharges < chargeInfo.maxCharges then
 			self:SetCooldownTimer(chargeInfo.cooldownStartTime, chargeInfo.cooldownDuration, cooldownInfo.isEnabled, chargeInfo.chargeModRate, self.bar:GetShowCooldownText(), self.bar:GetCooldownColor1(), self.bar:GetCooldownColor2(), self.bar:GetShowCooldownAlpha(), chargeInfo.currentCharges, chargeInfo.maxCharges) --only evoke charge cooldown (outer border) if charges are present and less than maxCharges (this is the case with the GCD)
 		else
@@ -828,13 +852,14 @@ function Button:UpdateUsable()
 end
 
 function Button:UpdateUsableSpell()
-	local isUsable, notEnoughMana = C_Spell.IsSpellUsable(self.spell)
+	local spell = self:GetCurrentSpell()
+	local isUsable, notEnoughMana = C_Spell.IsSpellUsable(spell)
 
 	if notEnoughMana and self.bar:GetManaColor() then
 		self.Icon:SetVertexColor(self.bar:GetManaColor()[1], self.bar:GetManaColor()[2], self.bar:GetManaColor()[3])
 	elseif isUsable then
 		--C_Spell.IsSpellInRange returns false when out of range and nil when range doesn't apply
-		if self.bar:GetShowRangeIndicator() and C_Spell.IsSpellInRange(self.spell, self.unit) == false then
+		if self.bar:GetShowRangeIndicator() and C_Spell.IsSpellInRange(spell, self.unit) == false then
 			self.Icon:SetVertexColor(self.bar:GetRangeColor()[1], self.bar:GetRangeColor()[2], self.bar:GetRangeColor()[3])
 		elseif self.bar:GetShowRangeIndicator() and Photon.spellCache[self.spell:lower()] and C_Spell.IsSpellInRange(Photon.spellCache[self.spell:lower()].spellID, self.unit) == false then
 			self.Icon:SetVertexColor(self.bar:GetRangeColor()[1], self.bar:GetRangeColor()[2], self.bar:GetRangeColor()[3])
@@ -885,7 +910,7 @@ function Button:UpdateUsableAction()
 	if notEnoughMana and self.bar:GetManaColor() then
 		self.Icon:SetVertexColor(self.bar:GetManaColor()[1], self.bar:GetManaColor()[2], self.bar:GetManaColor()[3])
 	elseif isUsable then
-		if self.bar:GetShowRangeIndicator() and IsActionInRange(self.spell, self.unit) == 0 then
+		if self.bar:GetShowRangeIndicator() and C_ActionBar.IsActionInRange(self.actionID, self.unit) == false then -- [retail port 2026-10-12] was IsActionInRange(self.spell, ...) == 0: wrong arg, retail errors
 			self.Icon:SetVertexColor(self.bar:GetRangeColor()[1], self.bar:GetRangeColor()[2], self.bar:GetRangeColor()[3])
 		else
 			self.Icon:SetVertexColor(1.0, 1.0, 1.0)
@@ -926,7 +951,8 @@ function Button:UpdateStatus()
 end
 
 function Button:UpdateSpellStatus()
-	if C_Spell.IsCurrentSpell(self.spell) or C_Spell.IsAutoRepeatSpell(self.spell) then
+	local spell = self:GetCurrentSpell()
+	if C_Spell.IsCurrentSpell(spell) or C_Spell.IsAutoRepeatSpell(spell) then
 		self:SetChecked(true)
 	else
 		self:SetChecked(false)
@@ -1005,7 +1031,9 @@ function Button:UpdateTooltip()
 			self:UpdateFlyoutTooltip()
 	-- macro must go after spells and items, for blizz macro #showtooltip to work
 		 elseif self:GetMacroBlizzMacro() then
-		 	GameTooltip:SetText(self:GetMacroName())
+		 	--a label wins, else the macro's own name
+		 	local label = self:GetMacroName()
+		 	GameTooltip:SetText(label and #label > 0 and label or self:GetMacroBlizzMacro())
 		elseif self:GetMacroText() and #self:GetMacroText() > 0 then
 			GameTooltip:SetText(self:GetMacroName())
 		end
@@ -1022,7 +1050,7 @@ end
 function Button:UpdateSpellTooltip()
 	if self.spell and self.spellID then --try to get the correct spell from the spellbook first
 		if self.bar:GetTooltipOption() == "normal" then
-			GameTooltip:SetSpellByID(self.spellID)
+			GameTooltip:SetSpellByID(self:GetCurrentSpell())
 		elseif self.bar:GetTooltipOption() == "minimal" then
 			GameTooltip:SetText(self.spell, 1, 1, 1)
 		end

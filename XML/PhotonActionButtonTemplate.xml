@@ -61,8 +61,10 @@ https://raw.githubusercontent.com/Gethe/wow-ui-source/live/Interface/FrameXML/UI
 				</FontString>
 
 				<Texture name="$parentBorder" parentKey="Border" file="Interface\Buttons\UI-ActionButton-Border" hidden="true" alphaMode="ADD">
+					<!--the size of the button, the image's own 64x64 runs over the buttons next to it-->
 					<Anchors>
-						<Anchor point="CENTER"/>
+						<Anchor point="TOPLEFT"/>
+						<Anchor point="BOTTOMRIGHT"/>
 					</Anchors>
 					<TexCoords left="0.1875" right="0.8125" top="0.1875" bottom="0.8125"/>
 				</Texture>

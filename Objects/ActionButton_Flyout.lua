@@ -165,10 +165,19 @@ local function scanSpellbook()
 	end
 end
 
+---GetFlyoutInfo errors for an ID that isn't a flyout, which a typed macro can have
+---@return string|nil name, string|nil description, number|nil numSlots, boolean|nil isKnown
+local function getFlyoutInfo(flyoutID)
+	local ok, name, description, numSlots, isKnown = pcall(GetFlyoutInfo, flyoutID)
+	if ok then
+		return name, description, numSlots, isKnown
+	end
+end
+
 ---the spells a flyout shows: known ones, and no empty Call Pet slots
 local function flyoutSpells(flyoutID)
 	local spells = {}
-	local _, _, numSlots = GetFlyoutInfo(flyoutID)
+	local _, _, numSlots = getFlyoutInfo(flyoutID)
 	for slot = 1, numSlots or 0 do
 		local spellID, _, isKnown = GetFlyoutSlotInfo(flyoutID, slot)
 		local petIndex, petName = GetCallPetSpellInfo(spellID)
@@ -315,7 +324,7 @@ function ActionButton:UpdateFlyout()
 end
 
 function ActionButton:UpdateFlyoutTooltip()
-	local name, description = GetFlyoutInfo(self.flyoutID)
+	local name, description = getFlyoutInfo(self.flyoutID)
 	GameTooltip:SetText(name or self:GetMacroName(), 1, 1, 1)
 	if description and #description > 0 and self.bar:GetTooltipOption() == "normal" then
 		GameTooltip:AddLine(description, nil, nil, nil, true)

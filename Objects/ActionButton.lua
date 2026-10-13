@@ -76,8 +76,8 @@ function ActionButton:InitializeButton()
 	self:SetupEvents()
 	self:SetupFlyoutClick()
 
-	self:SetAttribute("type", "macro")
 	self:SetAttribute("*macrotext*", self.SanitizedMacro(self:GetMacroText()))
+	self:ApplyCastType()
 
 	self:SetAttribute("hotkeypri", self.keys.hotKeyPri)
 	self:SetAttribute("hotkeys", self.keys.hotKeys)
@@ -207,14 +207,18 @@ function ActionButton:InitializeButton()
 						end
 
 						if not self:GetAttribute(msg.."-actionID") then
-							self:SetAttribute("type", "macro")
-
 							--see GetResolvedData
 							local macroText = self:GetAttribute(msg.."-macro_Text")
+							local spell = self:GetAttribute(msg.."-spell")
 							if (not macroText or #macroText == 0) and not self:GetAttribute(msg.."-blank") then
 								macroText = self:GetAttribute("fallback-macro_Text")
+								spell = self:GetAttribute("fallback-spell")
 							end
 							self:SetAttribute("*macrotext*", macroText)
+
+							--a plain /cast is cast by its ID, see ActionButton.PlainCastSpellID
+							self:SetAttribute("type", spell and "spell" or "macro")
+							self:SetAttribute("*spell*", spell)
 
 							--if there is a macro present, or if showGrid is enabled, show the button. If not, hide it. This works in combat.
 							if (self:GetAttribute("*macrotext*") and #self:GetAttribute("*macrotext*") > 0) or self:GetAttribute("showGrid") then
@@ -299,8 +303,13 @@ function ActionButton:SetupEvents()
 
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED", "UpdateAll")
 
-	self:RegisterEvent("SPELLS_CHANGED", "UpdateAll")
+	self:RegisterEvent("SPELLS_CHANGED")
 	self:RegisterEvent("MODIFIER_STATE_CHANGED", "UpdateAll")
+
+	--a spell turning into another one, like Voidform into Void Volley. fires in combat too
+	if not C_EventUtils or not C_EventUtils.IsEventValid or C_EventUtils.IsEventValid("SPELL_UPDATE_ICON") then
+		self:RegisterEvent("SPELL_UPDATE_ICON", "UpdateAll")
+	end
 
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 	self:RegisterEvent("UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_INTERRUPTED")
@@ -426,6 +435,7 @@ function ActionButton:ClearButton(clearAttributes)
 		self:SetAttribute("type2", nil)
 		self:SetAttribute("*action*", nil)
 		self:SetAttribute("*macrotext*", nil)
+		self:SetAttribute("*spell*", nil)
 		self:SetAttribute("*action1", nil)
 		self:SetAttribute("*macrotext2", nil)
 	end
@@ -446,7 +456,7 @@ function ActionButton:UpdateGlow()
 			self:StartGlow()
 		elseif self.spell and self.spell:lower() == "swipe()" and C_SpellActivationOverlay.IsSpellOverlayed(106785) then --this is a hack for feral druids (Legion patch 7.3.0. Bug reported)
 			self:StartGlow()
-		elseif C_SpellActivationOverlay.IsSpellOverlayed(self.spellID) then --this is the default "true" condition
+		elseif C_SpellActivationOverlay.IsSpellOverlayed(self.spellID) or C_SpellActivationOverlay.IsSpellOverlayed(self:GetCurrentSpell()) then --this is the default "true" condition
 			self:StartGlow()
 		else --this is the default "false" condition
 			self:StopGlow()
@@ -480,10 +490,6 @@ end
 function ActionButton:PLAYER_ENTERING_WORLD()
 	self:UpdateAll()
 	self:ApplyBindings()
-
-	-- if self.flyout then --this is a hack to get around CallPet not working on initial login. (weirdly it worked on /reload, but not login)
-	-- 	self:ScheduleTimer(function() self:InitializeButton() end, 1)
-	-- end
 end
 
 function ActionButton:UNIT_SPELLCAST_INTERRUPTED(unit)
@@ -789,6 +795,73 @@ function ActionButton:UpdateAll()
 	self:UpdateFlyout()
 end
 
+--a name can point at another spell of the same name for a while, like the Voidform aura next to Voidform turned Void Volley.
+local spellByName = {}
+local isSpellKnown = C_SpellBook and C_SpellBook.IsSpellKnown or IsPlayerSpell
+local function steadySpellID(spell, spellID)
+	local key = spell:lower()
+	local kept = spellByName[key]
+	if kept and isSpellKnown and isSpellKnown(kept) then
+		return kept
+	end
+	spellByName[key] = FindBaseSpellByID and FindBaseSpellByID(spellID) or spellID
+	return spellByName[key]
+end
+
+---the spell a macro casts when it is nothing but one plain /cast of a known spell, nil otherwise.
+---@return number|nil
+function ActionButton.PlainCastSpellID(macro)
+	if type(macro) ~= "string" then
+		return nil
+	end
+
+	local cast
+	for line in macro:gmatch("[^\n]+") do
+		line = line:match("^%s*(.-)%s*$")
+		if line == "" or line == "#autowrite" or line:find("^#showtooltip") then
+			--these change nothing about what is cast
+		elseif cast or not (line:find("^/cast%s") or line:find("^/spell%s")) then
+			return nil
+		else
+			cast = line:match("^/%a+%s+(.+)$")
+		end
+	end
+	if not cast or cast:find("[%[;,]") then
+		return nil
+	end
+
+	local spellID = ActionButton.ExtractMacroData(ActionButton.SanitizedMacro(macro)).spellID
+	if spellID and isSpellKnown and isSpellKnown(spellID) then
+		return spellID
+	end
+end
+
+---the active state's cast type, see PlainCastSpellID. the secure state code does the same in combat
+function ActionButton:ApplyCastType()
+	if InCombatLockdown() or self:GetAttribute("HasActionID") then
+		return
+	end
+	local spell = self.PlainCastSpellID(self:GetMacroText())
+	self:SetAttribute("type", spell and "spell" or "macro")
+	self:SetAttribute("*spell*", spell)
+end
+
+--a spell learned or a talent changed can change what a plain /cast is. the attributes can only change out of combat
+function ActionButton:SPELLS_CHANGED()
+	if not InCombatLockdown() and not self.spellsQueued then
+		self.spellsQueued = true
+		C_Timer.After(0.5, function()
+			self.spellsQueued = nil
+			if not InCombatLockdown() then
+				self:RefreshStateData()
+				self:ApplyCastType()
+			end
+			self:UpdateAll()
+		end)
+	end
+	self:UpdateAll()
+end
+
 ---@return {}|{spell: string, spellID: number, unit:string}|{item:string, unit:string}|{flyoutID:number}
 function ActionButton.ExtractMacroData(macro)
 	if not macro then
@@ -848,6 +921,10 @@ function ActionButton.ExtractMacroData(macro)
 				spellID = C_Spell.GetSpellInfo(abilityOrItem).spellID
 			end
 		end
+	end
+
+	if spell and spellID then
+		spellID = steadySpellID(spell, spellID)
 	end
 
 	--a Blizzard flyout, see ActionButton_Flyout.lua
@@ -942,7 +1019,7 @@ function ActionButton:GetAppearance(data)
 	if data.actionID then
 		return self.GetActionAppearance(data.actionID)
 	elseif spell then
-		texture, border = self.GetSpellAppearance(spell)
+		texture, border = self.GetSpellAppearance(spell, spellItem.spellID)
 	elseif item then
 		texture, border = self.GetItemAppearance(item)
 	elseif spellItem.flyoutID then
@@ -978,13 +1055,20 @@ function ActionButton:ApplyAppearance(texture, border)
 end
 
 --- @return number|string, nil @an icon texture, and an rgb tuple, both nilable
-function ActionButton.GetSpellAppearance(spell)
+function ActionButton.GetSpellAppearance(spell, spellID)
 	--Hide the border in case this button used to have an equipped item in it
 	--otherwise it will continue to have a green border until a reload takes place
 	local border = nil
 
 	---@type number|string|nil
-	local texture = C_Spell.GetSpellTexture(spell)
+	local texture
+
+	--what the spell is right now, like Void Volley for Voidform. the name alone doesn't follow it
+	if spellID and C_Spell.GetOverrideSpell then
+		texture = C_Spell.GetSpellTexture(C_Spell.GetOverrideSpell(spellID))
+	end
+
+	texture = texture or C_Spell.GetSpellTexture(spell)
 
 	if not texture then
 		if Photon.spellCache[spell:lower()] then
