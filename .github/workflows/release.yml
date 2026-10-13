@@ -10,6 +10,10 @@ on:
     tags:
       - '**'
 
+# the packager uses GITHUB_TOKEN to create the GitHub release, which needs write access
+permissions:
+  contents: write
+
 # a workflow is built up as jobs, and within these jobs are steps
 jobs:
 
@@ -32,7 +36,7 @@ jobs:
 
       # we first have to clone the AddOn project, this is a required step
       - name: Clone project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0  # gets git history for changelogs
 
