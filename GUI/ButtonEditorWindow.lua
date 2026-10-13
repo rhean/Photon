@@ -524,12 +524,26 @@ end
 
 --a bar loads again once typing pauses, not on every key
 local loadPending = {}
+local combatWaiter = CreateFrame("Frame")
+combatWaiter:SetScript("OnEvent", function(self)
+	self:UnregisterAllEvents()
+	for bar in pairs(loadPending) do
+		loadPending[bar] = nil
+		bar:Load()
+	end
+end)
+
 local function loadSoon(bar)
 	if loadPending[bar] then
 		return
 	end
 	loadPending[bar] = true
 	C_Timer.After(0.2, function()
+		--combat started while typing, the bar loads when it ends
+		if InCombatLockdown() then
+			combatWaiter:RegisterEvent("PLAYER_REGEN_ENABLED")
+			return
+		end
 		loadPending[bar] = nil
 		bar:Load()
 	end)

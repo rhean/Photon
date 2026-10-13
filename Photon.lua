@@ -201,6 +201,10 @@ end
 -------------------------------------------------
 
 function Photon:PLAYER_REGEN_DISABLED()
+	--bars and buttons can't be changed in combat, so the editors close
+	Photon.PhotonGUI:CloseButtonEditor()
+	Photon.PhotonGUI:CloseBarConfig()
+
 	if Photon.buttonEditMode then
 		Photon:ToggleButtonEditMode(false)
 	end
