@@ -43,6 +43,7 @@ Photon.bindingMode = false
 local tocVersion = select(4, GetBuildInfo())
 Photon.isWoWForever = (WOW_PROJECT_CAMELOT ~= nil and WOW_PROJECT_ID == WOW_PROJECT_CAMELOT) or (tocVersion >= 16000 and tocVersion < 20000)
 Photon.isWoWRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and not Photon.isWoWForever
+Photon.isWoWClassicEra = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 
 Photon.STRATAS = {
 	[1] = "BACKGROUND",
@@ -336,6 +337,7 @@ end
 --- Scans Character Spell Book and creates a table of all known spells.  This table is used to refrence macro spell info to generate tooltips and cooldowns.
 ---	If a spell is not displaying its tooltip or cooldown, then the spell in the macro probably is not in the database
 function Photon:UpdateSpellCache()
+	local C_SpellBook = addonTable.utilities.SpellBook --falls back to the older functions on Classic Era, see Utilities/SpellBook.lua
 	local sIndexMax = 0
 	local numSkillLines = C_SpellBook.GetNumSpellBookSkillLines()
 
@@ -388,6 +390,11 @@ function Photon:UpdateSpellCache()
 			end
 
 		end
+	end
+
+	--Classic Era has no professions tab, its profession spells are in the General tab and cached above
+	if not GetProfessions then
+		return
 	end
 
 	for i = 1, select("#", GetProfessions()) do

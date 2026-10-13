@@ -135,8 +135,16 @@ function Photon:HideBlizzardUI(profileDatabase)
 	if not blizzBars.MirrorBar then
 		--MirrorTimer1-3 were replaced by a single MirrorTimerContainer in 10.0
 		UIParent:UnregisterEvent("MIRROR_TIMER_START")
-		MirrorTimerContainer:UnregisterAllEvents()
-		MirrorTimerContainer:SetParent(Photon.hiddenFrame)
+		if MirrorTimerContainer then
+			MirrorTimerContainer:UnregisterAllEvents()
+			MirrorTimerContainer:SetParent(Photon.hiddenFrame)
+		else
+			--Classic Era still has the three timers from before 10.0
+			for i = 1, MIRRORTIMER_NUMTIMERS do
+				_G["MirrorTimer"..i]:UnregisterAllEvents()
+				_G["MirrorTimer"..i]:SetParent(Photon.hiddenFrame)
+			end
+		end
 	end
 	if not blizzBars.PetBar then
 		disableBarFrame(PetActionBar)
