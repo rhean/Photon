@@ -224,6 +224,7 @@ function ActionButton:PlaceMacro()
 end
 
 function ActionButton:PlaceSpell(action1, action2, spellID)
+	local C_SpellBook = addonTable.utilities.SpellBook --falls back to the older functions on Classic Era, see Utilities/SpellBook.lua
 	local spell
 
 	if action1 == 0 then

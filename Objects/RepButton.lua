@@ -87,6 +87,7 @@ local function SetRepWatch(ID, name, standing, header, minrep, maxrep, value, co
 end
 
 function RepButton:UpdateData(repGainedString)
+	local C_Reputation = addonTable.utilities.Reputation --falls back to the older functions on Classic Era, see Utilities/Reputation.lua
 	local BAR_REP_DATA = {
 		[0] = { l="Unknown", r=0.5, g=0.5, b=0.5},
 		[1] = { l="Hated", r=0.6, g=0.1, b=0.1},

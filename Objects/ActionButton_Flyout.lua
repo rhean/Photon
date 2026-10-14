@@ -152,6 +152,7 @@ end
 -------------------------------------------------------------------------------
 
 local function scanSpellbook()
+	local C_SpellBook = addonTable.utilities.SpellBook --falls back to the older functions on Classic Era, see Utilities/SpellBook.lua
 	wipe(flyoutInfo)
 	local bank = Enum.SpellBookSpellBank.Player
 	for line = 1, C_SpellBook.GetNumSpellBookSkillLines() do

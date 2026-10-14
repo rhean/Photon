@@ -16,6 +16,10 @@ Photon.MenuButton = MenuButton
 local MENU_BUTTON_NAMES = Photon.isWoWForever and {
 	"CharacterMicroButton", "ProfessionMicroButton", "SpellbookMicroButton", "TalentMicroButton", "LegacyMicroButton",
 	"QuestLogMicroButton", "GuildMicroButton", "LFDMicroButton", "CollectionsMicroButton", "StoreMicroButton", "MainMenuMicroButton",
+} or Photon.isWoWClassicEra and {
+	--the guild button is hidden on Classic Era, the guild is reached through Socials
+	"CharacterMicroButton", "SpellbookMicroButton", "TalentMicroButton", "QuestLogMicroButton", "SocialsMicroButton",
+	"WorldMapMicroButton", "MainMenuMicroButton", "HelpMicroButton",
 } or {
 	"CharacterMicroButton", "ProfessionMicroButton", "PlayerSpellsMicroButton", "AchievementMicroButton", "QuestLogMicroButton",
 	"HousingMicroButton", "GuildMicroButton", "LFDMicroButton", "CollectionsMicroButton", "EJMicroButton",
@@ -41,8 +45,11 @@ local helpParking = CreateFrame("Frame")
 helpParking:Hide()
 local storeHolder --the MenuButton holding StoreMicroButton
 
+--on Classic Era help is a button of its own on the bar, not the store's stand-in
+local helpHasOwnSpot = tContains(MENU_BUTTON_NAMES, "HelpMicroButton")
+
 local function StashHelpButton()
-	if not HelpMicroButton then
+	if not HelpMicroButton or helpHasOwnSpot then
 		return
 	end
 	if storeHolder then
@@ -58,6 +65,19 @@ local function StashHelpButton()
 	end
 end
 
+--buttons blizzard keeps hidden that aren't on our bar. left in blizzard's emptied menu they have no position,
+--and its MicroMenu:GetEdgeButton errors comparing them. parked with help they're out of its menu
+local UNUSED_BUTTON_NAMES = Photon.isWoWClassicEra and {"GuildMicroButton"} or {}
+
+local function ParkUnusedButtons()
+	for _, name in ipairs(UNUSED_BUTTON_NAMES) do
+		local button = _G[name]
+		if button and button:GetParent() ~= helpParking then
+			button:SetParent(helpParking)
+		end
+	end
+end
+
 --reparenting a micro button makes blizzard re-run MicroMenu:Layout right away, which calls this again.
 --without the guard every reclaim starts another reclaim and the client hangs
 local reclaiming = false
@@ -66,6 +86,7 @@ local function ReclaimMenuButtons()
 		return
 	end
 	reclaiming = true
+	ParkUnusedButtons() --before any button leaves blizzard's menu, see ParkUnusedButtons
 	StashHelpButton()
 	for menuButton in pairs(activeMenuButtons) do
 		menuButton:AnchorHookedButton()
@@ -121,6 +142,7 @@ end
 function MenuButton:InitializeButton()
 	if not tookOver then
 		TakeOverFromMicroMenu()
+		ParkUnusedButtons()
 		tookOver = true
 	end
 
