@@ -1,4 +1,4 @@
-## Interface: 120100, 16001
+## Interface: 120105, 16001, 50504
 ## Title: Photon
 ## Notes: A macro-based action bar and object manager add-on
 ## IconTexture: Interface\AddOns\Photon\Images\static_icon.tga
