@@ -788,6 +788,10 @@ end]]
 
 --overwrite function in parent class Button
 function ActionButton:UpdateAll()
+	if Photon.pendingReload then
+		return
+	end
+
 	--pass to parent UpdateAll function
 	Photon.Button.UpdateAll(self)
 

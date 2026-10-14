@@ -115,10 +115,14 @@ function Photon:OnInitialize()
 
 	StaticPopupDialogs["ReloadUI"] = {
 		text = L["ReloadUI"],
-		button1 = OKAY,
+		button1 = YES,
+		button2 = NO,
 		OnAccept = function()
 			ReloadUI()
 		end,
+		timeout = 0,
+		whileDead = true,
+		hideOnEscape = true,
 		preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
 	}
 
@@ -277,8 +281,8 @@ end
 
 
 function Photon:RefreshConfig(db, profile)
-	StaticPopup_Show("ReloadUI")
 	Photon.pendingReload = true
+	StaticPopup_Show("ReloadUI")
 end
 
 -----------------------------------------------------------------
