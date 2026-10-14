@@ -16,9 +16,10 @@ local macroDrag = {} --this is a table that holds onto the contents of the  curr
 local macroCache = {} --this will hold onto any previous contents of our button
 local standIn = {} --what SetMouseCursor put on the cursor to show macroDrag
 
---picking something else up replaces our stand-in on the cursor, but nothing tells macroDrag
-local function holdingStandIn(cursorType, action1, action2)
-	return cursorType == standIn[1] and action1 == standIn[2] and action2 == standIn[3]
+--picking something else up replaces our stand-in on the cursor, but nothing tells macroDrag.
+--type and ID only, an item's link changes once the client has loaded it
+local function holdingStandIn(cursorType, action1)
+	return cursorType == standIn[1] and action1 == standIn[2]
 end
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
@@ -30,6 +31,15 @@ if C_MountJournal and C_MountJournal.Pickup then
 		local cursorType, index = GetCursorInfo()
 		pickedMount.index = cursorType == "companion" and index or nil
 		pickedMount.mountID = C_MountJournal.GetDisplayedMountID(displayIndex)
+	end)
+
+	--a pickup that was let go of shouldn't match a later companion with the same index
+	local cursorWatcher = CreateFrame("Frame")
+	cursorWatcher:RegisterEvent("CURSOR_CHANGED")
+	cursorWatcher:SetScript("OnEvent", function()
+		if not GetCursorInfo() then
+			wipe(pickedMount)
+		end
 	end)
 end
 
@@ -93,7 +103,7 @@ function ActionButton:OnReceiveDrag()
 	local cursorType, action1, action2, spellID = GetCursorInfo()
 
 	--the macro was swapped off a button and something else picked up since, place that instead
-	if #macroDrag > 0 and not holdingStandIn(cursorType, action1, action2) then
+	if #macroDrag > 0 and not holdingStandIn(cursorType, action1) then
 		wipe(macroDrag)
 		Photon.dragging = false
 		if not cursorType then
@@ -435,14 +445,15 @@ function ActionButton:PlaceCompanion(action1, action2)
 		return
 	end
 
-	local _, _, spellID, icon = GetCompanionInfo(action2, action1)
-
-	--a mount from Mists Classic's mount journal, see pickedMount
-	if not spellID and action2 == "MOUNT" and pickedMount.index == action1 and pickedMount.mountID then
-		self:PlaceMount(pickedMount.mountID)
+	--a mount from Mists Classic's mount journal, see pickedMount. checked first, the index isn't a companion index
+	if action2 == "MOUNT" and pickedMount.index == action1 and pickedMount.mountID then
+		local mountID = pickedMount.mountID
+		wipe(pickedMount)
+		self:PlaceMount(mountID)
 		return
 	end
 
+	local _, _, spellID, icon = GetCompanionInfo(action2, action1)
 	local name = spellID and C_Spell.GetSpellName(spellID)
 
 	if name then
