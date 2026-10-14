@@ -102,6 +102,9 @@ function ActionButton:OnReceiveDrag()
 
 	local cursorType, action1, action2, spellID = GetCursorInfo()
 
+	--read before SetMouseCursor below clears the cursor, that can wipe pickedMount, see cursorWatcher
+	local journalMountID = cursorType == "companion" and action2 == "MOUNT" and pickedMount.index == action1 and pickedMount.mountID
+
 	--the macro was swapped off a button and something else picked up since, place that instead
 	if #macroDrag > 0 and not holdingStandIn(cursorType, action1) then
 		wipe(macroDrag)
@@ -156,7 +159,7 @@ function ActionButton:OnReceiveDrag()
 	elseif cursorType == "battlepet" then
 		self:PlaceBattlePet(action1, action2)
 	elseif cursorType == "companion" then
-		self:PlaceCompanion(action1, action2)
+		self:PlaceCompanion(action1, action2, journalMountID)
 	elseif cursorType == "petaction" then
 		self:PlacePetAbility(action1, action2)
 	end
@@ -440,16 +443,16 @@ function ActionButton:PlaceMount(action1, action2)
 end
 
 
-function ActionButton:PlaceCompanion(action1, action2)
+---@param journalMountID? number @a mount from Mists Classic's mount journal, see pickedMount
+function ActionButton:PlaceCompanion(action1, action2, journalMountID)
 	if action1 == 0 then
 		return
 	end
 
-	--a mount from Mists Classic's mount journal, see pickedMount. checked first, the index isn't a companion index
-	if action2 == "MOUNT" and pickedMount.index == action1 and pickedMount.mountID then
-		local mountID = pickedMount.mountID
+	--checked first, the journal's index isn't a companion index
+	if journalMountID then
 		wipe(pickedMount)
-		self:PlaceMount(mountID)
+		self:PlaceMount(journalMountID)
 		return
 	end
 

@@ -13,7 +13,16 @@ local MenuButton = setmetatable({}, {__index = Photon.Button})
 Photon.MenuButton = MenuButton
 
 --on Mists Socials and Guild share a spot, the useClassicGuildUI setting picks which one blizzard shows.
-local useClassicGuildUI = Photon.isWoWMists and C_CVar.GetCVarBool("useClassicGuildUI")
+--read when it's needed, the setting can load or change after this file
+local hasGuildSlot = Photon.isWoWMists
+
+---@return Button shown, Button unused
+local function GuildSlotButtons()
+	if C_CVar.GetCVarBool("useClassicGuildUI") then
+		return SocialsMicroButton, GuildMicroButton
+	end
+	return GuildMicroButton, SocialsMicroButton
+end
 
 --the micro buttons differ between clients, these orders match the default UI
 local MENU_BUTTON_NAMES = Photon.isWoWForever and {
@@ -25,7 +34,7 @@ local MENU_BUTTON_NAMES = Photon.isWoWForever and {
 	"WorldMapMicroButton", "MainMenuMicroButton", "HelpMicroButton",
 } or Photon.isWoWMists and {
 	"CharacterMicroButton", "SpellbookMicroButton", "TalentMicroButton", "AchievementMicroButton", "QuestLogMicroButton",
-	useClassicGuildUI and "SocialsMicroButton" or "GuildMicroButton", "PVPMicroButton", "LFGMicroButton",
+	"GuildMicroButton", "PVPMicroButton", "LFGMicroButton", --guild is the Socials/Guild slot, see GuildSlotButtons
 	"CollectionsMicroButton", "EJMicroButton", "StoreMicroButton", "MainMenuMicroButton",
 } or {
 	"CharacterMicroButton", "ProfessionMicroButton", "PlayerSpellsMicroButton", "AchievementMicroButton", "QuestLogMicroButton",
@@ -35,10 +44,21 @@ local MENU_BUTTON_NAMES = Photon.isWoWForever and {
 
 --only the buttons this client actually has
 local blizzMenuButtons = {}
+local guildSlot --the Socials/Guild slot's place in blizzMenuButtons
 for _, name in ipairs(MENU_BUTTON_NAMES) do
 	if _G[name] then
 		table.insert(blizzMenuButtons, _G[name])
+		if hasGuildSlot and name == "GuildMicroButton" then
+			guildSlot = #blizzMenuButtons
+		end
 	end
+end
+
+local function GetBlizzButton(id)
+	if id == guildSlot then
+		return (GuildSlotButtons())
+	end
+	return blizzMenuButtons[id]
 end
 
 Photon.NUM_MENU_BUTTONS = #blizzMenuButtons
@@ -74,14 +94,19 @@ end
 
 --buttons blizzard keeps hidden that aren't on our bar. left in blizzard's emptied menu they have no position,
 --and its MicroMenu:GetEdgeButton errors comparing them. parked with help they're out of its menu
-local UNUSED_BUTTON_NAMES = Photon.isWoWClassicEra and {"GuildMicroButton"}
-	or Photon.isWoWMists and {useClassicGuildUI and "GuildMicroButton" or "SocialsMicroButton"}
-	or {}
+local UNUSED_BUTTON_NAMES = Photon.isWoWClassicEra and {"GuildMicroButton"} or {}
 
 local function ParkUnusedButtons()
+	local unused = {}
 	for _, name in ipairs(UNUSED_BUTTON_NAMES) do
-		local button = _G[name]
-		if button and button:GetParent() ~= helpParking then
+		table.insert(unused, _G[name])
+	end
+	if guildSlot then
+		table.insert(unused, (select(2, GuildSlotButtons())))
+	end
+
+	for _, button in ipairs(unused) do
+		if button:GetParent() ~= helpParking then
 			button:SetParent(helpParking)
 		end
 	end
@@ -128,6 +153,23 @@ local function TakeOverFromMicroMenu()
 end
 local tookOver = false
 
+--the setting can change, or load after the bar is built. hand the slot to the button blizzard shows now
+if guildSlot then
+	local guildSettingWatcher = CreateFrame("Frame")
+	guildSettingWatcher:RegisterEvent("CVAR_UPDATE")
+	guildSettingWatcher:SetScript("OnEvent", function(_, _, name)
+		if name ~= "useClassicGuildUI" then
+			return
+		end
+		for menuButton in pairs(activeMenuButtons) do
+			if menuButton.id == guildSlot then
+				menuButton.hookedButton = (GuildSlotButtons())
+			end
+		end
+		ReclaimMenuButtons() --parks the other one, see ParkUnusedButtons
+	end)
+end
+
 ---------------------------------------------------------
 
 ---Constructor: Create a new Photon Button object (this is the base object for all Photon button types)
@@ -155,13 +197,14 @@ function MenuButton:InitializeButton()
 		tookOver = true
 	end
 
-	if blizzMenuButtons[self.id] then
-		self:SetWidth(blizzMenuButtons[self.id]:GetWidth()-2)
-		self:SetHeight(blizzMenuButtons[self.id]:GetHeight()-2)
+	local blizzButton = GetBlizzButton(self.id)
+	if blizzButton then
+		self:SetWidth(blizzButton:GetWidth()-2)
+		self:SetHeight(blizzButton:GetHeight()-2)
 
 		self:SetHitRectInsets(self:GetWidth()/2, self:GetWidth()/2, self:GetHeight()/2, self:GetHeight()/2)
 
-		self.hookedButton = blizzMenuButtons[self.id]
+		self.hookedButton = blizzButton
 		--a micro button can only sit on one bar, the newest menu bar takes it or two bars keep taking it from each other
 		for other in pairs(activeMenuButtons) do
 			if other ~= self and other.hookedButton == self.hookedButton then
