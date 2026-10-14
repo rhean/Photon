@@ -6,7 +6,7 @@ Photon has many built-in conditionals: for each bar, you can choose to show it b
 ## Download:
 The addon can be downloaded at these places:
 * **[Curse](https://www.curseforge.com/wow/addons/photon)** 
-* **[Wow Interface](https://www.wowinterface.com/)** 
+* **[Wow Interface](https://www.wowinterface.com/downloads/info27259-Photon.html)** 
 * **[Wago](https://addons.wago.io/addons/)** 
 
 ## Credit:
