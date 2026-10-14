@@ -359,8 +359,8 @@ function Photon.UpdateStanceStrings()
 		},
 	}
 
-	--Forever has no vehicles or dragonriding or extra bars
-	if Photon.isWoWForever then
+	--Forever and TBC have no vehicles or dragonriding or extra bars
+	if Photon.isWoWForever or Photon.isWoWTBC then
 		Photon.MANAGED_SECONDARY_STATES.dragonriding = nil
 		Photon.VISIBILITY_STATES.dragonriding0 = nil
 		Photon.VISIBILITY_STATES.dragonriding1 = nil

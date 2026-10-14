@@ -187,19 +187,17 @@ local function onPage(actionPage, state)
 end
 
 ---with multiSpec the default tree only shows until a spec is picked, see Button:CopyDefaultToSpec.
----Forever always has it, as spec 1
 ---@param bar Bar
 local function getSpecs(bar)
 	local multiSpec = bar:GetMultiSpec()
 	local activeSpec = Spec.active(multiSpec)
 
 	local specs = {}
-	if not multiSpec or Photon.isWoWForever or activeSpec == "default" then
-		table.insert(specs, {index = "default", name = Photon.isWoWForever and L["Spec 1"] or L["Default"]})
+	if not multiSpec or Photon.hasTalentGroups or activeSpec == "default" then
+		table.insert(specs, {index = "default", name = Photon.hasTalentGroups and L["Spec 1"] or L["Default"]})
 	end
 
 	if multiSpec then
-		--Forever only names its second
 		local names = Spec.names(multiSpec)
 		for index = 1, 4 do
 			if names[index] then

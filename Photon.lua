@@ -45,6 +45,9 @@ Photon.isWoWForever = (WOW_PROJECT_CAMELOT ~= nil and WOW_PROJECT_ID == WOW_PROJ
 Photon.isWoWRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and not Photon.isWoWForever
 Photon.isWoWClassicEra = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 Photon.isWoWMists = WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC
+Photon.isWoWTBC = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC
+--dual spec swaps between two talent groups here, there are no specializations to follow
+Photon.hasTalentGroups = Photon.isWoWForever or Photon.isWoWTBC
 
 Photon.STRATAS = {
 	[1] = "BACKGROUND",
@@ -305,7 +308,8 @@ function Photon:LoginMessage()
 
 
 	--Shadowlands warning that will show as long as a player has one button on their ZoneAbilityBar for Shadowlands content
-	if not Photon.isWoWForever and UnitLevel("player") >= 50 and Photon.db.profile.ZoneAbilityBar[1] and #Photon.db.profile.ZoneAbilityBar[1].buttons == 1 then
+	--only where the client has a Zone Ability Bar, see Photon:RegisterBars
+	if Photon.registeredBarData.ZoneAbilityBar and UnitLevel("player") >= 50 and Photon.db.profile.ZoneAbilityBar[1] and #Photon.db.profile.ZoneAbilityBar[1].buttons == 1 then
 		print(" ")
 		Photon:Print(WrapTextInColorCode("IMPORTANT: Shadowlands content now requires multiple Zone Ability Buttons. Please add at least 3 buttons to your Zone Ability Bar to support this new functionality.", "FF00FFEC"))
 		print(" ")

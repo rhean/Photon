@@ -377,10 +377,10 @@ function Button:MigrateDefaultData()
 end
 
 ---with multiSpec a spec gets a copy of the default tree once. both are kept for when multiSpec is
----toggled. Forever keeps the default tree as spec 1
+---toggled. Forever and TBC keep the default tree as spec 1
 ---@param curSpec number|string
 function Button:CopyDefaultToSpec(curSpec)
-	if Photon.isWoWForever or not self.bar:GetMultiSpec() or type(curSpec) ~= "number" then
+	if Photon.hasTalentGroups or not self.bar:GetMultiSpec() or type(curSpec) ~= "number" then
 		return
 	end
 
@@ -877,7 +877,7 @@ function Button:UpdateUsableItem()
 	--for some reason toys don't show as usable items, so this is a workaround for that
 	if not isUsable then
 		local itemID = C_Item.GetItemInfoInstant(self.item)
-		if itemID and PlayerHasToy(itemID) then
+		if itemID and PlayerHasToy and PlayerHasToy(itemID) then
 			isUsable = true
 		end
 	end

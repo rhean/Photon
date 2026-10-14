@@ -15,6 +15,9 @@ Photon.PetButton = PetButton
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
 
+--older clients don't have IsPetActive, their pet bar goes by PetHasActionBar
+local IsPetActive = IsPetActive or PetHasActionBar
+
 LibStub("AceEvent-3.0"):Embed(PetButton)
 LibStub("AceTimer-3.0"):Embed(PetButton)
 
