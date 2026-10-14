@@ -308,7 +308,8 @@ function Photon:LoginMessage()
 
 
 	--Shadowlands warning that will show as long as a player has one button on their ZoneAbilityBar for Shadowlands content
-	if not Photon.isWoWForever and UnitLevel("player") >= 50 and Photon.db.profile.ZoneAbilityBar[1] and #Photon.db.profile.ZoneAbilityBar[1].buttons == 1 then
+	--only where the client has a Zone Ability Bar, see Photon:RegisterBars
+	if Photon.registeredBarData.ZoneAbilityBar and UnitLevel("player") >= 50 and Photon.db.profile.ZoneAbilityBar[1] and #Photon.db.profile.ZoneAbilityBar[1].buttons == 1 then
 		print(" ")
 		Photon:Print(WrapTextInColorCode("IMPORTANT: Shadowlands content now requires multiple Zone Ability Buttons. Please add at least 3 buttons to your Zone Ability Bar to support this new functionality.", "FF00FFEC"))
 		print(" ")

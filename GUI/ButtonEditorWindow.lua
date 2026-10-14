@@ -187,7 +187,6 @@ local function onPage(actionPage, state)
 end
 
 ---with multiSpec the default tree only shows until a spec is picked, see Button:CopyDefaultToSpec.
----Forever always has it, as spec 1
 ---@param bar Bar
 local function getSpecs(bar)
 	local multiSpec = bar:GetMultiSpec()
@@ -199,7 +198,6 @@ local function getSpecs(bar)
 	end
 
 	if multiSpec then
-		--Forever only names its second
 		local names = Spec.names(multiSpec)
 		for index = 1, 4 do
 			if names[index] then
