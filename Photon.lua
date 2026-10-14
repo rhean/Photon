@@ -44,6 +44,7 @@ local tocVersion = select(4, GetBuildInfo())
 Photon.isWoWForever = (WOW_PROJECT_CAMELOT ~= nil and WOW_PROJECT_ID == WOW_PROJECT_CAMELOT) or (tocVersion >= 16000 and tocVersion < 20000)
 Photon.isWoWRetail = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and not Photon.isWoWForever
 Photon.isWoWClassicEra = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+Photon.isWoWMists = WOW_PROJECT_ID == WOW_PROJECT_MISTS_CLASSIC
 
 Photon.STRATAS = {
 	[1] = "BACKGROUND",
