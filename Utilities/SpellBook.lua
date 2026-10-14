@@ -37,10 +37,18 @@ local SpellBook = {
     return GetSpellBookItemName(index, bookType(bank))
   end,
 
+  --the old item info only gives the type and the spell or flyout ID, name and icon have their own functions
   GetSpellBookItemInfo = C_SpellBook.GetSpellBookItemInfo or function(index, bank)
-    local itemType, spellID = GetSpellBookItemInfo(index, bookType(bank))
+    local book = bookType(bank)
+    local itemType, actionID = GetSpellBookItemInfo(index, book)
     if itemType then
-      return {itemType = ITEM_TYPES[itemType], spellID = spellID}
+      return {
+        itemType = ITEM_TYPES[itemType],
+        actionID = actionID,
+        spellID = itemType ~= "FLYOUT" and actionID or nil, --like C_SpellBook, a flyout has no spell
+        name = GetSpellBookItemName(index, book),
+        iconID = GetSpellBookItemTexture(index, book),
+      }
     end
   end,
 

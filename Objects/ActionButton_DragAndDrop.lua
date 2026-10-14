@@ -14,8 +14,34 @@ local ActionButton = Photon.ActionButton
 
 local macroDrag = {} --this is a table that holds onto the contents of the  current macro being dragged
 local macroCache = {} --this will hold onto any previous contents of our button
+local standIn = {} --what SetMouseCursor put on the cursor to show macroDrag
+
+--picking something else up replaces our stand-in on the cursor, but nothing tells macroDrag.
+--type and ID only, an item's link changes once the client has loaded it
+local function holdingStandIn(cursorType, action1)
+	return cursorType == standIn[1] and action1 == standIn[2]
+end
 
 local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
+
+--Mists Classic's mount journal puts a mount on the cursor as a companion.
+local pickedMount = {}
+if C_MountJournal and C_MountJournal.Pickup then
+	hooksecurefunc(C_MountJournal, "Pickup", function(displayIndex)
+		local cursorType, index = GetCursorInfo()
+		pickedMount.index = cursorType == "companion" and index or nil
+		pickedMount.mountID = C_MountJournal.GetDisplayedMountID(displayIndex)
+	end)
+
+	--a pickup that was let go of shouldn't match a later companion with the same index
+	local cursorWatcher = CreateFrame("Frame")
+	cursorWatcher:RegisterEvent("CURSOR_CHANGED")
+	cursorWatcher:SetScript("OnEvent", function()
+		if not GetCursorInfo() then
+			wipe(pickedMount)
+		end
+	end)
+end
 
 --------------------------------------
 --------------------------------------
@@ -75,6 +101,18 @@ function ActionButton:OnReceiveDrag()
 	end
 
 	local cursorType, action1, action2, spellID = GetCursorInfo()
+
+	--the macro was swapped off a button and something else picked up since, place that instead
+	if #macroDrag > 0 and not holdingStandIn(cursorType, action1) then
+		wipe(macroDrag)
+		Photon.dragging = false
+		if not cursorType then
+			for _,bar in pairs(Photon.bars) do
+				bar:ACTIONBAR_SHOWHIDEGRID()
+			end
+			return
+		end
+	end
 
 	if self:GetMacroText() ~= "" and self:GetActiveData() == self.data then --if our button being dropped onto already has content, we need to cache that content. inherited content stays where it is
 		macroCache[1] = self:GetDragAction()
@@ -407,8 +445,16 @@ function ActionButton:PlaceCompanion(action1, action2)
 		return
 	end
 
+	--a mount from Mists Classic's mount journal, see pickedMount. checked first, the index isn't a companion index
+	if action2 == "MOUNT" and pickedMount.index == action1 and pickedMount.mountID then
+		local mountID = pickedMount.mountID
+		wipe(pickedMount)
+		self:PlaceMount(mountID)
+		return
+	end
+
 	local _, _, spellID, icon = GetCompanionInfo(action2, action1)
-	local name = C_Spell.GetSpellName(spellID)
+	local name = spellID and C_Spell.GetSpellName(spellID)
 
 	if name then
 		self:SetMacroName()
@@ -460,7 +506,7 @@ end
 
 --This is all just to put an icon on the mouse cursor. Sadly we can't use SetCursor, because once you leave the frame the icon goes away. PickupSpell seems to work, but we need a valid spellID
 --This trick here is that we ignore what is 'actually' and are just using it for the icon and the sound effects
-function ActionButton:SetMouseCursor()
+local function pickUpStandIn(self)
 	ClearCursor()
 
 	if self.spell and self.spellID then
@@ -494,4 +540,9 @@ function ActionButton:SetMouseCursor()
 
 	--failsafe so there is 'something' on the mouse cursor
 	C_Item.PickupItem(1217) --questionmark symbol
+end
+
+function ActionButton:SetMouseCursor()
+	pickUpStandIn(self)
+	standIn = {GetCursorInfo()}
 end

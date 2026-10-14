@@ -119,5 +119,10 @@ function Photon:RegisterBars(DB)
     allBars.ZoneAbilityBar = nil
   end
 
+  --zone abilities came with Warlords of Draenor, Mists only has vehicles and extra action buttons
+  if Photon.isWoWMists then
+    allBars.ZoneAbilityBar = nil
+  end
+
   return allBars
 end
