@@ -266,6 +266,16 @@ function ExpButton:SetXPType(newXPType)
 	self:OnEvent("changed_curXPType")
 end
 
+--a type this client doesn't have, like honor or renown in a profile from retail, shows player xp.
+local XP_TYPE_AVAILABLE = {
+	covenant_renown = C_Covenants ~= nil,
+	honor_points = UnitHonorMax ~= nil,
+}
+
 function ExpButton:GetXPType()
-	return self.config.curXPType
+	local xpType = self.config.curXPType
+	if XP_TYPE_AVAILABLE[xpType] == false then
+		return "player_xp"
+	end
+	return xpType
 end
