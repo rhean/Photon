@@ -49,9 +49,12 @@ function ExpButton:InitializeButton()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED", "OnEvent")
 
-	self:RegisterEvent("COVENANT_SANCTUM_RENOWN_LEVEL_CHANGED", "OnEvent")
-	self:RegisterEvent("AZERITE_ITEM_EXPERIENCE_CHANGED", "OnEvent")
-	self:RegisterEvent("HONOR_XP_UPDATE", "OnEvent")
+	--covenant renown, azerite and honor don't exist on every client
+	for _, event in ipairs({"COVENANT_SANCTUM_RENOWN_LEVEL_CHANGED", "AZERITE_ITEM_EXPERIENCE_CHANGED", "HONOR_XP_UPDATE"}) do
+		if not C_EventUtils or not C_EventUtils.IsEventValid or C_EventUtils.IsEventValid(event) then
+			self:RegisterEvent(event, "OnEvent")
+		end
+	end
 
 	self.StatusBar:Show()
 	self.typeString = L["XP Bar"]
@@ -186,7 +189,7 @@ function ExpButton:InitializeDropDown() -- initialize the dropdown menu for chos
 	})
 
 	--add Renown tracking for Covenants
-	if C_Covenants.GetActiveCovenantID() ~= 0 then
+	if C_Covenants and C_Covenants.GetActiveCovenantID() ~= 0 then
 		table.insert(menu, {
 			arg1 = self,
 			arg2 = "covenant_renown",
@@ -208,14 +211,16 @@ function ExpButton:InitializeDropDown() -- initialize the dropdown menu for chos
 		})
 	end
 
-	--add PvP Honor option
-	table.insert(menu, {
-		arg1 = self,
-		arg2 = "honor_points",
-		text = L["Track Honor Points"],
-		func = function(dropdown, self, newXPType) self:SetXPType(newXPType) end,
-		checked = self:GetXPType() == "honor_points",
-	})
+	--add PvP Honor option, Classic Era has an older honor system without these
+	if UnitHonorMax then
+		table.insert(menu, {
+			arg1 = self,
+			arg2 = "honor_points",
+			text = L["Track Honor Points"],
+			func = function(dropdown, self, newXPType) self:SetXPType(newXPType) end,
+			checked = self:GetXPType() == "honor_points",
+		})
+	end
 
 	--this is a spacer between everything else and close
 	table.insert(menu,	{
