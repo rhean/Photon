@@ -12,8 +12,8 @@ local Photon = addonTable.Photon
 local MenuButton = setmetatable({}, {__index = Photon.Button})
 Photon.MenuButton = MenuButton
 
---on Mists Socials and Guild share a spot, the useClassicGuildUI setting picks which one blizzard shows.
-local useClassicGuildUI = Photon.isWoWMists and C_CVar.GetCVarBool("useClassicGuildUI")
+--on Mists and TBC Socials and Guild share a spot, the useClassicGuildUI setting picks which one blizzard shows.
+local useClassicGuildUI = (Photon.isWoWMists or Photon.isWoWTBC) and C_CVar.GetCVarBool("useClassicGuildUI")
 
 --the micro buttons differ between clients, these orders match the default UI
 local MENU_BUTTON_NAMES = Photon.isWoWForever and {
@@ -27,6 +27,10 @@ local MENU_BUTTON_NAMES = Photon.isWoWForever and {
 	"CharacterMicroButton", "SpellbookMicroButton", "TalentMicroButton", "AchievementMicroButton", "QuestLogMicroButton",
 	useClassicGuildUI and "SocialsMicroButton" or "GuildMicroButton", "PVPMicroButton", "LFGMicroButton",
 	"CollectionsMicroButton", "EJMicroButton", "StoreMicroButton", "MainMenuMicroButton",
+} or Photon.isWoWTBC and {
+	"CharacterMicroButton", "SpellbookMicroButton", "TalentMicroButton", "QuestLogMicroButton",
+	useClassicGuildUI and "SocialsMicroButton" or "GuildMicroButton", "WorldMapMicroButton", "MainMenuMicroButton",
+	"HelpMicroButton",
 } or {
 	"CharacterMicroButton", "ProfessionMicroButton", "PlayerSpellsMicroButton", "AchievementMicroButton", "QuestLogMicroButton",
 	"HousingMicroButton", "GuildMicroButton", "LFDMicroButton", "CollectionsMicroButton", "EJMicroButton",
@@ -75,7 +79,7 @@ end
 --buttons blizzard keeps hidden that aren't on our bar. left in blizzard's emptied menu they have no position,
 --and its MicroMenu:GetEdgeButton errors comparing them. parked with help they're out of its menu
 local UNUSED_BUTTON_NAMES = Photon.isWoWClassicEra and {"GuildMicroButton"}
-	or Photon.isWoWMists and {useClassicGuildUI and "GuildMicroButton" or "SocialsMicroButton"}
+	or (Photon.isWoWMists or Photon.isWoWTBC) and {useClassicGuildUI and "GuildMicroButton" or "SocialsMicroButton"}
 	or {}
 
 local function ParkUnusedButtons()

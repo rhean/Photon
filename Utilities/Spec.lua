@@ -17,8 +17,8 @@ local Spec; Spec = {
   -- @param bool indicating whether we want multispec
   -- @return the spec index and name
   active = function (multiSpec)
-    --Forever has dual spec talent groups instead. group 1 is the default tree
-    if addonTable.Photon.isWoWForever then
+    --Forever and TBC have dual spec talent groups instead. group 1 is the default tree
+    if addonTable.Photon.hasTalentGroups then
       if multiSpec and C_SpecializationInfo.GetActiveSpecGroup() == 2 then
         return 2, L["Spec 2"]
       end
@@ -45,7 +45,7 @@ local Spec; Spec = {
   -- @param bool indicating whether we want multispec
   -- @return the names
   names = function(multiSpec)
-    if addonTable.Photon.isWoWForever then
+    if addonTable.Photon.hasTalentGroups then
       return multiSpec and {[2] = L["Spec 2"]} or {}
     end
 

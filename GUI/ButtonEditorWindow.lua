@@ -194,8 +194,8 @@ local function getSpecs(bar)
 	local activeSpec = Spec.active(multiSpec)
 
 	local specs = {}
-	if not multiSpec or Photon.isWoWForever or activeSpec == "default" then
-		table.insert(specs, {index = "default", name = Photon.isWoWForever and L["Spec 1"] or L["Default"]})
+	if not multiSpec or Photon.hasTalentGroups or activeSpec == "default" then
+		table.insert(specs, {index = "default", name = Photon.hasTalentGroups and L["Spec 1"] or L["Default"]})
 	end
 
 	if multiSpec then
