@@ -164,6 +164,9 @@ function ActionButton:InitializeButton()
 						local inForm = form and (form:find("^stance%d") or form:find("^pet%d")) and msg ~= "homestate"
 							and not msg:find("^stance") and not msg:find("^paged") and not msg:find("^pet")
 
+						--the profile's fallbackOrder "stance" tries stance1 before alt1, see Button:GetResolvedData
+						local stanceFirst = self:GetAttribute("fallbackOrder") == "stance"
+
 						--page 2-6 falls back the same way within the page, then on its default, then page 1's
 						if page and page:find("^paged%d") and page ~= "paged1" then
 							local key
@@ -173,13 +176,16 @@ function ActionButton:InitializeButton()
 									key = nil
 								end
 							end
+							if not key and inForm and stanceFirst and self:GetAttribute(page.."_"..form.."-own") then
+								key = page.."_"..form
+							end
 							if not key and msg ~= "homestate" then
 								key = page.."_"..msg
 								if not (self:GetAttribute(key.."-macro_Text") or self:GetAttribute(key.."-actionID")) then
 									key = nil
 								end
 							end
-							if not key and inForm then
+							if not key and inForm and not stanceFirst then
 								key = page.."_"..form
 								if not (self:GetAttribute(key.."-macro_Text") or self:GetAttribute(key.."-actionID")) then
 									key = nil
@@ -196,6 +202,10 @@ function ActionButton:InitializeButton()
 							local combo = form.."_"..msg
 							if self:GetAttribute(combo.."-macro_Text") or self:GetAttribute(combo.."-actionID") then
 								msg = combo
+							elseif stanceFirst then
+								if self:GetAttribute(form.."-own") then
+									msg = form
+								end
 							elseif not self:GetAttribute(msg.."-own") then
 								msg = form
 							end

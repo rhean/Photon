@@ -349,6 +349,11 @@ L["Shows / Hides the Default Blizzard UI"] = true
 L["Display Minimap Button"] = true
 L["Toggles the minimap button."] = true
 
+L["Editors"] = true
+L["Fallback Order"] = true
+L["State (Modifier)"] = true
+L["FallbackOrder_Desc"] = "What an empty state in a stance (like Shift in Bear Form) shows first. State (Modifier): the state's own macro on the default page (like Shift). Stance: the stance's default macro (Bear Form default)."
+
 L["Bar Visibility Toggles"] = true
 L["Target"] = true
 L["Has Target"] = true
