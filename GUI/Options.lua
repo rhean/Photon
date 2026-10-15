@@ -164,7 +164,7 @@ local function positionDefinitions(definitions)
 		function(value) current:SetAnchor(data.anchorTo, data.anchorPoint or "CENTER", value) end)
 	definitions.positionLocked = {
 		type = "toggle",
-		name = L["Lock Dragging"],
+		name = L["Bar Lock"],
 		get = function() return current:GetPositionLocked() end,
 		set = function(_, value) current:SetPositionLocked(value) end,
 	}
@@ -279,6 +279,26 @@ local function barDefinitions()
 			name = L["Delete Bar"],
 			confirm = function() return L["DeleteBar_Confirm"] end,
 			func = function() bar():DeleteBar() end,
+		},
+
+		--lock dragging on every bar at once
+		lockAllBars = {
+			type = "execute",
+			name = L["Lock All"],
+			func = function()
+				for _, other in pairs(Photon.bars) do
+					other:SetPositionLocked(true)
+				end
+			end,
+		},
+		unlockAllBars = {
+			type = "execute",
+			name = L["Unlock All"],
+			func = function()
+				for _, other in pairs(Photon.bars) do
+					other:SetPositionLocked(false)
+				end
+			end,
 		},
 
 		applyReload = {

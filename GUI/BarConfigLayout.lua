@@ -104,6 +104,10 @@ addonTable.barConfigLayout = {
 						{
 							{ id = "positionLocked", width = "normal" },
 						},
+						{
+							{ id = "lockAllBars", width = "half" },
+							{ id = "unlockAllBars", width = "half" },
+						},
 					}},
 					{ id = "anchorPoint", width = "half" },
 					{ id = "anchorRelativePoint", width = "half" },
