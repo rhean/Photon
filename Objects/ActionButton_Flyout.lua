@@ -98,7 +98,10 @@ local CLICK = [[
 local function updateCooldown(button)
 	local spell = button:GetAttribute("spell")
 	local info = spell and C_Spell.GetSpellCooldown(spell)
-	if info and info.duration > 0 then
+	if info and issecretvalue and issecretvalue(info.duration) then
+		--in combat the times are secret, so the cooldown reads them itself, see Button:SetSecretCooldown
+		button.Cooldown:SetCooldownFromDurationObject(C_Spell.GetSpellCooldownDuration(spell))
+	elseif info and info.duration > 0 then
 		button.Cooldown:SetCooldown(info.startTime, info.duration, info.modRate)
 	else
 		button.Cooldown:Clear()
@@ -114,6 +117,15 @@ local function newPopupButton(index)
 	button:SetNormalTexture("Interface\\Buttons\\UI-Quickslot2")
 	button:RegisterForClicks("AnyUp")
 	button:SetAttribute("type", "spell")
+
+	--dragging puts the spell on the cursor and leaves the popup as it is
+	button:RegisterForDrag("LeftButton")
+	button:SetScript("OnDragStart", function(self)
+		local spell = self:GetAttribute("spell")
+		if spell and not InCombatLockdown() then
+			C_Spell.PickupSpell(spell)
+		end
+	end)
 
 	--the secure click sets the spell, this follows it even in combat
 	button:SetScript("OnAttributeChanged", function(self, name, value)
