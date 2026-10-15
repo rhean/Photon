@@ -616,7 +616,7 @@ local function processKeyBinding(targetButton, key)
 					if targetButton ~= button and not button.keys.hotKeyLock then
 						button.keys.hotKeys:gsub("[^:]+", function(binding)
 							if key == binding then
-								local newkey = binding:gsub("%-", "%%-")
+								local newkey = binding:gsub("%p", "%%%0")
 								button.keys.hotKeys = button.keys.hotKeys:gsub(newkey..":", "")
 								button:ApplyBindings()
 							end
