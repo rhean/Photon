@@ -20,6 +20,15 @@ local function disableBarFrame(frame)
 	end
 end
 
+--Blizzards editmode triggers a error message when trying to move bars in combat
+local function disableEditModeFrame(frame)
+	if frame then
+		frame:UnregisterAllEvents()
+		RegisterAttributeDriver(frame, "state-visibility", "hide")
+		frame:SetAlpha(0)
+	end
+end
+
 local function disableButtonFrame(frame)
 	if frame then
 		frame:UnregisterAllEvents()
@@ -56,7 +65,7 @@ function Photon:HideBlizzardUI(profileDatabase)
 
 		--disable main blizzard bar and graphics
 		disableBarFrame(MainMenuBar)
-		disableBarFrame(MainActionBar)
+		disableEditModeFrame(MainActionBar)
 		disableBarFrame(MainMenuBarArtFrame)
 		disableBarFrame(MainMenuBarArtFrameBackground)
 		disableFrameSlidingAnimation(MainMenuBar)
