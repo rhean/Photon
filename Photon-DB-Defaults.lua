@@ -299,6 +299,8 @@ addonTable.databaseDefaults = {
 
 		mouseOverMod= "NONE",
 
+		fallbackOrder = "state",
+
 		firstRun = true,
 
 		PhotonItemCache = {},

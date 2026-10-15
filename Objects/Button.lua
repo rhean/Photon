@@ -349,6 +349,8 @@ function Button:LoadDataFromDatabase(curSpec, curState)
 			self:SetAttribute(state.."-blank", data.forceBlank or nil)
 		end
 
+		self:SetAttribute("fallbackOrder", Photon.db.profile.fallbackOrder)
+
 		--for states with no data anywhere
 		local fallback = self:GetResolvedData("homestate")
 		self:SetAttribute("fallback-macro_Text", hasMacro(fallback) and not fallback.forceBlank and fallback.macro_Text or nil)
@@ -425,7 +427,7 @@ function Button:HasOwnTree(statedata)
 end
 
 ---the data a state shows: its own, the spec's homestate, the default tree's same state, then its homestate.
----stance1_alt1 tries alt1, then stance1
+---stance1_alt1 tries alt1, then stance1 (the other way round with fallbackOrder "stance")
 ---@param state string
 ---@param statedata? table @a spec's states, the loaded spec when left out
 ---@return GenericSpecData
@@ -442,11 +444,15 @@ function Button:GetResolvedData(state, statedata)
 	if page then
 		local form, secondary = onPage:match("^(%a+%d+)_(.+)$")
 		if form then
-			local plain = rawget(statedata, page.."_"..secondary)
+			local first, second = page.."_"..secondary, page.."_"..form
+			if Photon.db.profile.fallbackOrder == "stance" then
+				first, second = second, first
+			end
+			local plain = rawget(statedata, first)
 			if hasMacro(plain) then
 				return plain
 			end
-			return self:GetResolvedData(page.."_"..form, statedata)
+			return self:GetResolvedData(second, statedata)
 		end
 		if onPage ~= "homestate" then
 			return self:GetResolvedData(page.."_homestate", statedata)
@@ -456,11 +462,16 @@ function Button:GetResolvedData(state, statedata)
 
 	local form, secondary = state:match("^(%a+%d+)_(.+)$")
 	if form then
-		local plain = rawget(statedata, secondary)
+		--the profile's fallbackOrder picks whether alt1 or stance1 comes first
+		local first, second = secondary, form
+		if Photon.db.profile.fallbackOrder == "stance" then
+			first, second = form, secondary
+		end
+		local plain = rawget(statedata, first)
 		if hasMacro(plain) then
 			return plain
 		end
-		return self:GetResolvedData(form, statedata)
+		return self:GetResolvedData(second, statedata)
 	end
 
 	local specHome = rawget(statedata, "homestate")

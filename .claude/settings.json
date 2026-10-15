@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk 'NR>=290&&NR<=320' Objects/Button.lua)"
+    ]
+  }
+}

@@ -39,7 +39,7 @@ end
 local function guiOptions()
 	local DB = Photon.db.profile
 	local changes = CopyTable(DB.blizzBars)
-	local args = {
+	local blizzArgs = {
 		RevertButton = {
 			order = 3,
 			name = L["Revert"],
@@ -71,7 +71,7 @@ local function guiOptions()
 	for bar, _ in pairs(changes) do
 		--skip bars that aren't registered on this client, like the vehicle exit bar on Forever
 		if Photon.registeredBarData[bar] then
-		args[bar] = {
+		blizzArgs[bar] = {
 			order = 2,
 			name = Photon.registeredBarData[bar].barLabel,
 			desc = L["Shows / Hides the Default Blizzard UI"],
@@ -97,19 +97,28 @@ local function guiOptions()
 			open(PhotonGUI)
 		end
 	end
-	args.BarConfig = {
-		order = -2,
-		name = L["Bar Config"],
-		type = "execute",
-		disabled = InCombatLockdown,
-		func = openEditor(PhotonGUI.OpenBarConfig),
-	}
-	args.ButtonEditor = {
-		order = -1,
-		name = L["Button Editor"],
-		type = "execute",
-		disabled = InCombatLockdown,
-		func = openEditor(PhotonGUI.OpenButtonEditor),
+	local args = {}
+	--its own box between the general options and the Blizzard UI
+	args.Editors = {
+		order = 0.9,
+		name = L["Editors"],
+		type = "group",
+		args = {
+			BarConfig = {
+				order = 1,
+				name = L["Bar Config"],
+				type = "execute",
+				disabled = InCombatLockdown,
+				func = openEditor(PhotonGUI.OpenBarConfig),
+			},
+			ButtonEditor = {
+				order = 2,
+				name = L["Button Editor"],
+				type = "execute",
+				disabled = InCombatLockdown,
+				func = openEditor(PhotonGUI.OpenButtonEditor),
+			},
+		},
 	}
 
 	args.PhotonMinimapButton = {
@@ -121,11 +130,45 @@ local function guiOptions()
 		get = function() return not DB.PhotonIcon.hide end,
 		width = "full"
 	}
+	--what an empty secondary state in a stance (stance1_alt1) shows first, see Button:GetResolvedData
+	args.FallbackOrder = {
+		order = 0.5,
+		name = L["Fallback Order"],
+		desc = L["FallbackOrder_Desc"],
+		type = "select",
+		values = {state = L["State (Modifier)"], stance = L["Stance"]},
+		sorting = {"state", "stance"},
+		spaceBefore = 8,
+		spaceAfter = 8,
+		hidden = function() return GetNumShapeshiftForms() < 2 end,
+		disabled = InCombatLockdown,
+		get = function() return DB.fallbackOrder end,
+		set = function(_, value)
+			if InCombatLockdown() then
+				return
+			end
+			DB.fallbackOrder = value
+			for _, bar in pairs(Photon.bars) do
+				if bar.class == "ActionBar" then
+					for _, button in ipairs(bar.buttons) do
+						button:RefreshStateData()
+					end
+					--re-run the state so the buttons pick their macro again, like Bar:UpdateStanceRemap
+					if bar.stance and bar.stance.registered then
+						bar:ClearStates(bar.handler, "stance")
+						bar:UpdateStates(bar.handler)
+					end
+				end
+			end
+		end,
+	}
+	--its own box below the general options
 	args.PhotonOverrides = {
 		name = L["Display the Blizzard UI"],
 		desc = L["Shows / Hides the Default Blizzard UI"],
-		type = "header",
+		type = "group",
 		order = 1,
+		args = blizzArgs,
 	}
 	return {
 		name = L["Options"],
@@ -363,9 +406,11 @@ local function createPanel(options)
 						local kind = option.type == "input" and option.multiline and "multiline" or option.type
 						local full = option.width == "full" or kind == "description" or kind == "header" or kind == "multiline"
 						local controlWidth = full and inner or math.min(inner, NORMAL_WIDTH * (tonumber(option.width) or WIDTHS[option.width] or 1))
-						if full or lineWidth + controlWidth > inner then
+						if full or option.spaceBefore or lineWidth + controlWidth > inner then
 							endLine()
 						end
+
+						top = top + (option.spaceBefore or 0)
 
 						local control = acquire(kind, adapted)
 						control:SetParent(box)
@@ -375,8 +420,9 @@ local function createPanel(options)
 						control.x = lineWidth
 						table.insert(line, control)
 						lineWidth = lineWidth + controlWidth + Style.gap
-						if full then
+						if full or option.spaceAfter then
 							endLine()
+							top = top + (option.spaceAfter or 0)
 						end
 					end
 				end
