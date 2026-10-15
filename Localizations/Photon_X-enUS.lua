@@ -172,6 +172,8 @@ L["ButtonEditor_IconDesc"] = "Click to choose an icon for this page."
 L["ButtonEditor_LabelDesc"] = "Text shown on the button when the bar's Button Label option is on."
 L["ButtonEditor_ResetIconDesc"] = "Goes back to the macro's own icon instead of the one you picked."
 L["ButtonEditor_RemovePageDesc"] = "Removes the selected condition page from this row of buttons."
+L["ButtonEditor_AllForms"] = "Expand"
+L["ButtonEditor_AllFormsDesc"] = "Shows Default and every {form} next to each other instead of in tabs."
 
 L["Toggle Keybind Mode"] = true
 L["Open the Interface Menu"] = true
