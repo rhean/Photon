@@ -71,6 +71,7 @@ function Bar.new(class, barID)
 	newBar:SetWidth(375)
 	newBar:SetHeight(40)
 	newBar:EnableKeyboard(false)
+	newBar:SetClampedToScreen(true)
 
 	newBar:SetScript("OnShow", function(self) self:OnShow() end)
 	newBar:SetScript("OnHide", function(self) self:OnHide() end)

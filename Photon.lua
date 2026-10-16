@@ -158,6 +158,9 @@ function Photon:OnEnable()
 	Photon:RegisterEvent("CHARACTER_POINTS_CHANGED")
 	Photon:RegisterEvent("LEARNED_SPELL_IN_SKILL_LINE")
 	Photon:RegisterEvent("UPDATE_SHAPESHIFT_FORMS")
+	--blizzard's bars can come back when a cinematic or movie ends
+	Photon:RegisterEvent("CINEMATIC_STOP", "RehideBlizzardUI")
+	Photon:RegisterEvent("STOP_MOVIE", "RehideBlizzardUI")
 
 	Photon:UpdateStanceStrings()
 
@@ -239,6 +242,20 @@ function Photon:PLAYER_ENTERING_WORLD()
 		TitanUtils_AddonAdjust("MainMenuBar", true)
 	end
 
+	Photon:HideBlizzardUI(DB)
+end
+
+local rehideWaiter = CreateFrame("Frame")
+rehideWaiter:SetScript("OnEvent", function(self)
+	self:UnregisterAllEvents()
+	Photon:HideBlizzardUI(DB)
+end)
+
+function Photon:RehideBlizzardUI()
+	if InCombatLockdown() then
+		rehideWaiter:RegisterEvent("PLAYER_REGEN_ENABLED")
+		return
+	end
 	Photon:HideBlizzardUI(DB)
 end
 

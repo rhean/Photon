@@ -112,9 +112,13 @@ function Photon:RegisterBars(DB)
     },
   }
 
-  --Forever, Classic Era and TBC have no vehicles, extra action buttons or zone abilities
-  if Photon.isWoWForever or Photon.isWoWClassicEra or Photon.isWoWTBC then
+  --Classic Era and TBC have no vehicles
+  if Photon.isWoWClassicEra or Photon.isWoWTBC then
     allBars.ExitBar = nil
+  end
+
+  --Forever, Classic Era and TBC have no extra action buttons or zone abilities
+  if Photon.isWoWForever or Photon.isWoWClassicEra or Photon.isWoWTBC then
     allBars.ExtraBar = nil
     allBars.ZoneAbilityBar = nil
   end

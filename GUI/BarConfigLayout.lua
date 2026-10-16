@@ -193,6 +193,14 @@ addonTable.barConfigLayout = {
 			}},
 		}},
 		{ id = "visibility", name = "Bar Conditions", groups = {
+			{ id = "replacements", name = "Replacements", rows = {
+				{
+					{ id = "state_vehicle", width = "normal" },
+					{ id = "state_possess", width = "normal" },
+					{ id = "state_override", width = "normal" },
+					{ id = "state_dragonriding", width = "normal" },
+				},
+			}},
 			{ id = "states", name = "Activate a page for these conditions", rows = {
 				{
 					{ id = "statesBox1", box = true, name = "", light = true, width = "full", rows = {
@@ -227,16 +235,6 @@ addonTable.barConfigLayout = {
 						{
 							{ id = "state_mounted", width = "normal" },
 							{ id = "state_swimming", width = "normal" },
-						},
-					}},
-				},
-				{
-					{ id = "statesBox5", box = true, name = "", light = true, width = "full", rows = {
-						{
-							{ id = "state_vehicle", width = "normal" },
-							{ id = "state_possess", width = "normal" },
-							{ id = "state_override", width = "normal" },
-							{ id = "state_dragonriding", width = "normal" },
 						},
 					}},
 				},
