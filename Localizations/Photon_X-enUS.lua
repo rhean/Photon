@@ -172,6 +172,8 @@ L["ButtonEditor_IconDesc"] = "Click to choose an icon for this page."
 L["ButtonEditor_LabelDesc"] = "Text shown on the button when the bar's Button Label option is on."
 L["ButtonEditor_ResetIconDesc"] = "Goes back to the macro's own icon instead of the one you picked."
 L["ButtonEditor_RemovePageDesc"] = "Removes the selected condition page from this row of buttons."
+L["ButtonEditor_AllForms"] = "Expand"
+L["ButtonEditor_AllFormsDesc"] = "Shows Default and every {form} next to each other instead of in tabs."
 
 L["Toggle Keybind Mode"] = true
 L["Open the Interface Menu"] = true
@@ -310,7 +312,9 @@ L["Anchor To"] = true
 L["Screen"] = true
 L["Bar Point"] = true
 L["Target Point"] = true
-L["Lock Dragging"] = true
+L["Bar Lock"] = true
+L["Lock All"] = true
+L["Unlock All"] = true
 
 L["Preset Action States"] = true
 L["Custom Action States"] = true
@@ -513,6 +517,8 @@ L["BarDesc_StanceWord"] = "stance" --warrior, monk and the rest
 
 -- General Configuration
 L["BarDesc_deleteBar"] = "Permanently deletes this bar and all the buttons on it."
+L["BarDesc_lockAllBars"] = "Lock mouse dragging for every bar."
+L["BarDesc_unlockAllBars"] = "Unlock mouse dragging for every bar."
 
 -- Enabled Functions
 L["BarDesc_multiSpec"] = "Gives each specialization its own set of buttons."

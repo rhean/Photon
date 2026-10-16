@@ -28,15 +28,18 @@ local render
 local selected = {}
 
 --what is on show: pages in order, their editors by page and the modifiers that can be added
-local view = {pages = {}, editors = {}, available = {}}
+local view = {pages = {}, editors = {}, available = {}, column = {}, row = {}}
 
 --modifier pages folded by hand, for the same button, spec, action bar page and tab. the rest fold when empty
 local expanded, expandedFor = {}, nil
 
 --made with the window, see createWindow
 local specRow, specLabel, specDropdown, helpButton, pageTabs, tabs, body, emptyText
-local addButton, removeButton, rowPool
-local editors, editorPool
+local addButton, removeButton, expandButton, rowPool
+local left, editors, editorPool
+
+--the window's width before side by side widened it
+local narrowWidth
 
 --blizzard's action bars take over the buttons in these, so there is no macro to edit
 local ACTION_BAR_STATES = {vehicle = true, dragonriding = true, possess = true, override = true, extrabar = true}
@@ -509,6 +512,56 @@ end
 local function layoutEditors()
 	local width = editors:GetContentWidth()
 	local y = 0
+
+	--side by side, a column per form, each row as tall as its tallest editor
+	if view.columns then
+		local columnWidth = math.floor((width - Style.gap * (view.columns - 1)) / view.columns)
+		local rows = {}
+		for _, page in ipairs(view.pages) do
+			local row = view.row[page]
+			rows[row] = rows[row] or {}
+			table.insert(rows[row], page)
+		end
+		--a line across the columns between rows, in the middle of a wider gap
+		view.dividers = view.dividers or {}
+		for _, divider in ipairs(view.dividers) do
+			divider:Hide()
+		end
+		local rowGap = Style.gap * 3
+		for index, rowPages in ipairs(rows) do
+			if index > 1 then
+				local divider = view.dividers[index - 1]
+				if not divider then
+					divider = editors.child:CreateTexture(nil, "ARTWORK")
+					divider:SetColorTexture(0.3, 0.3, 0.3, 1)
+					divider:SetHeight(1)
+					view.dividers[index - 1] = divider
+				end
+				divider:ClearAllPoints()
+				divider:SetPoint("TOPLEFT", 0, -(y - math.ceil(rowGap / 2)))
+				divider:SetPoint("TOPRIGHT", 0, -(y - math.ceil(rowGap / 2)))
+				divider:Show()
+			end
+			local height = 0
+			for _, page in ipairs(rowPages) do
+				local editor = view.editors[page]
+				editor:ClearAllPoints()
+				editor:SetPoint("TOPLEFT", (view.column[page] - 1) * (columnWidth + Style.gap), -y)
+				editor:SetWidth(columnWidth)
+				editor.offset = y
+				height = math.max(height, layoutPageEditor(editor, columnWidth))
+			end
+			y = y + height + rowGap
+		end
+		editors:SetContentHeight(math.max(0, y - rowGap))
+		return
+	end
+
+	--tabs have no rows
+	for _, divider in ipairs(view.dividers or {}) do
+		divider:Hide()
+	end
+
 	for _, page in ipairs(view.pages) do
 		local editor = view.editors[page]
 		editor:ClearAllPoints()
@@ -644,11 +697,11 @@ end
 
 -------------------------------- tab --------------------------------
 
----the tab's own page, then one per modifier the row uses. actionPages is empty on a bar without pages
-local function fillTab(button, specIndex, specName, forms, modifiers, actionPages)
+---the tab's own page, then one per modifier the row uses. actionPages is empty on a bar without pages.
+---side by side, column is the tab's place and the pages add to the ones on show
+local function fillTab(button, specIndex, specName, forms, modifiers, actionPages, tab, column)
 	local bar = button.bar
 	local multiSpec = bar:GetMultiSpec()
-	local tab = selected.tab
 	local actionPage = selected.actionPage
 	local tabStates = {"homestate", unpack(forms)}
 
@@ -713,9 +766,13 @@ local function fillTab(button, specIndex, specName, forms, modifiers, actionPage
 			table.insert(view.available, modifier)
 		end
 	end
-	view.pages = pages
+	for index, page in ipairs(pages) do
+		table.insert(view.pages, page)
+		view.column[page] = column
+		view.row[page] = index
+	end
 
-	if not tContains(pages, selected.page) then
+	if not column and not tContains(pages, selected.page) then
 		selected.page = pages[1]
 	end
 
@@ -733,8 +790,9 @@ local function fillTab(button, specIndex, specName, forms, modifiers, actionPage
 	end
 
 	-------------------------------- page list --------------------------------
+	--side by side has no page list
 	local previous
-	for _, page in ipairs(pages) do
+	for _, page in ipairs(column and {} or pages) do
 		local item = rowPool:Acquire()
 		item.page = page
 		--the tab already names the form
@@ -780,9 +838,6 @@ local function fillTab(button, specIndex, specName, forms, modifiers, actionPage
 		editor.onRemove = onRemove
 		view.editors[page] = editor
 	end
-
-	layoutEditors()
-	selectPage(selected.page, true)
 end
 
 -------------------------------- window --------------------------------
@@ -804,11 +859,20 @@ local function placeBody()
 		end
 	end
 	--the last tab on the tab row over the pages, or left of remove without tabs. it shows with what it sits on
+	--expand is a tab before ?, it only shows with the forms' tabs
+	expandButton:SetParent(tabs)
+	expandButton:ClearAllPoints()
+	local helpAfter = lastTabRow and lastTabRow.lastTab
+	if lastTabRow == tabs then
+		expandButton:SetHeight(tabs.lastTab:GetHeight())
+		expandButton:SetPoint("LEFT", tabs.lastTab, "RIGHT", 2, 0)
+		helpAfter = expandButton
+	end
 	helpButton:ClearAllPoints()
 	if lastTabRow then
 		helpButton:SetParent(lastTabRow)
 		helpButton:SetHeight(lastTabRow.lastTab:GetHeight())
-		helpButton:SetPoint("LEFT", lastTabRow.lastTab, "RIGHT", 2, 0)
+		helpButton:SetPoint("LEFT", helpAfter, "RIGHT", 2, 0)
 	else
 		helpButton:SetParent(specRow)
 		helpButton:SetHeight(Style.rowHeight)
@@ -885,6 +949,44 @@ local function createWindow()
 	removeButton:SetPoint("RIGHT")
 	addTooltip(removeButton, L["Remove page"], L["ButtonEditor_RemovePageDesc"])
 
+	--a tab like the forms' that shows default and every form side by side, open while it is on.
+	--a form's tab goes back to tabs, see the tabs' onSelect
+	expandButton = CreateFrame("Button", nil, specRow)
+	Style.Flat(expandButton, Style.strip)
+	--gold like ?, open or not
+	expandButton.label = UI.Text(expandButton, nil, Style.accent)
+	expandButton.label:SetPoint("CENTER", 0, 1)
+	expandButton.label:SetText(L["ButtonEditor_AllForms"])
+	expandButton:SetWidth(expandButton.label:GetStringWidth() + 24)
+	expandButton.opening = expandButton:CreateTexture(nil, "OVERLAY")
+	expandButton.opening:SetColorTexture(unpack(Style.window))
+	expandButton.opening:SetPoint("BOTTOMLEFT", 1, 0)
+	expandButton.opening:SetPoint("BOTTOMRIGHT", -1, 0)
+	expandButton.opening:SetHeight(1)
+	local expandHover = expandButton:CreateTexture(nil, "HIGHLIGHT")
+	expandHover:SetAllPoints()
+	expandHover:SetColorTexture(unpack(Style.hover))
+	function expandButton:SetOpen(open)
+		self.photonFlat.bg:SetColorTexture(unpack(open and Style.window or Style.strip))
+		self.opening:SetShown(open)
+	end
+	expandButton:SetScript("OnClick", function()
+		if not selected.allForms then
+			selected.allForms = true
+			selected.page = nil
+			render()
+		end
+	end)
+	expandButton:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+		GameTooltip:SetText(L["ButtonEditor_AllForms"], 1, 1, 1)
+		GameTooltip:AddLine((L["ButtonEditor_AllFormsDesc"]:gsub("{form}", addonTable.optionDefinitions.formWord())), nil, nil, nil, true)
+		GameTooltip:Show()
+	end)
+	expandButton:SetScript("OnLeave", function()
+		GameTooltip:Hide()
+	end)
+
 	--how default works on hover, placed with the tabs, see placeBody
 	helpButton = CreateFrame("Button", nil, specRow)
 	Style.Flat(helpButton, Style.strip)
@@ -947,6 +1049,7 @@ local function createWindow()
 	-------------------------------- default and forms --------------------------------
 	tabs = UI.Tabs(content, function(value)
 		selected.tab = value
+		selected.allForms = nil
 		selected.page = nil
 		render()
 	end)
@@ -954,7 +1057,7 @@ local function createWindow()
 	body = CreateFrame("Frame", nil, content)
 
 	-------------------------------- page list --------------------------------
-	local left = UI.Box(body)
+	left = UI.Box(body)
 	left.strip:Hide()
 	left:SetPoint("TOPLEFT")
 	left:SetPoint("BOTTOMLEFT")
@@ -965,7 +1068,6 @@ local function createWindow()
 
 	-------------------------------- macros --------------------------------
 	editors = UI.ScrollArea(body)
-	editors:SetPoint("TOPLEFT", left, "TOPRIGHT", Style.padding, 0)
 	editors:SetPoint("BOTTOMRIGHT")
 	editorPool = UI.Pool(function()
 		return createPageEditor(editors.child)
@@ -995,7 +1097,10 @@ function render()
 	rowPool:ReleaseAll()
 	editorPool:ReleaseAll()
 	wipe(view.editors)
+	wipe(view.column)
+	wipe(view.row)
 	view.pages = {}
+	view.columns = nil
 
 	local button = Photon.currentButton
 	if not button or button.bar.class ~= "ActionBar" then
@@ -1084,26 +1189,65 @@ function render()
 		selected.tab = "homestate"
 	end
 
+	local sideBySide = selected.allForms and #forms > 0
+	expandButton:SetOpen(sideBySide)
+
+	--the window widens to fit the columns, and goes back after
+	if sideBySide then
+		narrowWidth = narrowWidth or window:GetWidth()
+		local wanted = math.min(40 + (#forms + 1) * 280, UIParent:GetWidth())
+		if window:GetWidth() < wanted then
+			window:SetWidth(wanted)
+		end
+	elseif narrowWidth then
+		window:SetWidth(narrowWidth)
+		narrowWidth = nil
+	end
+
+	left:SetShown(not sideBySide)
+	editors:ClearAllPoints()
+	editors:SetPoint("BOTTOMRIGHT")
+	if sideBySide then
+		editors:SetPoint("TOPLEFT")
+	else
+		editors:SetPoint("TOPLEFT", left, "TOPRIGHT", Style.padding, 0)
+	end
+
+	--side by side no form's tab is open, expand is
 	if #forms > 0 then
 		--with a pet bar the default is what shows without a pet
 		local tabList = {{text = bar.data.pet and L["No Pet"] or L["Default"], value = "homestate"}}
 		for _, form in ipairs(forms) do
 			table.insert(tabList, {text = stateName(form), value = form})
 		end
-		tabs:SetTabs(tabList, selected.tab)
+		tabs:SetTabs(tabList, not sideBySide and selected.tab or nil)
 		tabs:Show()
 	else
 		tabs:Hide()
 	end
 
-	local context = tostring(button)..":"..tostring(spec.index)..":"..tostring(selected.actionPage)..":"..selected.tab
+	local context = tostring(button)..":"..tostring(spec.index)..":"..tostring(selected.actionPage)..":"..(sideBySide and "all" or selected.tab)
 	if context ~= expandedFor then
 		wipe(expanded)
 		expandedFor = context
 	end
 
 	placeBody()
-	fillTab(button, spec.index, spec.name, forms, modifiers, actionPages)
+	if sideBySide then
+		local tabStates = {"homestate", unpack(forms)}
+		view.columns = #tabStates
+		for column, tab in ipairs(tabStates) do
+			fillTab(button, spec.index, spec.name, forms, modifiers, actionPages, tab, column)
+		end
+		if not tContains(view.pages, selected.page) then
+			selected.page = view.pages[1]
+		end
+	else
+		fillTab(button, spec.index, spec.name, forms, modifiers, actionPages, selected.tab)
+	end
+
+	layoutEditors()
+	selectPage(selected.page, true)
 end
 
 function PhotonGUI:OpenButtonEditor()
