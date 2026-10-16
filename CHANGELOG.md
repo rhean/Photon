@@ -1,3 +1,15 @@
+## 0.3
+
+### New
+- "Lock All" and "Unlock All" buttons in the bar options, to lock or unlock every bar at once.
+- Button editor: new Expand option that shows every stance or form side by side instead of in tabs, giving you a full overview of what a button does.
+- The replacement bars (vehicle, possess, override and dragonriding) now have their own Replacements category in Bar Conditions, to make it clear which bars have special functions.
+- Vehicle bars are back on Forever. The game has keybinds for them, so we can assume vehicles will be used in some form.
+
+### Fixes
+- Fixed the default action bars sometimes becoming visible after a cinematic.
+- Bars with more than one column no longer squash their buttons together when placed at the edge of the screen.
+
 ## 0.2.5
 
 ### New
