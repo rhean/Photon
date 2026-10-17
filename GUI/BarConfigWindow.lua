@@ -901,6 +901,14 @@ function render()
 	local offset = scroll:GetVerticalScroll()
 	releaseAll()
 
+	--a bar is always selected while there is one, the first in the picker's order
+	if not Photon.currentBar then
+		local first = barItems()[1]
+		if first then
+			Photon.Bar.ChangeSelectedBar(first.value)
+		end
+	end
+
 	local bar = Photon.currentBar
 	local defs = addonTable.optionDefinitions
 
