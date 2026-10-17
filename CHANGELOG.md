@@ -1,3 +1,15 @@
+## 0.4
+
+### New
+- The Button Backdrop colour can now be changed, to tint the border around action bar buttons.
+- The Icon Tint can now be changed, to change the overlay colour on action bar buttons.
+- It's now possible to override the visuals of individual buttons. The bar config has a button to reset all the buttons on its bar.
+
+### Fixes and Tweaks
+- The default cast bar and mirror timers (breath, fatigue) are now hidden the same way as the other default bars.
+- The bar editor now always has a bar selected when it opens.
+- The editors have lighter backgrounds, grey buttons, a brighter selection highlight on bars and easier-to-read checkboxes.
+
 ## 0.3
 
 ### New
