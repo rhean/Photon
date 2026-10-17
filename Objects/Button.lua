@@ -632,12 +632,26 @@ function Button:UpdateNormalTexture()
 		noactionTexture = "Interface\\Buttons\\UI-Quickslot"
 	end
 
+	local color = self.bar:GetSlotColor()
 	if self:HasAction() then
 		self:SetNormalTexture(actionTexture or "")
-		self:GetNormalTexture():SetVertexColor(1,1,1,1)
+		self:GetNormalTexture():SetVertexColor(color[1],color[2],color[3],1)
 	else
 		self:SetNormalTexture(noactionTexture or "")
-		self:GetNormalTexture():SetVertexColor(1,1,1,0.5)
+		self:GetNormalTexture():SetVertexColor(color[1],color[2],color[3],0.5)
+	end
+
+	--the thicker inner border, over the icon. not with a Masque skin, that draws its own
+	if self.SlotInner then
+		self.SlotInner:SetShown(self:HasAction() and not self.__MSQ_NormalSkin)
+		self.SlotInner:SetVertexColor(color[1],color[2],color[3],1)
+	end
+
+	if self.IconTint then
+		local tint = self.bar:GetIconTint()
+		self.IconTint:SetShown(self:HasAction())
+		self.IconTint:SetColorTexture(tint[1],tint[2],tint[3],1)
+		self.IconTint:SetBlendMode("MOD")
 	end
 end
 

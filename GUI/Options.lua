@@ -262,6 +262,21 @@ local function barDefinitions()
 		cooldownCounter = barToggle(L["CD Counter"], "GetShowCooldownText", "SetShowCooldownText", unlessOption("visualOptions", "CDTEXT")),
 		cooldownColor1 = barColor(L["Color"], "GetCooldownColor1", "SetCooldownColor1", unlessOption("visualOptions", "CDTEXT")),
 		cooldownColor2 = barColor(L["Last 5s"], "GetCooldownColor2", "SetCooldownColor2", unlessOption("visualOptions", "CDTEXT")),
+		slotColor = barColor(L["Color"], "GetSlotColor", "SetSlotColor", unlessOption("visualOptions", "SLOTCOLOR")),
+		iconTint = barColor(L["Color"], "GetIconTint", "SetIconTint", unlessOption("visualOptions", "SLOTCOLOR")),
+		--back to white, which leaves the slot art and icon as they are
+		slotColorClear = {
+			type = "execute",
+			name = L["Clear"],
+			hidden = unlessOption("visualOptions", "SLOTCOLOR"),
+			func = function() bar():SetSlotColor() end,
+		},
+		iconTintClear = {
+			type = "execute",
+			name = L["Clear"],
+			hidden = unlessOption("visualOptions", "SLOTCOLOR"),
+			func = function() bar():SetIconTint() end,
+		},
 		cooldownAlpha = barToggle(L["Fade on Cooldown"], "GetShowCooldownAlpha", "SetShowCooldownAlpha", unlessOption("visualOptions", "CDALPHA")),
 		spellAlerts = barSelect(L["Spell Alerts"],
 			{none = L["None"], alternate = L["Subdued Alert"], default = L["Default Alert"]},

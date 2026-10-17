@@ -315,6 +315,7 @@ L["Target Point"] = true
 L["Bar Lock"] = true
 L["Lock All"] = true
 L["Unlock All"] = true
+L["Clear"] = true
 
 L["Preset Action States"] = true
 L["Custom Action States"] = true

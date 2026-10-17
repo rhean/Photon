@@ -212,6 +212,8 @@ local genericBarData = {
 	cdcolor1 = {1,0.82,0},
 	cdcolor2 = {1,0.1,0.1},
 	rangecolor = {0.7,0.15,0.15},
+	slotColor = {1,1,1},
+	iconTint = {1,1,1},
 	manacolor = {0.5,0.5,1.0},
 
 	border = true,

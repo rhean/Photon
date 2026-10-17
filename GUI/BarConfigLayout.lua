@@ -177,6 +177,22 @@ addonTable.barConfigLayout = {
 					}},
 				},
 				{
+					{ id = "slotColorBox", box = true, name = "", light = true, width = 1.5, rows = {
+						{
+							{ text = "Button Backdrop", width = 0.75 },
+							{ id = "slotColor", width = "half" },
+							{ id = "slotColorClear", width = "half" },
+						},
+					}},
+					{ id = "iconTintBox", box = true, name = "", light = true, width = 1.5, rows = {
+						{
+							{ text = "Icon Tint", width = 0.75 },
+							{ id = "iconTint", width = "half" },
+							{ id = "iconTintClear", width = "half" },
+						},
+					}},
+				},
+				{
 					{ id = "tooltipsBox", box = true, name = "", light = true, width = 1.5, rows = {
 						{
 							{ id = "tooltips", width = 1.5 },

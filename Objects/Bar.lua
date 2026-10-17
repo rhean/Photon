@@ -1887,6 +1887,40 @@ function Bar:GetBindColor()
 	return self.data.bindColor
 end
 
+--the tint of the square slot art behind each button's icon.
+function Bar:SetSlotColor(option)
+	if option then
+		self.data.slotColor = option
+	else
+		self.data.slotColor = {1,1,1,1}
+	end
+
+	for _, button in pairs(self.buttons) do
+		button:UpdateNormalTexture()
+	end
+end
+
+function Bar:GetSlotColor()
+	return self.data.slotColor
+end
+
+--multiplied over each button's icon.
+function Bar:SetIconTint(option)
+	if option then
+		self.data.iconTint = option
+	else
+		self.data.iconTint = {1,1,1,1}
+	end
+
+	for _, button in pairs(self.buttons) do
+		button:UpdateNormalTexture()
+	end
+end
+
+function Bar:GetIconTint()
+	return self.data.iconTint
+end
+
 function Bar:SetShowButtonText(checked)
 	if checked then
 		self.data.buttonText = true
