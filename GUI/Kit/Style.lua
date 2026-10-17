@@ -11,8 +11,8 @@ local _, addonTable = ...
 --colors are {r, g, b, a}
 
 local Style = {
-	window = {0.15, 0.15, 0.16, 0.96},
-	panel = {0.12, 0.12, 0.13, 1},
+	window = {0.21, 0.21, 0.22, 0.96},
+	panel = {0.16, 0.16, 0.17, 1},
 	panelLight = {0.19, 0.19, 0.2, 1},
 	box = {0.13, 0.13, 0.14, 1},
 	strip = {0.1, 0.1, 0.11, 1},

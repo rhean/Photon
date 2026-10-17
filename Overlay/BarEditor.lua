@@ -31,7 +31,7 @@ local function updateAppearance(overlay)
 	if concealed and overlay.active then
 		overlay.frame:SetBackdropColor(1,0,0,0.6)
 	elseif not concealed and overlay.active then
-		overlay.frame:SetBackdropColor(0,0,1,0.5)
+		overlay.frame:SetBackdropColor(0.15,0.35,1,0.6)
 	elseif concealed and not overlay.active then
 		overlay.frame:SetBackdropColor(1,0,0,0.4)
 	elseif not concealed and not overlay.active then

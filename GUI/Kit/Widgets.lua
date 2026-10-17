@@ -49,13 +49,16 @@ function UI.Text(parent, font, color)
 end
 
 ---@param onClick? fun(button: Button)
----blizzard's red panel button
+---blizzard's red panel button, in grayscale
 function UI.Button(parent, text, onClick)
 	local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
 	button:SetHeight(Style.rowHeight)
 
 	for _, texture in ipairs({button.Left, button.Middle, button.Right, button:GetHighlightTexture()}) do
-		texture:SetDesaturation(0.7)
+		texture:SetDesaturated(true)
+	end
+	for _, texture in ipairs({button.Left, button.Middle, button.Right}) do
+		texture:SetVertexColor(0.7, 0.6, 0.6)
 	end
 
 	button:SetScript("OnClick", onClick)
