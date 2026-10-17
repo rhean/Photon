@@ -266,15 +266,24 @@ function Bar:DeleteBar()
 	end
 end
 
+function Bar:GetShownButtons()
+	return self.data.shownButtons or #self.data.buttons
+end
+
 function Bar:AddObjectToBar() --called from PhotonGUI
 	local id = #self.buttons + 1
 
 	if #self.buttons < self.objMax then
 		local buttonBaseObject = Photon.registeredBarData[self.class].objTemplate
-		buttonBaseObject.new(self, id)
+		buttonBaseObject.new(self, id) --takes the saved button back when the bar had one there
 	end
+	self.data.shownButtons = #self.buttons
 
 	self:LoadObjects()
+	--a button taken back gets its saved keys working again, buttons only bind them on login otherwise
+	if self.buttons[id] then
+		self.buttons[id]:ApplyBindings()
+	end
 	self:SetObjectLoc()
 	self:SetPerimeter()
 	self:SetSize()
@@ -292,12 +301,10 @@ function Bar:RemoveObjectFromBar() --called from PhotonGUI
 
 		object:ClearAllPoints()
 
-		table.remove(self.data.buttons, id) --this is somewhat redundant if deleting a bar, but it doesn't hurt and is important for individual button deletions
+		--its data stays in data.buttons for when the bar grows again. its keys stop working, they are kept with it
 		table.remove(self.buttons, id)
-
-		if object.binder then
-			object.binder:KeybindOverlay_ClearBindings()
-		end
+		self.data.shownButtons = #self.buttons
+		ClearOverrideBindings(object)
 
 		--edit overlays are parented to UIParent, so they would stay on screen after the button is trashed
 		if object.editFrame then

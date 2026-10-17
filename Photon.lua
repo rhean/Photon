@@ -641,6 +641,15 @@ local function processKeyBinding(targetButton, key)
 					end
 				end
 			end
+
+			--the buttons a bar keeps after shrinking have no frame, the key moves from their saved keys too
+			local escaped = key:gsub("%p", "%%%0")
+			for index = #bar.buttons + 1, #bar.data.buttons do
+				local keys = bar.data.buttons[index].keys
+				if keys and keys.hotKeys and not keys.hotKeyLock then
+					keys.hotKeys = keys.hotKeys:gsub(":"..escaped..":", ":")
+				end
+			end
 		end
 
 		--search the current hotKeys to see if our new key is missing, and if so add it
