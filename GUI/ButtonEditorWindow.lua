@@ -633,50 +633,67 @@ local function bindPageEditor(editor, button, specIndex, specName, page, collaps
 		local data = button:GetResolvedData(page, specData)
 		editor.icon:SetTexture(not data.forceBlank and button:GetAppearance(data) or "INTERFACE\\ICONS\\INV_MISC_QUESTIONMARK")
 	end
-	refreshIcon()
 
 	--without a macro of its own, the one it uses shows grayed out
-	local fallback
-	editor.showNotice = not hasMacro(own)
-	if editor.showNotice then
-		fallback = button:GetResolvedData(page, specData)
-		local source = hasMacro(fallback) and sourceName(button, specData, specName, fallback)
-		local notice = fallback.forceBlank and L["ButtonEditor_InheritsBlank"] or L["ButtonEditor_Inherits"]
-		editor.notice:SetText(source and string.format(notice, source) or L["ButtonEditor_Empty"])
-		--a blank one has nothing to show
-		if not source or fallback.forceBlank then
-			fallback = nil
+	editor.showFallback = function()
+		refreshIcon()
+
+		local fallback
+		editor.showNotice = not hasMacro(own)
+		if editor.showNotice then
+			fallback = button:GetResolvedData(page, specData)
+			local source = hasMacro(fallback) and sourceName(button, specData, specName, fallback)
+			local notice = fallback.forceBlank and L["ButtonEditor_InheritsBlank"] or L["ButtonEditor_Inherits"]
+			editor.notice:SetText(source and string.format(notice, source) or L["ButtonEditor_Empty"])
+			--a blank one has nothing to show
+			if not source or fallback.forceBlank then
+				fallback = nil
+			end
 		end
+		editor.labelBox:SetPlaceholder(fallback and fallback.macro_Name)
+
+		--with a macro of its own, what it falls back on once that is deleted, grayed as soon as the box is empty
+		local macroFallback = fallback
+		if not editor.showNotice and not own.forceBlank then
+			rawset(specData, page, nil)
+			local data = button:GetResolvedData(page, specData)
+			rawset(specData, page, own)
+			macroFallback = hasMacro(data) and not data.forceBlank and data or nil
+		end
+		editor.macroBox:SetPlaceholder(macroFallback and type(macroFallback.macro_Text) == "string" and macroFallback.macro_Text)
 	end
 
 	editor.labelBox:SetText(own and own.macro_Name or "")
-	editor.labelBox:SetPlaceholder(fallback and fallback.macro_Name)
 	editor.macroBox:SetText(own and type(own.macro_Text) == "string" and own.macro_Text or "")
+	editor.showFallback()
 
-	--with a macro of its own, what it falls back on once that is deleted, grayed as soon as the box is empty
-	local macroFallback = fallback
-	if not editor.showNotice and not own.forceBlank then
-		rawset(specData, page, nil)
-		local data = button:GetResolvedData(page, specData)
-		rawset(specData, page, own)
-		macroFallback = hasMacro(data) and not data.forceBlank and data or nil
+	--the editor being typed in keeps its text and cursor, the rest show what they use now
+	local function refreshOthers()
+		for _, other in pairs(view.editors) do
+			if other ~= editor then
+				other.showFallback()
+			end
+		end
 	end
-	editor.macroBox:SetPlaceholder(macroFallback and type(macroFallback.macro_Text) == "string" and macroFallback.macro_Text)
 
 	editor.onLabel = function(text)
 		update{macro_Name = text}
+		refreshOthers()
 	end
 	editor.onMacro = function(text)
 		update{macro_Text = text}
 		refreshIcon()
+		refreshOthers()
 	end
 	editor.onResetIcon = function()
 		update{macro_Icon = false}
 		refreshIcon()
+		refreshOthers()
 	end
 	editor.onIcon = function(icon)
 		update{macro_Icon = icon}
 		refreshIcon()
+		refreshOthers()
 	end
 	--the page keeps its macro for when it is unticked. other pages may fall back on it, so all of them update
 	editor:SetBlank(own ~= nil and own.forceBlank == true)
