@@ -25,16 +25,13 @@ local STRIP_HEIGHT = Style.stripHeight
 --bar types that also get the status bar appearance tabs
 local STATUS_BARS = {XPBar = true, RepBar = true, CastBar = true, MirrorBar = true}
 
-local window, barDropdown, wrapper, tabs, pageTabs, scroll, emptyText
-local boxPool
---a pool of controls per setting type, see CONTROLS
-local pools = {}
+local window, barDropdown, wrapper, tabs, pageTabs, emptyText
+--the window's boxes.
+local mainView
 
 --the shown tab and page, kept while the window is open
 local selected = {}
 local lastTab
-
-local boxes = {}
 
 local render
 local renderPending
@@ -54,8 +51,8 @@ local function widthUnits(width)
 	return WIDTH_UNITS[width] or 2
 end
 
-local function sliderHeld()
-	for _, slider in ipairs(pools.range and pools.range.used or {}) do
+local function sliderHeld(view)
+	for _, slider in ipairs(view.pools.range and view.pools.range.used or {}) do
 		if slider.dragging then
 			return true
 		end
@@ -71,7 +68,7 @@ local function requestRender()
 	renderPending = true
 	C_Timer.After(0, function()
 		renderPending = false
-		if not sliderHeld() then
+		if mainView and not sliderHeld(mainView) then
 			render()
 		end
 	end)
@@ -508,17 +505,17 @@ end
 -----------------------------------------------------------------------------
 
 ---a control for the option, in the box. nil for a type there is no control for
-local function addControl(box, line, kind, option, units)
+local function addControl(view, box, line, kind, option, units)
 	if not CONTROLS[kind] then
 		return
 	end
-	pools[kind] = pools[kind] or UI.Pool(function()
-		return CONTROLS[kind](scroll.child)
+	view.pools[kind] = view.pools[kind] or UI.Pool(function()
+		return CONTROLS[kind](view.scroll.child)
 	end)
 
-	local control = pools[kind]:Acquire()
+	local control = view.pools[kind]:Acquire()
 	control:SetParent(box)
-	control.changed = changed
+	control.changed = view.changed
 	control.option = option
 	control.units = math.min(units, UNITS)
 	control:Bind(option)
@@ -529,7 +526,7 @@ local function addControl(box, line, kind, option, units)
 end
 
 ---a line of controls per row, and how many settings they have and how many show
-local function buildRows(container, rows, entry)
+local function buildRows(view, container, rows, entry)
 	local defs = addonTable.optionDefinitions
 	local lines = {}
 	local settings, shown = 0, 0
@@ -540,19 +537,19 @@ local function buildRows(container, rows, entry)
 		local rowSettings, rowShown, texts = 0, 0, {}
 		for _, item in ipairs(row) do
 			if item.box then
-				local box = addControl(container, line, "box", item, widthUnits(item.width or "double"))
+				local box = addControl(view, container, line, "box", item, widthUnits(item.width or "double"))
 				local boxSettings, boxShown
 				--an old style items list is one row
-				box.rows, boxSettings, boxShown = buildRows(box, item.rows or {item.items or {}}, entry)
+				box.rows, boxSettings, boxShown = buildRows(view, box, item.rows or {item.items or {}}, entry)
 				settings, shown = settings + boxSettings, shown + boxShown
 				box.hidden = boxSettings > 0 and boxShown == 0
 				box:SetShown(not box.hidden)
 			elseif item.header then
-				addControl(container, line, "header", {name = defs.localized(item.header)}, UNITS)
+				addControl(view, container, line, "header", {name = defs.localized(item.header)}, UNITS)
 			elseif item.text then
-				table.insert(texts, addControl(container, line, "description", {name = defs.localized(item.text)}, widthUnits(item.width or "full")))
+				table.insert(texts, addControl(view, container, line, "description", {name = defs.localized(item.text)}, widthUnits(item.width or "full")))
 			elseif item.spacer then
-				addControl(container, line, "spacer", {}, widthUnits(item.width))
+				addControl(view, container, line, "spacer", {}, widthUnits(item.width))
 			else
 				local option = entry.definitions[item.id]
 				if option then
@@ -568,7 +565,7 @@ local function buildRows(container, rows, entry)
 
 				rowSettings = rowSettings + 1
 				if option then
-					local control = addControl(container, line, option.type, option, widthUnits(item.width))
+					local control = addControl(view, container, line, option.type, option, widthUnits(item.width))
 					if control then
 						settings = settings + 1
 						if not control.hidden then
@@ -595,18 +592,18 @@ local function buildRows(container, rows, entry)
 end
 
 ---one box of the layout with its rows of controls. a page of a tab of pages has no title
-local function buildBox(group, entry, asPage)
-	local box = boxPool:Acquire()
+local function buildBox(view, group, entry, asPage)
+	local box = view.boxPool:Acquire()
 	box.titleText = asPage and "" or addonTable.optionDefinitions.localized(group.name or "")
 	box.slots = tonumber(group.slots) or UNITS
 
 	--an old style items list is one row
 	local settings, shown
-	box.rows, settings, shown = buildRows(box, group.rows or {group.items or {}}, entry)
+	box.rows, settings, shown = buildRows(view, box, group.rows or {group.items or {}}, entry)
 
 	--no empty box when this bar type has none of its settings. one with only text or headers still shows
 	box.hidden = settings > 0 and shown == 0
-	table.insert(boxes, box)
+	table.insert(view.boxes, box)
 end
 
 ---places lines of controls in frame, slots wide, wrapping when a line is full. a line's settings
@@ -684,10 +681,10 @@ function layoutLines(frame, lines, unit, slots, left, top)
 end
 
 ---places a box's controls for a width and returns its height
-local function layoutBox(box, width, y)
+local function layoutBox(view, box, width, y)
 	local pad, gap = Style.padding, Style.gap
 	box:ClearAllPoints()
-	box:SetPoint("TOPLEFT", scroll.child, "TOPLEFT", 0, -y)
+	box:SetPoint("TOPLEFT", view.scroll.child, "TOPLEFT", 0, -y)
 	box:SetWidth(width)
 
 	local top = pad
@@ -708,24 +705,55 @@ end
 --room between the window's boxes, more than inside them
 local BOX_GAP = Style.gap + 10
 
-local function layout()
-	local width = scroll:GetContentWidth()
+local function layout(view)
+	local width = view.scroll:GetContentWidth()
 	local y = 0
-	for _, box in ipairs(boxes) do
+	for _, box in ipairs(view.boxes) do
 		box:SetShown(not box.hidden)
 		if not box.hidden then
-			y = y + layoutBox(box, width, y) + BOX_GAP
+			y = y + layoutBox(view, box, width, y) + BOX_GAP
 		end
 	end
-	scroll:SetContentHeight(math.max(0, y - BOX_GAP))
+	view.scroll:SetContentHeight(math.max(0, y - BOX_GAP))
 end
 
-local function releaseAll()
-	for _, pool in pairs(pools) do
+local function releaseAll(view)
+	for _, pool in pairs(view.pools) do
 		pool:ReleaseAll()
 	end
-	boxPool:ReleaseAll()
-	wipe(boxes)
+	view.boxPool:ReleaseAll()
+	wipe(view.boxes)
+end
+
+---a scroll area of boxes in parent, with its own controls. changed runs after a setting is set
+local function createView(parent, changed)
+	local view = {pools = {}, boxes = {}, changed = changed}
+	view.scroll = UI.ScrollArea(parent)
+	view.scroll.OnResize = function()
+		layout(view)
+	end
+	view.boxPool = UI.Pool(function()
+		return UI.Box(view.scroll.child)
+	end)
+	return view
+end
+
+---boxes of BarConfigLayout.lua in another window, see VisualOverrideWindow.lua. place view.scroll in it
+function PhotonGUI.CreateLayoutView(parent, changed)
+	local view = createView(parent, changed)
+
+	---groups are the layout's, definitions the settings they place, as Options.lua makes them
+	function view:Draw(groups, definitions)
+		local offset = self.scroll:GetVerticalScroll()
+		releaseAll(self)
+		for _, group in ipairs(groups) do
+			buildBox(self, group, {definitions = definitions})
+		end
+		layout(self)
+		self.scroll:ScrollTo(offset)
+	end
+
+	return view
 end
 
 -----------------------------------------------------------------------------
@@ -756,8 +784,8 @@ local function placeScroll()
 	if pageTabs:IsShown() then
 		below(pageTabs, Style.gap)
 	end
-	below(scroll, pad)
-	scroll:SetPoint("BOTTOMRIGHT", wrapper, "BOTTOMRIGHT", -pad, pad)
+	below(mainView.scroll, pad)
+	mainView.scroll:SetPoint("BOTTOMRIGHT", wrapper, "BOTTOMRIGHT", -pad, pad)
 end
 
 --every bar, by name, for the picker
@@ -884,13 +912,7 @@ local function createWindow()
 		end
 	end)
 
-	scroll = UI.ScrollArea(wrapper)
-	scroll.OnResize = layout
-
-
-	boxPool = UI.Pool(function()
-		return UI.Box(scroll.child)
-	end)
+	mainView = createView(wrapper, changed)
 end
 
 function render()
@@ -898,8 +920,9 @@ function render()
 		return
 	end
 
+	local scroll = mainView.scroll
 	local offset = scroll:GetVerticalScroll()
-	releaseAll()
+	releaseAll(mainView)
 
 	local bar = Photon.currentBar
 	local defs = addonTable.optionDefinitions
@@ -946,7 +969,7 @@ function render()
 		tabs:Hide()
 		pageTabs:Hide()
 		placeScroll()
-		layout()
+		layout(mainView)
 		return
 	end
 	selected.tab = entry.key
@@ -989,9 +1012,9 @@ function render()
 
 	-------------------------------- boxes --------------------------------
 	for _, group in ipairs(groups) do
-		buildBox(group, entry, asPages)
+		buildBox(mainView, group, entry, asPages)
 	end
-	layout()
+	layout(mainView)
 
 	--keep the place when the same tab is drawn again
 	local place = selected.tab..":"..tostring(selected.page)

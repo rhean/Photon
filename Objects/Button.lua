@@ -592,7 +592,7 @@ function Button:ApplyBindings()
 
 	self.Hotkey:SetText(Button.hotKeyText(self.keys.hotKeys:match("^:([^:]+)") or ""))
 
-	if self.bar:GetShowBindText() then
+	if self:GetVisuals():GetShowBindText() then
 		self.Hotkey:Show()
 	else
 		self.Hotkey:Hide()
@@ -621,6 +621,69 @@ function Button:UpdateIcon()
 	-- empty --
 end
 
+-------------------------------------------------
+-----Visuals: the bar's, or the button's own-----
+-------------------------------------------------
+
+--the bar data the Visuals box sets, see Options.lua. a button with its own visuals keeps a copy of them
+local VISUAL_KEYS = {
+	"bindText", "bindColor", "buttonText", "macroColor", "countText", "countColor",
+	"rangeInd", "rangecolor", "manacolor", "cdText", "cdcolor1", "cdcolor2", "cdAlpha",
+	"slotColor", "iconTint", "spellGlow", "tooltips", "tooltipsCombat", "showBorderStyle",
+}
+
+---what the button's look is read from: its bar, or with its own visuals a stand-in for the bar
+---whose data is the button's. the bar's setters work on the stand-in and update only this button
+---@return Bar
+function Button:GetVisuals()
+	local visuals = self.DB.visuals
+	if not visuals then
+		return self.bar
+	end
+	if not self.visualsProxy or self.visualsProxy.data ~= visuals then
+		--a setting added after the copy was made still follows the bar
+		setmetatable(visuals, {__index = self.bar.data})
+		self.visualsProxy = setmetatable({
+			data = visuals,
+			buttons = {self},
+			UpdateBarStatus = function() end,
+		}, {__index = self.bar})
+	end
+	return self.visualsProxy
+end
+
+function Button:HasVisualOverride()
+	return self.DB.visuals ~= nil
+end
+
+---on starts from a copy of the bar's visuals, off goes back to following the bar
+function Button:SetVisualOverride(on)
+	if on and not self.DB.visuals then
+		local visuals = {}
+		for _, key in ipairs(VISUAL_KEYS) do
+			local value = self.bar.data[key]
+			visuals[key] = type(value) == "table" and CopyTable(value) or value
+		end
+		self.DB.visuals = visuals
+	elseif not on then
+		self.DB.visuals = nil
+		self.visualsProxy = nil
+	end
+	self:RefreshVisuals()
+	--the bar config's Clear Button Overrides goes on or off with it
+	Photon.PhotonGUI:RefreshBarConfig()
+end
+
+---draws the button again after where its visuals come from changed
+function Button:RefreshVisuals()
+	self:InitializeButtonSettings()
+	self:UpdateNormalTexture()
+	self:CancelCooldownTimer(true)
+	self:UpdateCooldown()
+	self:UpdateIcon()
+	self:UpdateUsable()
+end
+
 function Button:UpdateNormalTexture()
 	local actionTexture, noactionTexture
 
@@ -632,7 +695,7 @@ function Button:UpdateNormalTexture()
 		noactionTexture = "Interface\\Buttons\\UI-Quickslot"
 	end
 
-	local color = self.bar:GetSlotColor()
+	local color = self:GetVisuals():GetSlotColor()
 	if self:HasAction() then
 		self:SetNormalTexture(actionTexture or "")
 		self:GetNormalTexture():SetVertexColor(color[1],color[2],color[3],1)
@@ -648,8 +711,9 @@ function Button:UpdateNormalTexture()
 	end
 
 	if self.IconTint then
-		local tint = self.bar:GetIconTint()
-		self.IconTint:SetShown(self:HasAction())
+		local tint = self:GetVisuals():GetIconTint()
+		--over any icon on show, one picked for a macro without a spell or item too
+		self.IconTint:SetShown(self.Icon:IsShown() and self.Icon:GetTexture() ~= nil)
 		self.IconTint:SetColorTexture(tint[1],tint[2],tint[3],1)
 		self.IconTint:SetBlendMode("MOD")
 	end
@@ -799,6 +863,12 @@ function Button:UpdateCooldown()
 	end
 end
 
+---the countdown and fade settings SetCooldownTimer takes after the times, from the button's visuals
+function Button:CooldownLook()
+	local visuals = self:GetVisuals()
+	return visuals:GetShowCooldownText(), visuals:GetCooldownColor1(), visuals:GetCooldownColor2(), visuals:GetShowCooldownAlpha()
+end
+
 function Button:UpdateSpellCooldown()
 	if self.spell and self.isShown then
 		local spell = self:GetCurrentSpell()
@@ -810,9 +880,10 @@ function Button:UpdateSpellCooldown()
 		elseif issecretvalue(cooldownInfo.startTime) then
 			self:SetSecretCooldown(C_Spell.GetSpellCooldownDuration(spell))
 		elseif chargeInfo and not issecretvalue(chargeInfo.maxCharges) and chargeInfo.maxCharges > 0 and chargeInfo.currentCharges < chargeInfo.maxCharges then
-			self:SetCooldownTimer(chargeInfo.cooldownStartTime, chargeInfo.cooldownDuration, cooldownInfo.isEnabled, chargeInfo.chargeModRate, self.bar:GetShowCooldownText(), self.bar:GetCooldownColor1(), self.bar:GetCooldownColor2(), self.bar:GetShowCooldownAlpha(), chargeInfo.currentCharges, chargeInfo.maxCharges) --only evoke charge cooldown (outer border) if charges are present and less than maxCharges (this is the case with the GCD)
+			local showText, color1, color2, showAlpha = self:CooldownLook()
+			self:SetCooldownTimer(chargeInfo.cooldownStartTime, chargeInfo.cooldownDuration, cooldownInfo.isEnabled, chargeInfo.chargeModRate, showText, color1, color2, showAlpha, chargeInfo.currentCharges, chargeInfo.maxCharges) --only evoke charge cooldown (outer border) if charges are present and less than maxCharges (this is the case with the GCD)
 		else
-			self:SetCooldownTimer(cooldownInfo.startTime, cooldownInfo.duration, cooldownInfo.isEnabled, cooldownInfo.modRate, self.bar:GetShowCooldownText(), self.bar:GetCooldownColor1(), self.bar:GetCooldownColor2(), self.bar:GetShowCooldownAlpha()) --call standard cooldown, handles both abilty cooldowns and GCD
+			self:SetCooldownTimer(cooldownInfo.startTime, cooldownInfo.duration, cooldownInfo.isEnabled, cooldownInfo.modRate, self:CooldownLook()) --call standard cooldown, handles both abilty cooldowns and GCD
 		end
 	else
 		self:CancelCooldownTimer(true)
@@ -837,7 +908,7 @@ function Button:UpdateItemCooldown()
 			local itemID = C_Item.GetItemInfoInstant(self.item)
 			start, duration, enable, modrate = C_Container.GetItemCooldown(itemID)
 		end
-		self:SetCooldownTimer(start, duration, enable, modrate, self.bar:GetShowCooldownText(), self.bar:GetCooldownColor1(), self.bar:GetCooldownColor2(), self.bar:GetShowCooldownAlpha())
+		self:SetCooldownTimer(start, duration, enable, modrate, self:CooldownLook())
 	else
 		self:CancelCooldownTimer(true)
 	end
@@ -851,7 +922,7 @@ function Button:UpdateActionCooldown()
 				self:SetSecretCooldown(C_ActionBar.GetActionCooldownDuration(self.actionID))
 				return
 			end
-			self:SetCooldownTimer(start, duration, enable, modrate, self.bar:GetShowCooldownText(), self.bar:GetCooldownColor1(), self.bar:GetCooldownColor2(), self.bar:GetShowCooldownAlpha())
+			self:SetCooldownTimer(start, duration, enable, modrate, self:CooldownLook())
 		end
 	else
 		self:CancelCooldownTimer(true)
@@ -879,15 +950,16 @@ end
 function Button:UpdateUsableSpell()
 	local spell = self:GetCurrentSpell()
 	local isUsable, notEnoughMana = C_Spell.IsSpellUsable(spell)
+	local visuals = self:GetVisuals()
 
-	if notEnoughMana and self.bar:GetManaColor() then
-		self.Icon:SetVertexColor(self.bar:GetManaColor()[1], self.bar:GetManaColor()[2], self.bar:GetManaColor()[3])
+	if notEnoughMana and visuals:GetManaColor() then
+		self.Icon:SetVertexColor(unpack(visuals:GetManaColor(), 1, 3))
 	elseif isUsable then
 		--C_Spell.IsSpellInRange returns false when out of range and nil when range doesn't apply
-		if self.bar:GetShowRangeIndicator() and C_Spell.IsSpellInRange(spell, self.unit) == false then
-			self.Icon:SetVertexColor(self.bar:GetRangeColor()[1], self.bar:GetRangeColor()[2], self.bar:GetRangeColor()[3])
-		elseif self.bar:GetShowRangeIndicator() and Photon.spellCache[self.spell:lower()] and C_Spell.IsSpellInRange(Photon.spellCache[self.spell:lower()].spellID, self.unit) == false then
-			self.Icon:SetVertexColor(self.bar:GetRangeColor()[1], self.bar:GetRangeColor()[2], self.bar:GetRangeColor()[3])
+		if visuals:GetShowRangeIndicator() and C_Spell.IsSpellInRange(spell, self.unit) == false then
+			self.Icon:SetVertexColor(unpack(visuals:GetRangeColor(), 1, 3))
+		elseif visuals:GetShowRangeIndicator() and Photon.spellCache[self.spell:lower()] and C_Spell.IsSpellInRange(Photon.spellCache[self.spell:lower()].spellID, self.unit) == false then
+			self.Icon:SetVertexColor(unpack(visuals:GetRangeColor(), 1, 3))
 		else
 			self.Icon:SetVertexColor(1.0, 1.0, 1.0)
 		end
@@ -907,15 +979,16 @@ function Button:UpdateUsableItem()
 		end
 	end
 
-	if notEnoughMana and self.bar:GetManaColor() then
-		self.Icon:SetVertexColor(self.bar:GetManaColor()[1], self.bar:GetManaColor()[2], self.bar:GetManaColor()[3])
+	local visuals = self:GetVisuals()
+	if notEnoughMana and visuals:GetManaColor() then
+		self.Icon:SetVertexColor(unpack(visuals:GetManaColor(), 1, 3))
 	elseif isUsable then
 		--C_Item.IsItemInRange is protected in combat, so skip the range check there
-		local checkRange = self.bar:GetShowRangeIndicator() and not InCombatLockdown()
+		local checkRange = visuals:GetShowRangeIndicator() and not InCombatLockdown()
 		if checkRange and C_Item.IsItemInRange(self.item, self.unit) == false then
-			self.Icon:SetVertexColor(self.bar:GetRangeColor()[1], self.bar:GetRangeColor()[2], self.bar:GetRangeColor()[3])
+			self.Icon:SetVertexColor(unpack(visuals:GetRangeColor(), 1, 3))
 		elseif checkRange and Photon.itemCache[self.item:lower()] and C_Item.IsItemInRange(Photon.itemCache[self.item:lower()], self.unit) == false then
-			self.Icon:SetVertexColor(self.bar:GetRangeColor()[1], self.bar:GetRangeColor()[2], self.bar:GetRangeColor()[3])
+			self.Icon:SetVertexColor(unpack(visuals:GetRangeColor(), 1, 3))
 		else
 			self.Icon:SetVertexColor(1.0, 1.0, 1.0)
 		end
@@ -931,12 +1004,13 @@ function Button:UpdateUsableAction()
 	end
 
 	local isUsable, notEnoughMana = IsUsableAction(self.actionID)
+	local visuals = self:GetVisuals()
 
-	if notEnoughMana and self.bar:GetManaColor() then
-		self.Icon:SetVertexColor(self.bar:GetManaColor()[1], self.bar:GetManaColor()[2], self.bar:GetManaColor()[3])
+	if notEnoughMana and visuals:GetManaColor() then
+		self.Icon:SetVertexColor(unpack(visuals:GetManaColor(), 1, 3))
 	elseif isUsable then
-		if self.bar:GetShowRangeIndicator() and C_ActionBar.IsActionInRange(self.actionID, self.unit) == false then -- [retail port 2026-10-12] was IsActionInRange(self.spell, ...) == 0: wrong arg, retail errors
-			self.Icon:SetVertexColor(self.bar:GetRangeColor()[1], self.bar:GetRangeColor()[2], self.bar:GetRangeColor()[3])
+		if visuals:GetShowRangeIndicator() and C_ActionBar.IsActionInRange(self.actionID, self.unit) == false then -- [retail port 2026-10-12] was IsActionInRange(self.spell, ...) == 0: wrong arg, retail errors
+			self.Icon:SetVertexColor(unpack(visuals:GetRangeColor(), 1, 3))
 		else
 			self.Icon:SetVertexColor(1.0, 1.0, 1.0)
 		end
@@ -1035,10 +1109,10 @@ end
 -----------------------------------------------------------------------------------------
 
 function Button:UpdateTooltip()
-	if self.bar:GetTooltipOption() ~= "off" then --if the bar isn't showing tooltips, don't proceed
+	if self:GetVisuals():GetTooltipOption() ~= "off" then --if the bar isn't showing tooltips, don't proceed
 
 		--if we are in combat and we don't have tooltips enable in-combat, don't go any further
-		if InCombatLockdown() and not self.bar:GetTooltipCombat() then
+		if InCombatLockdown() and not self:GetVisuals():GetTooltipCombat() then
 			return
 		end
 
@@ -1073,16 +1147,17 @@ function Button:UpdateTooltip()
 end
 
 function Button:UpdateSpellTooltip()
+	local option = self:GetVisuals():GetTooltipOption()
 	if self.spell and self.spellID then --try to get the correct spell from the spellbook first
-		if self.bar:GetTooltipOption() == "normal" then
+		if option == "normal" then
 			GameTooltip:SetSpellByID(self:GetCurrentSpell())
-		elseif self.bar:GetTooltipOption() == "minimal" then
+		elseif option == "minimal" then
 			GameTooltip:SetText(self.spell, 1, 1, 1)
 		end
 	elseif Photon.spellCache[self.spell:lower()] then --if the spell isn't in the spellbook, check our spell cache
-		if self.bar:GetTooltipOption() == "normal" then
+		if option == "normal" then
 			GameTooltip:SetSpellByID(Photon.spellCache[self.spell:lower()].spellID)
-		elseif self.bar:GetTooltipOption() == "minimal" then
+		elseif option == "minimal" then
 			GameTooltip:SetText(Photon.spellCache[self.spell:lower()].spellName, 1, 1, 1)
 		end
 	else
@@ -1099,16 +1174,18 @@ function Button:UpdateItemTooltip()
 		return
 	end
 
-	if self.bar:GetTooltipOption() == "normal" then
+	local option = self:GetVisuals():GetTooltipOption()
+	if option == "normal" then
 		GameTooltip:SetHyperlink(link)
-	elseif self.bar:GetTooltipOption() == "minimal" then
+	elseif option == "minimal" then
 		GameTooltip:SetText(name, 1, 1, 1)
 	end
 end
 
 function Button:UpdateActionTooltip()
 	if HasAction(self.actionID) then
-		if self.bar:GetTooltipOption() == "normal" or self.bar:GetTooltipOption() == "minimal" then
+		local option = self:GetVisuals():GetTooltipOption()
+		if option == "normal" or option == "minimal" then
 			GameTooltip:SetAction(self.actionID)
 		end
 	end

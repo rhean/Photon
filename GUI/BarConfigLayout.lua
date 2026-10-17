@@ -210,6 +210,9 @@ addonTable.barConfigLayout = {
 				{
 					{ id = "borderStyle", width = "normal" },
 				},
+				{
+					{ id = "clearButtonOverrides", width = 1.5 },
+				},
 			}},
 		}},
 		{ id = "visibility", name = "Bar Conditions", groups = {

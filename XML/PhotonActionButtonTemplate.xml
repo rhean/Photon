@@ -32,7 +32,7 @@ https://raw.githubusercontent.com/Gethe/wow-ui-source/live/Interface/FrameXML/UI
 			</Layer>
 
 			<Layer level="BACKGROUND" textureSubLevel="3">
-				<!--multiplied over the icon, white leaves it as it is.->
+				<!--multiplied over the icon, white leaves it as it is.-->
 				<Texture parentKey="IconTint" alphaMode="MOD" hidden="true">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="3" y="-3"/>
