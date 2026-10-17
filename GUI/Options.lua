@@ -103,9 +103,10 @@ local function barStateToggle(state, name)
 	return {
 		type = "toggle",
 		name = name,
-		--states only apply to action bars. rogues get stealth as their home stance state instead
+		--states only apply to action bars. rogues get stealth as their home stance state instead.
 		hidden = function()
 			return bar().class ~= "ActionBar" or (Photon.class == "ROGUE" and state == "stealth")
+				or (state == "stance" and GetNumShapeshiftForms() == 0 and not bar().data.stance)
 		end,
 		get = function() return not not bar().data[state] end,
 		set = function(_, value) bar():SetState(state, true, value) end,
