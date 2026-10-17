@@ -334,9 +334,14 @@ function UI.Dropdown(parent, onSelect)
 	--blizzard's builds the menu once while it is made, before there are items
 	dropdown = UI.MenuButton(parent, "", function(root)
 		for _, item in ipairs(dropdown and dropdown.items or {}) do
-			local radio = root:CreateRadio(item.text, function()
+			--a disabled item is grey text that does nothing on click, a menu's own disabled state takes the hover and its tooltip with it
+			local text = item.disabled and "|cff808080"..item.text.."|r" or item.text
+			local radio = root:CreateRadio(text, function()
 				return item.value == dropdown.value
 			end, function()
+				if item.disabled then
+					return MenuResponse and MenuResponse.Open
+				end
 				hover(nil)
 				dropdown.value = item.value
 				if not dropdown.GenerateMenu then
@@ -344,13 +349,22 @@ function UI.Dropdown(parent, onSelect)
 				end
 				onSelect(item.value)
 			end)
-			--older menus have no hover
+			--older menus have no hover. the tooltip is shown here too, a menu's own one goes when OnEnter is set
 			if radio.SetOnEnter then
-				radio:SetOnEnter(function()
+				radio:SetOnEnter(function(frame)
 					hover(item.value)
+					if item.tooltip and frame then
+						GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
+						GameTooltip:SetText(item.text, 1, 1, 1)
+						GameTooltip:AddLine(item.tooltip, nil, nil, nil, true)
+						GameTooltip:Show()
+					end
 				end)
 				radio:SetOnLeave(function()
 					hover(nil)
+					if item.tooltip then
+						GameTooltip:Hide()
+					end
 				end)
 			end
 		end
@@ -364,7 +378,7 @@ function UI.Dropdown(parent, onSelect)
 		end, dropdown)
 	end
 
-	---@param items {value: any, text: string}[]
+	---@param items {value: any, text: string, disabled: boolean?, tooltip: string?}[]
 	function dropdown:SetItems(items)
 		self.items = items
 	end

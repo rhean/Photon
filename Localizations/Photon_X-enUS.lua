@@ -316,6 +316,7 @@ L["Rotation"] = true
 -- the position box, on the General Configuration tab
 L["Position"] = true
 L["Anchor To"] = true
+L["AnchorTo_Loop"] = "%s is already positioned from %s. Anchoring to it would make a circular dependency."
 L["Screen"] = true
 L["Bar Point"] = true
 L["Target Point"] = true

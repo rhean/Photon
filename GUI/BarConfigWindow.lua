@@ -226,9 +226,12 @@ CONTROLS.select = function(parent)
 				return tostring(values[a]) < tostring(values[b])
 			end)
 		end
+		--disabledValues are on the list greyed out, valueTooltips show on hover.
+		local disabledValues = resolve(option.disabledValues) or {}
+		local valueTooltips = resolve(option.valueTooltips) or {}
 		local items = {}
 		for _, key in ipairs(order) do
-			table.insert(items, {value = key, text = values[key]})
+			table.insert(items, {value = key, text = values[key], disabled = disabledValues[key], tooltip = valueTooltips[key]})
 		end
 
 		self.dropdown:SetItems(items)
