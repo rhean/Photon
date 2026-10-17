@@ -28,6 +28,7 @@ function Photon:RegisterGUI()
 				CDALPHA = true,
 				SPELLGLOW = true,
 				TOOLTIPS = true,
+				SLOTCOLOR = true,
 			}
 		},
 		BagBar = {
@@ -60,6 +61,7 @@ function Photon:RegisterGUI()
 				CDTEXT = true,
 				CDALPHA = true,
 				TOOLTIPS = true,
+				SLOTCOLOR = true,
 			}
 		},
 		XPBar = {

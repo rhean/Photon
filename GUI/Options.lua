@@ -34,35 +34,41 @@ local function unlessOption(kind, flag)
 	end
 end
 
-local function barToggle(name, getter, setter, hidden)
+--what a setting reads from and what it changes, the selected bar unless it says otherwise. see visualDefinitions
+local SELECTED_BAR = {get = bar, set = bar}
+
+local function barToggle(name, getter, setter, hidden, target)
+	target = target or SELECTED_BAR
 	return {
 		type = "toggle",
 		name = name,
 		hidden = hidden,
-		get = function() return not not bar()[getter](bar()) end,
-		set = function(_, value) bar()[setter](bar(), value) end,
+		get = function() return not not target.get()[getter](target.get()) end,
+		set = function(_, value) target.set()[setter](target.set(), value) end,
 	}
 end
 
-local function barColor(name, getter, setter, hidden)
+local function barColor(name, getter, setter, hidden, target)
+	target = target or SELECTED_BAR
 	return {
 		type = "color",
 		name = name,
 		hidden = hidden,
-		get = function() return unpack(bar()[getter](bar())) end,
-		set = function(_, r, g, b, a) bar()[setter](bar(), {r, g, b, a}) end,
+		get = function() return unpack(target.get()[getter](target.get())) end,
+		set = function(_, r, g, b, a) target.set()[setter](target.set(), {r, g, b, a}) end,
 	}
 end
 
-local function barSelect(name, values, sorting, getter, setter, fallback, hidden)
+local function barSelect(name, values, sorting, getter, setter, fallback, hidden, target)
+	target = target or SELECTED_BAR
 	return {
 		type = "select",
 		name = name,
 		values = values,
 		sorting = sorting,
 		hidden = hidden,
-		get = function() return bar()[getter](bar()) or fallback end,
-		set = function(_, value) bar()[setter](bar(), value) end,
+		get = function() return target.get()[getter](target.get()) or fallback end,
+		set = function(_, value) target.set()[setter](target.set(), value) end,
 	}
 end
 
@@ -183,6 +189,57 @@ local function positionDefinitions(definitions)
 	}
 end
 
+---the Visuals box. target says what the settings read and change: the selected bar, or a
+---button's own visuals. The bar and button configs should be kept in sync
+local function visualDefinitions(definitions, target)
+	definitions.keybindLabel = barToggle(L["Keybind Label"], "GetShowBindText", "SetShowBindText", unlessOption("visualOptions", "BINDTEXT"), target)
+	definitions.keybindColor = barColor(L["Color"], "GetBindColor", "SetBindColor", unlessOption("visualOptions", "BINDTEXT"), target)
+	definitions.buttonName = barToggle(L["Button Label"], "GetShowButtonText", "SetShowButtonText", unlessOption("visualOptions", "BUTTONTEXT"), target)
+	definitions.buttonNameColor = barColor(L["Color"], "GetMacroColor", "SetMacroColor", unlessOption("visualOptions", "BUTTONTEXT"), target)
+	definitions.stackCharge = barToggle(L["Stack/Charge"], "GetShowCountText", "SetShowCountText", unlessOption("visualOptions", "COUNTTEXT"), target)
+	definitions.stackChargeColor = barColor(L["Color"], "GetCountColor", "SetCountColor", unlessOption("visualOptions", "COUNTTEXT"), target)
+	definitions.outOfRange = barToggle(L["Out-of-Range"], "GetShowRangeIndicator", "SetShowRangeIndicator", unlessOption("visualOptions", "RANGEIND"), target)
+	definitions.outOfRangeColor = barColor(L["Color"], "GetRangeColor", "SetRangeColor", unlessOption("visualOptions", "RANGEIND"), target)
+	definitions.cooldownCounter = barToggle(L["CD Counter"], "GetShowCooldownText", "SetShowCooldownText", unlessOption("visualOptions", "CDTEXT"), target)
+	definitions.cooldownColor1 = barColor(L["Color"], "GetCooldownColor1", "SetCooldownColor1", unlessOption("visualOptions", "CDTEXT"), target)
+	definitions.cooldownColor2 = barColor(L["Last 5s"], "GetCooldownColor2", "SetCooldownColor2", unlessOption("visualOptions", "CDTEXT"), target)
+	definitions.slotColor = barColor(L["Color"], "GetSlotColor", "SetSlotColor", unlessOption("visualOptions", "SLOTCOLOR"), target)
+	definitions.iconTint = barColor(L["Color"], "GetIconTint", "SetIconTint", unlessOption("visualOptions", "SLOTCOLOR"), target)
+	--back to white, which leaves the slot art and icon as they are
+	definitions.slotColorClear = {
+		type = "execute",
+		name = L["Clear"],
+		hidden = unlessOption("visualOptions", "SLOTCOLOR"),
+		func = function() target.set():SetSlotColor() end,
+	}
+	definitions.iconTintClear = {
+		type = "execute",
+		name = L["Clear"],
+		hidden = unlessOption("visualOptions", "SLOTCOLOR"),
+		func = function() target.set():SetIconTint() end,
+	}
+	definitions.cooldownAlpha = barToggle(L["Fade on Cooldown"], "GetShowCooldownAlpha", "SetShowCooldownAlpha", unlessOption("visualOptions", "CDALPHA"), target)
+	definitions.spellAlerts = barSelect(L["Spell Alerts"],
+		{none = L["None"], alternate = L["Subdued Alert"], default = L["Default Alert"]},
+		{"none", "alternate", "default"},
+		"GetSpellGlow", "SetSpellGlow", "none", unlessOption("visualOptions", "SPELLGLOW"), target)
+	definitions.tooltips = barSelect(L["Enable Tooltips"],
+		{off = L["Off"], minimal = L["Minimal"], normal = L["Normal"]},
+		{"off", "minimal", "normal"},
+		"GetTooltipOption", "SetTooltipOption", "off", unlessOption("visualOptions", "TOOLTIPS"), target)
+	definitions.tooltipsInCombat = barToggle(L["Tooltips in Combat"], "GetTooltipCombat", "SetTooltipCombat", unlessOption("visualOptions", "TOOLTIPS"), target)
+	definitions.borderStyle = barToggle(L["Show Border Style"], "GetShowBorderStyle", "SetShowBorderStyle", unlessOption("visualOptions", "BORDERSTYLE"), target)
+end
+
+---the hover text, see the BarDesc_ entries in the locale
+local function describe(definitions)
+	local formWord = L[FORM_WORDS[Photon.class] or "BarDesc_StanceWord"]
+	for id, option in pairs(definitions) do
+		local desc = rawget(L, "BarDesc_"..id)
+		option.desc = option.desc or (desc and desc:gsub("{form}", formWord))
+	end
+end
+
 --built each time the options are shown, so ranges follow the current bar
 local function barDefinitions()
 	local numObjects = bar():GetNumObjects()
@@ -251,34 +308,41 @@ local function barDefinitions()
 			{2, 3, 4, 5, 6},
 			"GetStrata", "SetStrata"),
 
-		keybindLabel = barToggle(L["Keybind Label"], "GetShowBindText", "SetShowBindText", unlessOption("visualOptions", "BINDTEXT")),
-		keybindColor = barColor(L["Color"], "GetBindColor", "SetBindColor", unlessOption("visualOptions", "BINDTEXT")),
-		buttonName = barToggle(L["Button Label"], "GetShowButtonText", "SetShowButtonText", unlessOption("visualOptions", "BUTTONTEXT")),
-		buttonNameColor = barColor(L["Color"], "GetMacroColor", "SetMacroColor", unlessOption("visualOptions", "BUTTONTEXT")),
-		stackCharge = barToggle(L["Stack/Charge"], "GetShowCountText", "SetShowCountText", unlessOption("visualOptions", "COUNTTEXT")),
-		stackChargeColor = barColor(L["Color"], "GetCountColor", "SetCountColor", unlessOption("visualOptions", "COUNTTEXT")),
-		outOfRange = barToggle(L["Out-of-Range"], "GetShowRangeIndicator", "SetShowRangeIndicator", unlessOption("visualOptions", "RANGEIND")),
-		outOfRangeColor = barColor(L["Color"], "GetRangeColor", "SetRangeColor", unlessOption("visualOptions", "RANGEIND")),
-		cooldownCounter = barToggle(L["CD Counter"], "GetShowCooldownText", "SetShowCooldownText", unlessOption("visualOptions", "CDTEXT")),
-		cooldownColor1 = barColor(L["Color"], "GetCooldownColor1", "SetCooldownColor1", unlessOption("visualOptions", "CDTEXT")),
-		cooldownColor2 = barColor(L["Last 5s"], "GetCooldownColor2", "SetCooldownColor2", unlessOption("visualOptions", "CDTEXT")),
-		cooldownAlpha = barToggle(L["Fade on Cooldown"], "GetShowCooldownAlpha", "SetShowCooldownAlpha", unlessOption("visualOptions", "CDALPHA")),
-		spellAlerts = barSelect(L["Spell Alerts"],
-			{none = L["None"], alternate = L["Subdued Alert"], default = L["Default Alert"]},
-			{"none", "alternate", "default"},
-			"GetSpellGlow", "SetSpellGlow", "none", unlessOption("visualOptions", "SPELLGLOW")),
-		tooltips = barSelect(L["Enable Tooltips"],
-			{off = L["Off"], minimal = L["Minimal"], normal = L["Normal"]},
-			{"off", "minimal", "normal"},
-			"GetTooltipOption", "SetTooltipOption", "off", unlessOption("visualOptions", "TOOLTIPS")),
-		tooltipsInCombat = barToggle(L["Tooltips in Combat"], "GetTooltipCombat", "SetTooltipCombat", unlessOption("visualOptions", "TOOLTIPS")),
-		borderStyle = barToggle(L["Show Border Style"], "GetShowBorderStyle", "SetShowBorderStyle", unlessOption("visualOptions", "BORDERSTYLE")),
-
 		deleteBar = {
 			type = "execute",
 			name = L["Delete Bar"],
 			confirm = function() return L["DeleteBar_Confirm"] end,
 			func = function() bar():DeleteBar() end,
+		},
+
+		--every button on the bar back to the bar's visuals, see Button:SetVisualOverride.
+		--not in a button's own visuals window, which has no definition for it
+		clearButtonOverrides = {
+			type = "execute",
+			name = L["Clear Button Overrides"],
+			hidden = function() return bar().class ~= "ActionBar" end,
+			disabled = function()
+				for _, button in pairs(bar().buttons) do
+					if button:HasVisualOverride() then
+						return false
+					end
+				end
+				return true
+			end,
+			confirm = function() return L["ClearButtonOverrides_Confirm"] end,
+			func = function()
+				for _, button in pairs(bar().buttons) do
+					if button:HasVisualOverride() then
+						button:SetVisualOverride(false)
+					end
+				end
+				--the selected button may have been one of them
+				local current = Photon.currentButton
+				if current and current.bar == bar() then
+					Photon.PhotonGUI:UpdateVisualOverrideCheck()
+					Photon.PhotonGUI:CloseVisualOverride()
+				end
+			end,
 		},
 
 		--lock dragging on every bar at once
@@ -333,13 +397,8 @@ local function barDefinitions()
 	end
 
 	positionDefinitions(definitions)
-
-	--the hover text, see the BarDesc_ entries in the locale
-	local formWord = L[FORM_WORDS[Photon.class] or "BarDesc_StanceWord"]
-	for id, option in pairs(definitions) do
-		local desc = rawget(L, "BarDesc_"..id)
-		option.desc = option.desc or (desc and desc:gsub("{form}", formWord))
-	end
+	visualDefinitions(definitions, SELECTED_BAR)
+	describe(definitions)
 
 	return definitions
 end
@@ -489,6 +548,15 @@ addonTable.optionDefinitions = {
 			return
 		end
 		return barDefinitions()
+	end,
+
+	---the Visuals box for a button with its own visuals, see Button:GetVisuals
+	buttonVisuals = function(button)
+		local definitions = {}
+		local function visuals() return button:GetVisuals() end
+		visualDefinitions(definitions, {get = visuals, set = visuals})
+		describe(definitions)
+		return definitions
 	end,
 
 	---the selected status bar button's appearance settings, nil without one

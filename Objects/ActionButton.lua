@@ -263,23 +263,25 @@ function ActionButton:InitializeButtonSettings()
 	self:SetFrameStrata(Photon.STRATAS[self.bar:GetStrata()-1])
 	self:SetScale(self.bar:GetBarScale())
 
-	if self.bar:GetShowBindText() then
+	local visuals = self:GetVisuals()
+
+	if visuals:GetShowBindText() then
 		self.Hotkey:Show()
-		self.Hotkey:SetTextColor(self.bar:GetBindColor()[1],self.bar:GetBindColor()[2],self.bar:GetBindColor()[3])
+		self.Hotkey:SetTextColor(unpack(visuals:GetBindColor(), 1, 3))
 	else
 		self.Hotkey:Hide()
 	end
 
-	if self.bar:GetShowButtonText() then
+	if visuals:GetShowButtonText() then
 		self.Name:Show()
-		self.Name:SetTextColor(self.bar:GetMacroColor()[1],self.bar:GetMacroColor()[2],self.bar:GetMacroColor()[3])
+		self.Name:SetTextColor(unpack(visuals:GetMacroColor(), 1, 3))
 	else
 		self.Name:Hide()
 	end
 
-	if self.bar:GetShowCountText() then
+	if visuals:GetShowCountText() then
 		self.Count:Show()
-		self.Count:SetTextColor(self.bar:GetCountColor()[1],self.bar:GetCountColor()[2],self.bar:GetCountColor()[3])
+		self.Count:SetTextColor(unpack(visuals:GetCountColor(), 1, 3))
 	else
 		self.Count:Hide()
 	end
@@ -452,7 +454,7 @@ function ActionButton:ClearButton(clearAttributes)
 end
 
 function ActionButton:UpdateGlow()
-	if self.bar:GetSpellGlow() and self.spellID then
+	if self:GetVisuals():GetSpellGlow() and self.spellID then
 		--druid fix for thrash glow not showing for feral druids.
 		--Thrash Guardian: 77758
 		--Thrash Feral: 106832
@@ -478,7 +480,7 @@ end
 
 
 function ActionButton:StartGlow()
-	if self.bar:GetSpellGlow() == "default" then
+	if self:GetVisuals():GetSpellGlow() == "default" then
 		LCG.AutoCastGlow_Stop(self)
 		LCG.ButtonGlow_Start(self)
 	else

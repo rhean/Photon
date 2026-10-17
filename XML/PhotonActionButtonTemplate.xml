@@ -31,6 +31,28 @@ https://raw.githubusercontent.com/Gethe/wow-ui-source/live/Interface/FrameXML/UI
 				</Texture>
 			</Layer>
 
+			<Layer level="BACKGROUND" textureSubLevel="3">
+				<!--multiplied over the icon, white leaves it as it is.-->
+				<Texture parentKey="IconTint" alphaMode="MOD" hidden="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="3" y="-3"/>
+						<Anchor point="BOTTOMRIGHT" x="-3" y="3"/>
+					</Anchors>
+					<Color r="1" g="1" b="1" a="1"/>
+				</Texture>
+			</Layer>
+
+			<Layer level="BACKGROUND" textureSubLevel="4">
+				<!--a second copy of the slot art 2px in from the NormalTexture, thickening its border over the icon's edge.
+					see Button:UpdateNormalTexture-->
+				<Texture parentKey="SlotInner" file="Interface\Buttons\UI-Quickslot2" hidden="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-9" y="9"/>
+						<Anchor point="BOTTOMRIGHT" x="9" y="-9"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+
 			<Layer level="ARTWORK" textureSubLevel="1">
 				<FontString name="$parentCountdown" parentKey="Countdown" inherits="NumberFontNormal">
 					<Anchors>

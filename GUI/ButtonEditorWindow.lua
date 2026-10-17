@@ -37,6 +37,10 @@ local expanded, expandedFor = {}, nil
 local specRow, specLabel, specDropdown, helpButton, pageTabs, tabs, body, emptyText
 local addButton, removeButton, expandButton, rowPool
 local left, editors, editorPool
+local overrideCheck
+
+--the button on show last, so picking another one opens its own visuals
+local lastButton
 
 --the window's width before side by side widened it
 local narrowWidth
@@ -889,6 +893,8 @@ local function createWindow()
 	window:SetMinSize(560, 420)
 	window:SetScript("OnHide", function()
 		PhotonGUI:CloseIconSelector()
+		PhotonGUI:CloseVisualOverride()
+		lastButton = nil
 		if Photon.buttonEditMode then
 			Photon:ToggleButtonEditMode(false)
 		end
@@ -916,6 +922,19 @@ local function createWindow()
 	end)
 	specDropdown:SetPoint("LEFT", specLabel, "RIGHT", Style.gap * 2, 0)
 	specDropdown:SetWidth(220)
+
+	--the button's own visuals over its bar's, set in a window of their own, see VisualOverrideWindow.lua
+	overrideCheck = UI.Checkbox(specRow, function(checked)
+		Photon.currentButton:SetVisualOverride(checked)
+		if checked then
+			PhotonGUI:OpenVisualOverride()
+		else
+			PhotonGUI:CloseVisualOverride()
+		end
+	end)
+	overrideCheck:SetLabel(L["Override Visuals"])
+	overrideCheck:SetWidth(16 + Style.gap + overrideCheck.label:GetStringWidth() + 4)
+	addTooltip(overrideCheck, L["Override Visuals"], L["OverrideVisuals_Desc"])
 
 	addButton = UI.MenuButton(specRow, L["Add page for condition"], function(root)
 		local lastSection
@@ -1103,6 +1122,17 @@ function render()
 	view.columns = nil
 
 	local button = Photon.currentButton
+
+	--the visuals window follows the selection: open for a button with its own visuals, closed for the rest
+	if button ~= lastButton then
+		lastButton = button
+		if button and button.bar.class == "ActionBar" and button:HasVisualOverride() then
+			PhotonGUI:OpenVisualOverride()
+		else
+			PhotonGUI:CloseVisualOverride()
+		end
+	end
+
 	if not button or button.bar.class ~= "ActionBar" then
 		window:SetStatus(L["ButtonEditor_SelectButton"])
 		specRow:Hide()
@@ -1146,13 +1176,16 @@ function render()
 	specDropdown:SetShown(hasSpecs)
 	specRow:Show()
 
-	--right of the spec, or first in the row without one
+	--right of the spec, or first in the row without one. the button's own visuals come after
 	addButton:ClearAllPoints()
 	if hasSpecs then
 		addButton:SetPoint("LEFT", specDropdown, "RIGHT", Style.gap * 2, 0)
 	else
 		addButton:SetPoint("LEFT")
 	end
+	overrideCheck:ClearAllPoints()
+	overrideCheck:SetPoint("LEFT", addButton, "RIGHT", Style.gap * 2, 0)
+	overrideCheck:SetChecked(button:HasVisualOverride())
 
 	-------------------------------- default and forms --------------------------------
 	--a pet bar has its pet page as a tab, in place of forms. action bar pages go around both
@@ -1265,6 +1298,14 @@ end
 
 function PhotonGUI:RefreshButtonEditor()
 	render()
+end
+
+---Override Visuals again, after Clear Button Overrides in the bar config
+function PhotonGUI:UpdateVisualOverrideCheck()
+	local button = Photon.currentButton
+	if overrideCheck and button then
+		overrideCheck:SetChecked(button:HasVisualOverride())
+	end
 end
 
 function PhotonGUI:CloseButtonEditor()

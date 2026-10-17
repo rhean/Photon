@@ -114,7 +114,7 @@ function Photon:HideBlizzardUI(profileDatabase)
 	end
 	if not blizzBars.CastBar then
 		PlayerCastingBarFrame:UnregisterAllEvents()
-		PlayerCastingBarFrame:SetParent(Photon.hiddenFrame)
+		PlayerCastingBarFrame:SetParent(UIHider)
 	end
 	if not blizzBars.ExitBar then
 		disableBarFrame(MainMenuBarVehicleLeaveButton)
@@ -146,12 +146,12 @@ function Photon:HideBlizzardUI(profileDatabase)
 		UIParent:UnregisterEvent("MIRROR_TIMER_START")
 		if MirrorTimerContainer then
 			MirrorTimerContainer:UnregisterAllEvents()
-			MirrorTimerContainer:SetParent(Photon.hiddenFrame)
+			MirrorTimerContainer:SetParent(UIHider)
 		else
 			--Classic Era still has the three timers from before 10.0
 			for i = 1, MIRRORTIMER_NUMTIMERS do
 				_G["MirrorTimer"..i]:UnregisterAllEvents()
-				_G["MirrorTimer"..i]:SetParent(Photon.hiddenFrame)
+				_G["MirrorTimer"..i]:SetParent(UIHider)
 			end
 		end
 	end
