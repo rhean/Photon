@@ -37,7 +37,7 @@ local expanded, expandedFor = {}, nil
 local specRow, specLabel, specDropdown, helpButton, pageTabs, tabs, body, emptyText
 local addButton, removeButton, expandButton, rowPool
 local left, editors, editorPool
-local overrideCheck
+local overrideCheck, modifierRow
 
 --the button on show last, so picking another one opens its own visuals
 local lastButton
@@ -302,11 +302,12 @@ local function addTooltip(frame, title, desc)
 end
 
 --the selected look, a light background with an accent line on the left, inset from the edge
-local function addSelection(frame, inset)
+---@param lineOnly? boolean @only the accent line, the box keeps its own darker background
+local function addSelection(frame, inset, lineOnly)
 	frame.selectedBg = frame:CreateTexture(nil, "BACKGROUND", nil, -7)
 	frame.selectedBg:SetPoint("TOPLEFT", inset, -inset)
 	frame.selectedBg:SetPoint("BOTTOMRIGHT", -inset, inset)
-	frame.selectedBg:SetColorTexture(unpack(Style.selected))
+	frame.selectedBg:SetColorTexture(unpack(lineOnly and Style.clear or Style.selected))
 
 	frame.marker = frame:CreateTexture(nil, "ARTWORK")
 	frame.marker:SetColorTexture(unpack(Style.accent))
@@ -353,7 +354,7 @@ end
 
 local function createPageEditor(parent)
 	local editor = UI.Box(parent)
-	addSelection(editor, editor.edge)
+	addSelection(editor, editor.edge, true)
 
 	--folds a modifier page
 	editor.header = CreateFrame("Button", nil, editor.strip)
@@ -633,50 +634,67 @@ local function bindPageEditor(editor, button, specIndex, specName, page, collaps
 		local data = button:GetResolvedData(page, specData)
 		editor.icon:SetTexture(not data.forceBlank and button:GetAppearance(data) or "INTERFACE\\ICONS\\INV_MISC_QUESTIONMARK")
 	end
-	refreshIcon()
 
 	--without a macro of its own, the one it uses shows grayed out
-	local fallback
-	editor.showNotice = not hasMacro(own)
-	if editor.showNotice then
-		fallback = button:GetResolvedData(page, specData)
-		local source = hasMacro(fallback) and sourceName(button, specData, specName, fallback)
-		local notice = fallback.forceBlank and L["ButtonEditor_InheritsBlank"] or L["ButtonEditor_Inherits"]
-		editor.notice:SetText(source and string.format(notice, source) or L["ButtonEditor_Empty"])
-		--a blank one has nothing to show
-		if not source or fallback.forceBlank then
-			fallback = nil
+	editor.showFallback = function()
+		refreshIcon()
+
+		local fallback
+		editor.showNotice = not hasMacro(own)
+		if editor.showNotice then
+			fallback = button:GetResolvedData(page, specData)
+			local source = hasMacro(fallback) and sourceName(button, specData, specName, fallback)
+			local notice = fallback.forceBlank and L["ButtonEditor_InheritsBlank"] or L["ButtonEditor_Inherits"]
+			editor.notice:SetText(source and string.format(notice, source) or L["ButtonEditor_Empty"])
+			--a blank one has nothing to show
+			if not source or fallback.forceBlank then
+				fallback = nil
+			end
 		end
+		editor.labelBox:SetPlaceholder(fallback and fallback.macro_Name)
+
+		--with a macro of its own, what it falls back on once that is deleted, grayed as soon as the box is empty
+		local macroFallback = fallback
+		if not editor.showNotice and not own.forceBlank then
+			rawset(specData, page, nil)
+			local data = button:GetResolvedData(page, specData)
+			rawset(specData, page, own)
+			macroFallback = hasMacro(data) and not data.forceBlank and data or nil
+		end
+		editor.macroBox:SetPlaceholder(macroFallback and type(macroFallback.macro_Text) == "string" and macroFallback.macro_Text)
 	end
 
 	editor.labelBox:SetText(own and own.macro_Name or "")
-	editor.labelBox:SetPlaceholder(fallback and fallback.macro_Name)
 	editor.macroBox:SetText(own and type(own.macro_Text) == "string" and own.macro_Text or "")
+	editor.showFallback()
 
-	--with a macro of its own, what it falls back on once that is deleted, grayed as soon as the box is empty
-	local macroFallback = fallback
-	if not editor.showNotice and not own.forceBlank then
-		rawset(specData, page, nil)
-		local data = button:GetResolvedData(page, specData)
-		rawset(specData, page, own)
-		macroFallback = hasMacro(data) and not data.forceBlank and data or nil
+	--the editor being typed in keeps its text and cursor, the rest show what they use now
+	local function refreshOthers()
+		for _, other in pairs(view.editors) do
+			if other ~= editor then
+				other.showFallback()
+			end
+		end
 	end
-	editor.macroBox:SetPlaceholder(macroFallback and type(macroFallback.macro_Text) == "string" and macroFallback.macro_Text)
 
 	editor.onLabel = function(text)
 		update{macro_Name = text}
+		refreshOthers()
 	end
 	editor.onMacro = function(text)
 		update{macro_Text = text}
 		refreshIcon()
+		refreshOthers()
 	end
 	editor.onResetIcon = function()
 		update{macro_Icon = false}
 		refreshIcon()
+		refreshOthers()
 	end
 	editor.onIcon = function(icon)
 		update{macro_Icon = icon}
 		refreshIcon()
+		refreshOthers()
 	end
 	--the page keeps its macro for when it is unticked. other pages may fall back on it, so all of them update
 	editor:SetBlank(own ~= nil and own.forceBlank == true)
@@ -850,7 +868,7 @@ end
 local function placeBody()
 	local top = 0
 	if specRow:IsShown() then
-		top = top + SPEC_ROW_SPACE + specRow:GetHeight() + SPEC_ROW_SPACE
+		top = top + SPEC_ROW_SPACE + specRow:GetHeight() + Style.gap + modifierRow:GetHeight() + SPEC_ROW_SPACE
 	end
 	local lastTabRow
 	for _, tabRow in ipairs({pageTabs, tabs}) do
@@ -862,25 +880,16 @@ local function placeBody()
 			lastTabRow = tabRow
 		end
 	end
-	--the last tab on the tab row over the pages, or left of remove without tabs. it shows with what it sits on
-	--expand is a tab before ?, it only shows with the forms' tabs
+	--expand and ? are tabs after the forms' last one. they show with the forms' tabs, without forms there is nothing to explain
 	expandButton:SetParent(tabs)
+	helpButton:SetParent(tabs)
 	expandButton:ClearAllPoints()
-	local helpAfter = lastTabRow and lastTabRow.lastTab
+	helpButton:ClearAllPoints()
 	if lastTabRow == tabs then
 		expandButton:SetHeight(tabs.lastTab:GetHeight())
 		expandButton:SetPoint("LEFT", tabs.lastTab, "RIGHT", 2, 0)
-		helpAfter = expandButton
-	end
-	helpButton:ClearAllPoints()
-	if lastTabRow then
-		helpButton:SetParent(lastTabRow)
-		helpButton:SetHeight(lastTabRow.lastTab:GetHeight())
-		helpButton:SetPoint("LEFT", helpAfter, "RIGHT", 2, 0)
-	else
-		helpButton:SetParent(specRow)
-		helpButton:SetHeight(Style.rowHeight)
-		helpButton:SetPoint("RIGHT", removeButton, "LEFT", -Style.gap, 0)
+		helpButton:SetHeight(tabs.lastTab:GetHeight())
+		helpButton:SetPoint("LEFT", expandButton, "RIGHT", 2, 0)
 	end
 	body:ClearAllPoints()
 	body:SetPoint("TOPLEFT", 0, -top)
@@ -923,8 +932,11 @@ local function createWindow()
 	specDropdown:SetPoint("LEFT", specLabel, "RIGHT", Style.gap * 2, 0)
 	specDropdown:SetWidth(220)
 
-	--the button's own visuals over its bar's, set in a window of their own, see VisualOverrideWindow.lua
-	overrideCheck = UI.Checkbox(specRow, function(checked)
+	--on the right in a light box: the button's own visuals over its bar's, set in a window of their own, see VisualOverrideWindow.lua
+	local overrideBox = CreateFrame("Frame", nil, specRow)
+	Style.Flat(overrideBox, Style.panelLight)
+	overrideBox:SetPoint("RIGHT")
+	overrideCheck = UI.Checkbox(overrideBox, function(checked)
 		Photon.currentButton:SetVisualOverride(checked)
 		if checked then
 			PhotonGUI:OpenVisualOverride()
@@ -934,9 +946,16 @@ local function createWindow()
 	end)
 	overrideCheck:SetLabel(L["Override Visuals"])
 	overrideCheck:SetWidth(16 + Style.gap + overrideCheck.label:GetStringWidth() + 4)
+	overrideCheck:SetPoint("LEFT", Style.gap, 0)
+	overrideBox:SetSize(overrideCheck:GetWidth() + Style.gap * 2, Style.rowHeight + 4)
 	addTooltip(overrideCheck, L["Override Visuals"], L["OverrideVisuals_Desc"])
 
-	addButton = UI.MenuButton(specRow, L["Add page for condition"], function(root)
+	modifierRow = CreateFrame("Frame", nil, specRow)
+	modifierRow:SetPoint("TOPLEFT", specRow, "BOTTOMLEFT", 0, -Style.gap)
+	modifierRow:SetPoint("TOPRIGHT", specRow, "BOTTOMRIGHT", 0, -Style.gap)
+	modifierRow:SetHeight(Style.rowHeight)
+
+	addButton = UI.MenuButton(modifierRow, L["Add page for condition"], function(root)
 		local lastSection
 		for _, modifier in ipairs(view.available) do
 			--a gap between the bar config's boxes
@@ -960,9 +979,19 @@ local function createWindow()
 			end
 		end
 	end)
+	local conditionLabel = UI.Text(modifierRow, nil, Style.dim)
+	conditionLabel:SetPoint("LEFT")
+	conditionLabel:SetText(L["Condition"])
+	--both captions as wide as the longer one, so the spec dropdown and adding a page line up
+	local captionWidth = math.max(specLabel:GetStringWidth(), conditionLabel:GetStringWidth())
+	for _, caption in ipairs({specLabel, conditionLabel}) do
+		caption:SetWidth(captionWidth)
+		caption:SetJustifyH("LEFT")
+	end
+	addButton:SetPoint("LEFT", conditionLabel, "RIGHT", Style.gap * 2, 0)
 
 	--removes the selected page's modifier
-	removeButton = UI.Button(specRow, L["Remove page"], function()
+	removeButton = UI.Button(modifierRow, L["Remove page"], function()
 		view.editors[selected.page].onRemove()
 	end)
 	removeButton:SetPoint("RIGHT")
@@ -1163,28 +1192,15 @@ function render()
 	spec = spec or active or specs[1]
 	selected.spec = spec.index
 
-	local hasSpecs = #specs > 1
-	if hasSpecs then
-		local items = {}
-		for _, candidate in ipairs(specs) do
-			table.insert(items, {value = candidate.index, text = candidate.name})
-		end
-		specDropdown:SetItems(items)
-		specDropdown:SetValue(spec.index)
+	local items = {}
+	for _, candidate in ipairs(specs) do
+		table.insert(items, {value = candidate.index, text = candidate.name})
 	end
-	specLabel:SetShown(hasSpecs)
-	specDropdown:SetShown(hasSpecs)
+	specDropdown:SetItems(items)
+	specDropdown:SetValue(spec.index)
+	specDropdown:SetEnabled(#specs > 1)
 	specRow:Show()
 
-	--right of the spec, or first in the row without one. the button's own visuals come after
-	addButton:ClearAllPoints()
-	if hasSpecs then
-		addButton:SetPoint("LEFT", specDropdown, "RIGHT", Style.gap * 2, 0)
-	else
-		addButton:SetPoint("LEFT")
-	end
-	overrideCheck:ClearAllPoints()
-	overrideCheck:SetPoint("LEFT", addButton, "RIGHT", Style.gap * 2, 0)
 	overrideCheck:SetChecked(button:HasVisualOverride())
 
 	-------------------------------- default and forms --------------------------------

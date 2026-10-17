@@ -1,5 +1,8 @@
 .env
 .idea
+.claude
+CLAUDE.md
+CLAUDE.local.md
 .libcache
 .luarc.json
 dist

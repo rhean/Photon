@@ -1,3 +1,14 @@
+## 0.4.1
+
+### Fixes and Tweaks
+- The greyed-out text in the button editor now updates while you type.
+- Buttons with only an icon and no macro can now be interacted with.
+- The Anchor To list shows every bar again. Bars that would anchor in a circle are greyed out.
+- The top of the button editor has been cleaned up: only the relevant elements show for each class, and they should no longer overflow.
+- The "?" help in the button editor only shows for classes with stances or forms.
+- The Stance option no longer shows for classes without stances.
+- More contrast in the button editor, so the info boxes should be clearer.
+
 ## 0.4
 
 ### New

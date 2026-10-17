@@ -103,9 +103,10 @@ local function barStateToggle(state, name)
 	return {
 		type = "toggle",
 		name = name,
-		--states only apply to action bars. rogues get stealth as their home stance state instead
+		--states only apply to action bars. rogues get stealth as their home stance state instead.
 		hidden = function()
 			return bar().class ~= "ActionBar" or (Photon.class == "ROGUE" and state == "stealth")
+				or (state == "stance" and GetNumShapeshiftForms() == 0 and not bar().data.stance)
 		end,
 		get = function() return not not bar().data[state] end,
 		set = function(_, value) bar():SetState(state, true, value) end,
@@ -134,13 +135,17 @@ local function positionDefinitions(definitions)
 		end
 	end
 
-	--the screen, then every bar that doesn't follow this one already, which would make a loop
-	local targets, targetOrder = {screen = L["Screen"]}, {"screen"}
+	--the screen, then every other bar. one that follows this one already would make a loop, it is greyed out
+	local targets, targetOrder, loops, loopTooltips = {screen = L["Screen"]}, {"screen"}, {}, {}
 	for _, other in ipairs(Photon.bars) do
-		local key = other ~= current and not other:IsAnchoredTo(current) and other:GetAnchorKey()
+		local key = other ~= current and other:GetAnchorKey()
 		if key then
 			targets[key] = other:GetBarName()
 			table.insert(targetOrder, key)
+			if other:IsAnchoredTo(current) then
+				loops[key] = true
+				loopTooltips[key] = string.format(L["AnchorTo_Loop"], other:GetBarName(), current:GetBarName())
+			end
 		end
 	end
 
@@ -154,8 +159,13 @@ local function positionDefinitions(definitions)
 		name = L["Anchor To"],
 		values = targets,
 		sorting = targetOrder,
+		disabledValues = loops,
+		valueTooltips = loopTooltips,
 		get = function() return data.anchorTo or "screen" end,
 		set = outOfCombat(function(value)
+			if loops[value] then
+				return
+			end
 			current:SetAnchor(value ~= "screen" and value or nil, data.anchorPoint or "CENTER", data.point)
 		end),
 		onHover = function(key)

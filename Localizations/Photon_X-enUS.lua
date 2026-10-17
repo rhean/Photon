@@ -146,6 +146,7 @@ L["Configure Appearance"] = true
 L["Bar Config"] = true
 L["Button Editor"] = true
 L["Specialization"] = true
+L["Condition"] = true
 L["Modifiers"] = true
 L["ButtonEditor_Location"] = "Button %d - Row %d"
 L["ButtonEditor_Button"] = "Button %d"
@@ -316,6 +317,7 @@ L["Rotation"] = true
 -- the position box, on the General Configuration tab
 L["Position"] = true
 L["Anchor To"] = true
+L["AnchorTo_Loop"] = "%s is already positioned from %s. Anchoring to it would make a circular dependency."
 L["Screen"] = true
 L["Bar Point"] = true
 L["Target Point"] = true
@@ -664,13 +666,14 @@ L["BarDesc_visibility_fishing1"] = "Hides the bar when you have a fishing pole e
 L["WhatsNew_Title"] = "Photon %s"
 L["WhatsNew_Text"] = [[
 Welcome to the beta release of Photon!
-Please help out by posting any bugs and suggestions over at github.com/rhean/Photon
+Please help out by posting any bugs and suggestions on Curse or github.com/rhean/Photon
 
-New in 0.4:
-- The Button Backdrop colour can now be changed, to tint the border around action bar buttons.
-- The Icon Tint can now be changed, to change the overlay colour on action bar buttons.
-- It's now possible to override the visuals of individual buttons. The bar config has a button to reset all the buttons on its bar.
-- The default cast bar and mirror timers (breath, fatigue) are now hidden the same way as the other default bars.
-- The bar editor now always has a bar selected when it opens.
-- The editors have lighter backgrounds, grey buttons, a brighter selection highlight on bars and easier-to-read checkboxes.
+New in 0.4.1:
+- The greyed-out text in the button editor now updates while you type.
+- Buttons with only an icon and no macro can now be interacted with.
+- The Anchor To list shows every bar again. Bars that would anchor in a circle are greyed out.
+- The top of the button editor has been cleaned up: only the relevant elements show for each class, and they should no longer overflow.
+- The "?" help in the button editor only shows for classes with stances or forms.
+- The Stance option no longer shows for classes without stances.
+- More contrast in the button editor, so the info boxes should be clearer.
 ]]

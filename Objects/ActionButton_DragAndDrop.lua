@@ -46,6 +46,11 @@ end
 --------------------------------------
 --------------------------------------
 
+--a macro, or only an icon picked in the button editor, both move with a drag
+local function hasContent(self)
+	return self:GetMacroText() ~= "" or not not self:GetMacroIcon()
+end
+
 --this is the function that fires when you begin dragging an item
 function ActionButton:OnDragStart()
 	if InCombatLockdown() or not self.bar or self.actionID then
@@ -66,7 +71,7 @@ function ActionButton:OnDragStart()
 		drag = false
 	end
 
-	if drag and self:GetMacroText() ~= "" then
+	if drag and hasContent(self) then
 		--an inherited macro belongs to another state, clearing this state would leave it showing
 		if self:GetActiveData() ~= self.data then
 			Photon:Print(L["DragDrop_Inherited_Message"])
@@ -117,7 +122,7 @@ function ActionButton:OnReceiveDrag()
 		end
 	end
 
-	if self:GetMacroText() ~= "" and self:GetActiveData() == self.data then --if our button being dropped onto already has content, we need to cache that content. inherited content stays where it is
+	if hasContent(self) and self:GetActiveData() == self.data then --if our button being dropped onto already has content, we need to cache that content. inherited content stays where it is
 		macroCache[1] = self:GetDragAction()
 		macroCache[2] = self:GetMacroText()
 		macroCache[3] = self:GetMacroIcon()
@@ -224,7 +229,7 @@ function ActionButton:PickUpMacro()
 		macroDrag = CopyTable(macroCache)
 		wipe(macroCache) --once macroCache is loaded into macroDrag, wipe it
 
-	elseif self:GetMacroText() ~= "" then --not HasAction, macros without a spell or item (like /cancelaura) have to move too
+	elseif hasContent(self) then --not HasAction, macros without a spell or item (like /cancelaura) and lone icons have to move too
 
 		macroDrag[1] = self:GetDragAction()
 		macroDrag[2] = self:GetMacroText()
