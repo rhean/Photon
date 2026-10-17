@@ -879,25 +879,16 @@ local function placeBody()
 			lastTabRow = tabRow
 		end
 	end
-	--the last tab on the tab row over the pages, or left of remove without tabs. it shows with what it sits on
-	--expand is a tab before ?, it only shows with the forms' tabs
+	--expand and ? are tabs after the forms' last one. they show with the forms' tabs, without forms there is nothing to explain
 	expandButton:SetParent(tabs)
+	helpButton:SetParent(tabs)
 	expandButton:ClearAllPoints()
-	local helpAfter = lastTabRow and lastTabRow.lastTab
+	helpButton:ClearAllPoints()
 	if lastTabRow == tabs then
 		expandButton:SetHeight(tabs.lastTab:GetHeight())
 		expandButton:SetPoint("LEFT", tabs.lastTab, "RIGHT", 2, 0)
-		helpAfter = expandButton
-	end
-	helpButton:ClearAllPoints()
-	if lastTabRow then
-		helpButton:SetParent(lastTabRow)
-		helpButton:SetHeight(lastTabRow.lastTab:GetHeight())
-		helpButton:SetPoint("LEFT", helpAfter, "RIGHT", 2, 0)
-	else
-		helpButton:SetParent(modifierRow)
-		helpButton:SetHeight(Style.rowHeight)
-		helpButton:SetPoint("RIGHT", removeButton, "LEFT", -Style.gap, 0)
+		helpButton:SetHeight(tabs.lastTab:GetHeight())
+		helpButton:SetPoint("LEFT", expandButton, "RIGHT", 2, 0)
 	end
 	body:ClearAllPoints()
 	body:SetPoint("TOPLEFT", 0, -top)
