@@ -302,11 +302,12 @@ local function addTooltip(frame, title, desc)
 end
 
 --the selected look, a light background with an accent line on the left, inset from the edge
-local function addSelection(frame, inset)
+---@param lineOnly? boolean @only the accent line, the box keeps its own darker background
+local function addSelection(frame, inset, lineOnly)
 	frame.selectedBg = frame:CreateTexture(nil, "BACKGROUND", nil, -7)
 	frame.selectedBg:SetPoint("TOPLEFT", inset, -inset)
 	frame.selectedBg:SetPoint("BOTTOMRIGHT", -inset, inset)
-	frame.selectedBg:SetColorTexture(unpack(Style.selected))
+	frame.selectedBg:SetColorTexture(unpack(lineOnly and Style.clear or Style.selected))
 
 	frame.marker = frame:CreateTexture(nil, "ARTWORK")
 	frame.marker:SetColorTexture(unpack(Style.accent))
@@ -353,7 +354,7 @@ end
 
 local function createPageEditor(parent)
 	local editor = UI.Box(parent)
-	addSelection(editor, editor.edge)
+	addSelection(editor, editor.edge, true)
 
 	--folds a modifier page
 	editor.header = CreateFrame("Button", nil, editor.strip)

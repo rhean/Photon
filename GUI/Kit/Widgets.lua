@@ -163,7 +163,7 @@ end
 ---@param onChange? fun(text: string)
 function UI.MultiLineEditBox(parent, lines, onChange)
 	local frame = CreateFrame("Frame", nil, parent)
-	Style.Flat(frame, Style.field)
+	Style.Flat(frame, Style.field, Style.fieldBorder)
 
 	local scroll = CreateFrame("ScrollFrame", nil, frame)
 	scroll:SetPoint("TOPLEFT", 6, -4)
@@ -241,7 +241,7 @@ function UI.MultiLineEditBox(parent, lines, onChange)
 		Style.SetBorder(frame, Style.focus)
 	end)
 	box:HookScript("OnEditFocusLost", function()
-		Style.SetBorder(frame, Style.border)
+		Style.SetBorder(frame, Style.fieldBorder)
 	end)
 
 	function frame:SetText(text)

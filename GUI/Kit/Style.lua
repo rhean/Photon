@@ -17,6 +17,8 @@ local Style = {
 	box = {0.13, 0.13, 0.14, 1},
 	strip = {0.1, 0.1, 0.11, 1},
 	field = {0.04, 0.04, 0.05, 1},
+	--a multi-line text field's border, lighter than border so the field stands out. focus is lighter still
+	fieldBorder = {0.35, 0.35, 0.36, 1},
 	--a checkbox's box, lighter than panelLight so it shows in a light box too
 	checkbox = {0.25, 0.25, 0.26, 1},
 	border = {0, 0, 0, 1},
