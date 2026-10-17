@@ -37,7 +37,7 @@ local expanded, expandedFor = {}, nil
 local specRow, specLabel, specDropdown, helpButton, pageTabs, tabs, body, emptyText
 local addButton, removeButton, expandButton, rowPool
 local left, editors, editorPool
-local overrideCheck
+local overrideCheck, modifierRow
 
 --the button on show last, so picking another one opens its own visuals
 local lastButton
@@ -867,7 +867,7 @@ end
 local function placeBody()
 	local top = 0
 	if specRow:IsShown() then
-		top = top + SPEC_ROW_SPACE + specRow:GetHeight() + SPEC_ROW_SPACE
+		top = top + SPEC_ROW_SPACE + specRow:GetHeight() + Style.gap + modifierRow:GetHeight() + SPEC_ROW_SPACE
 	end
 	local lastTabRow
 	for _, tabRow in ipairs({pageTabs, tabs}) do
@@ -895,7 +895,7 @@ local function placeBody()
 		helpButton:SetHeight(lastTabRow.lastTab:GetHeight())
 		helpButton:SetPoint("LEFT", helpAfter, "RIGHT", 2, 0)
 	else
-		helpButton:SetParent(specRow)
+		helpButton:SetParent(modifierRow)
 		helpButton:SetHeight(Style.rowHeight)
 		helpButton:SetPoint("RIGHT", removeButton, "LEFT", -Style.gap, 0)
 	end
@@ -940,8 +940,11 @@ local function createWindow()
 	specDropdown:SetPoint("LEFT", specLabel, "RIGHT", Style.gap * 2, 0)
 	specDropdown:SetWidth(220)
 
-	--the button's own visuals over its bar's, set in a window of their own, see VisualOverrideWindow.lua
-	overrideCheck = UI.Checkbox(specRow, function(checked)
+	--on the right in a light box: the button's own visuals over its bar's, set in a window of their own, see VisualOverrideWindow.lua
+	local overrideBox = CreateFrame("Frame", nil, specRow)
+	Style.Flat(overrideBox, Style.panelLight)
+	overrideBox:SetPoint("RIGHT")
+	overrideCheck = UI.Checkbox(overrideBox, function(checked)
 		Photon.currentButton:SetVisualOverride(checked)
 		if checked then
 			PhotonGUI:OpenVisualOverride()
@@ -951,9 +954,16 @@ local function createWindow()
 	end)
 	overrideCheck:SetLabel(L["Override Visuals"])
 	overrideCheck:SetWidth(16 + Style.gap + overrideCheck.label:GetStringWidth() + 4)
+	overrideCheck:SetPoint("LEFT", Style.gap, 0)
+	overrideBox:SetSize(overrideCheck:GetWidth() + Style.gap * 2, Style.rowHeight + 4)
 	addTooltip(overrideCheck, L["Override Visuals"], L["OverrideVisuals_Desc"])
 
-	addButton = UI.MenuButton(specRow, L["Add page for condition"], function(root)
+	modifierRow = CreateFrame("Frame", nil, specRow)
+	modifierRow:SetPoint("TOPLEFT", specRow, "BOTTOMLEFT", 0, -Style.gap)
+	modifierRow:SetPoint("TOPRIGHT", specRow, "BOTTOMRIGHT", 0, -Style.gap)
+	modifierRow:SetHeight(Style.rowHeight)
+
+	addButton = UI.MenuButton(modifierRow, L["Add page for condition"], function(root)
 		local lastSection
 		for _, modifier in ipairs(view.available) do
 			--a gap between the bar config's boxes
@@ -977,9 +987,19 @@ local function createWindow()
 			end
 		end
 	end)
+	local conditionLabel = UI.Text(modifierRow, nil, Style.dim)
+	conditionLabel:SetPoint("LEFT")
+	conditionLabel:SetText(L["Condition"])
+	--both captions as wide as the longer one, so the spec dropdown and adding a page line up
+	local captionWidth = math.max(specLabel:GetStringWidth(), conditionLabel:GetStringWidth())
+	for _, caption in ipairs({specLabel, conditionLabel}) do
+		caption:SetWidth(captionWidth)
+		caption:SetJustifyH("LEFT")
+	end
+	addButton:SetPoint("LEFT", conditionLabel, "RIGHT", Style.gap * 2, 0)
 
 	--removes the selected page's modifier
-	removeButton = UI.Button(specRow, L["Remove page"], function()
+	removeButton = UI.Button(modifierRow, L["Remove page"], function()
 		view.editors[selected.page].onRemove()
 	end)
 	removeButton:SetPoint("RIGHT")
@@ -1180,28 +1200,15 @@ function render()
 	spec = spec or active or specs[1]
 	selected.spec = spec.index
 
-	local hasSpecs = #specs > 1
-	if hasSpecs then
-		local items = {}
-		for _, candidate in ipairs(specs) do
-			table.insert(items, {value = candidate.index, text = candidate.name})
-		end
-		specDropdown:SetItems(items)
-		specDropdown:SetValue(spec.index)
+	local items = {}
+	for _, candidate in ipairs(specs) do
+		table.insert(items, {value = candidate.index, text = candidate.name})
 	end
-	specLabel:SetShown(hasSpecs)
-	specDropdown:SetShown(hasSpecs)
+	specDropdown:SetItems(items)
+	specDropdown:SetValue(spec.index)
+	specDropdown:SetEnabled(#specs > 1)
 	specRow:Show()
 
-	--right of the spec, or first in the row without one. the button's own visuals come after
-	addButton:ClearAllPoints()
-	if hasSpecs then
-		addButton:SetPoint("LEFT", specDropdown, "RIGHT", Style.gap * 2, 0)
-	else
-		addButton:SetPoint("LEFT")
-	end
-	overrideCheck:ClearAllPoints()
-	overrideCheck:SetPoint("LEFT", addButton, "RIGHT", Style.gap * 2, 0)
 	overrideCheck:SetChecked(button:HasVisualOverride())
 
 	-------------------------------- default and forms --------------------------------

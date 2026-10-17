@@ -146,6 +146,7 @@ L["Configure Appearance"] = true
 L["Bar Config"] = true
 L["Button Editor"] = true
 L["Specialization"] = true
+L["Condition"] = true
 L["Modifiers"] = true
 L["ButtonEditor_Location"] = "Button %d - Row %d"
 L["ButtonEditor_Button"] = "Button %d"

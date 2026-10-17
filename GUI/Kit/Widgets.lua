@@ -399,7 +399,7 @@ function UI.Checkbox(parent, onChange)
 	check:SetHeight(Style.rowHeight)
 
 	check.box = CreateFrame("Frame", nil, check)
-	Style.Flat(check.box, Style.checkbox, nil, 2)
+	Style.Flat(check.box, Style.checkbox)
 	check.box:SetSize(16, 16)
 	check.box:SetPoint("LEFT")
 

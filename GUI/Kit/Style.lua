@@ -43,11 +43,10 @@ local Style = {
 
 local SIDES = {"TOP", "BOTTOM", "LEFT", "RIGHT"}
 
----a filled background with a border inside its edge, made once per frame
+---a filled background with a 1px border, made once per frame
 ---@param color? table @Style.panel when left out
 ---@param borderColor? table @Style.border when left out
----@param borderSize? number @1px when left out
-function Style.Flat(frame, color, borderColor, borderSize)
+function Style.Flat(frame, color, borderColor)
 	local skin = frame.photonFlat
 	if not skin then
 		skin = {bg = frame:CreateTexture(nil, "BACKGROUND", nil, -8)}
@@ -57,20 +56,18 @@ function Style.Flat(frame, color, borderColor, borderSize)
 		end
 		skin.TOP:SetPoint("TOPLEFT")
 		skin.TOP:SetPoint("TOPRIGHT")
+		skin.TOP:SetHeight(1)
 		skin.BOTTOM:SetPoint("BOTTOMLEFT")
 		skin.BOTTOM:SetPoint("BOTTOMRIGHT")
+		skin.BOTTOM:SetHeight(1)
 		skin.LEFT:SetPoint("TOPLEFT")
 		skin.LEFT:SetPoint("BOTTOMLEFT")
+		skin.LEFT:SetWidth(1)
 		skin.RIGHT:SetPoint("TOPRIGHT")
 		skin.RIGHT:SetPoint("BOTTOMRIGHT")
+		skin.RIGHT:SetWidth(1)
 		frame.photonFlat = skin
 	end
-
-	borderSize = borderSize or 1
-	skin.TOP:SetHeight(borderSize)
-	skin.BOTTOM:SetHeight(borderSize)
-	skin.LEFT:SetWidth(borderSize)
-	skin.RIGHT:SetWidth(borderSize)
 
 	skin.bg:SetColorTexture(unpack(color or Style.panel))
 	Style.SetBorder(frame, borderColor or Style.border)
