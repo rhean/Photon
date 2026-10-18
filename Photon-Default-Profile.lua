@@ -172,6 +172,20 @@ addonTable.defaultProfile.ExitBar = {
 }
 
 -----------------------------------
+----------- Totem Bar -------------
+-----------------------------------
+addonTable.defaultProfile.TotemBar = {
+	[1] = {
+		hidestates = ":",
+		point = "BOTTOM",
+		x = 0,
+		y = 145,
+
+		buttons = Array.initialize(6, function() return {} end),
+	}
+}
+
+-----------------------------------
 ------------ Pet Bar --------------
 -----------------------------------
 addonTable.defaultProfile.PetBar = {

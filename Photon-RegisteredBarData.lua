@@ -110,7 +110,21 @@ function Photon:RegisterBars(DB)
       objTemplate = Photon.ExitButton,
       objMax = 1
     },
+    TotemBar = {
+      class = "TotemBar",
+      barType = "TotemBar",
+      barLabel = L["Totem Bar"],
+      objType = "TotemButton",
+      barDB = DB.TotemBar,
+      objTemplate = Photon.TotemButton,
+      objMax = 6
+    },
   }
+
+  --the totem bar is Forever's, for shamans
+  if not (Photon.isWoWForever and Photon.class == "SHAMAN") then
+    allBars.TotemBar = nil
+  end
 
   --Classic Era and TBC have no vehicles
   if Photon.isWoWClassicEra or Photon.isWoWTBC then

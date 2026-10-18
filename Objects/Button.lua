@@ -1009,7 +1009,7 @@ function Button:UpdateUsableAction()
 	if notEnoughMana and visuals:GetManaColor() then
 		self.Icon:SetVertexColor(unpack(visuals:GetManaColor(), 1, 3))
 	elseif isUsable then
-		if visuals:GetShowRangeIndicator() and C_ActionBar.IsActionInRange(self.actionID, self.unit) == false then -- [retail port 2026-10-12] was IsActionInRange(self.spell, ...) == 0: wrong arg, retail errors
+		if visuals:GetShowRangeIndicator() and C_ActionBar and C_ActionBar.IsActionInRange and C_ActionBar.IsActionInRange(self.actionID, self.unit) == false then -- [retail port 2026-10-12] was IsActionInRange(self.spell, ...) == 0: wrong arg, retail errors
 			self.Icon:SetVertexColor(unpack(visuals:GetRangeColor(), 1, 3))
 		else
 			self.Icon:SetVertexColor(1.0, 1.0, 1.0)

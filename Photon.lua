@@ -140,6 +140,7 @@ function Photon:OnInitialize()
 	if DB.firstRun then
 		Photon:InitializeEmptyDatabase(DB)
 	end
+	Photon:AddTotemBar(DB)
 	Photon:CreateBarsAndButtons(DB)
 end
 
@@ -674,7 +675,8 @@ function Photon:ToggleBindingMode(show)
 			bar.class == "ActionBar" or
 			bar.class == "ExtraBar" or
 			bar.class == "ZoneAbilityBar" or
-			bar.class == "PetBar"
+			bar.class == "PetBar" or
+			bar.class == "TotemBar"
 		)
 	end
 

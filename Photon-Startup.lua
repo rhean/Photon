@@ -34,6 +34,15 @@ function Photon:InitializeEmptyDatabase(DB)
 	end
 end
 
+function Photon:AddTotemBar(DB)
+	if Photon.registeredBarData.TotemBar and not DB.totemBarAdded then
+		DB.totemBarAdded = true
+		if #DB.TotemBar == 0 then
+			mergeIntoDB(DB.TotemBar, addonTable.defaultProfile.TotemBar)
+		end
+	end
+end
+
 function Photon:CreateBarsAndButtons(profileData)
 	-- remove blizzard controlled bars from the list of bars we will create
 	-- but still keep photon action bars regardless
