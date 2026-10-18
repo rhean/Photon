@@ -299,7 +299,7 @@ local function barDefinitions()
 			end,
 		},
 		columns = barRange(L["Columns"], 0, math.max(numObjects, 1), 1, false, "GetColumns", "SetColumns"),
-		scale = barRange(L["Scale"], 0.1, 2, 0.05, true, "GetBarScale", "SetBarScale"),
+		scale = barRange(L["Scale"], 0.1, 2, 0.01, true, "GetBarScale", "SetBarScale"),
 		shape = barSelect(L["Shape"],
 			{linear = L["Linear"], circle = L["Circle"], ["circle + one"] = L["Circle + One"], square = L["Square"], diamond = L["Diamond"]},
 			{"linear", "circle", "circle + one", "square", "diamond"},
