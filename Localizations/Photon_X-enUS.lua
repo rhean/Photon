@@ -417,6 +417,11 @@ L["Stance Bar"] = true
 L["Extra Action Bar"] = true
 L["Bag Bar"] = true
 L["Pet Bar"] = true
+L["Totem Bar"] = true
+L["Fire Totem"] = true
+L["Earth Totem"] = true
+L["Water Totem"] = true
+L["Air Totem"] = true
 L["Menu Bar"] = true
 L["XP Bar"] = true
 L["Rep Bar"] = true
@@ -668,12 +673,10 @@ L["WhatsNew_Text"] = [[
 Welcome to the beta release of Photon!
 Please help out by posting any bugs and suggestions on Curse or github.com/rhean/Photon
 
-New in 0.4.1:
-- The greyed-out text in the button editor now updates while you type.
-- Buttons with only an icon and no macro can now be interacted with.
-- The Anchor To list shows every bar again. Bars that would anchor in a circle are greyed out.
-- The top of the button editor has been cleaned up: only the relevant elements show for each class, and they should no longer overflow.
-- The "?" help in the button editor only shows for classes with stances or forms.
-- The Stance option no longer shows for classes without stances.
-- More contrast in the button editor, so the info boxes should be clearer.
+New in 0.4.2:
+- Totem Bar for shamans on Forever: your Call of the Elements, the four totem slots and Totemic Recall as Photon buttons, with keybinds, skins and the usual bar options. Right-click a slot to choose its totem, or the Call button to switch between Calls. Empty slots show their element, and spells you haven't learned yet are greyed out.
+- Bars keep their buttons when you shrink them, so a button comes back with its macro and keybind if you grow the bar again.
+- Bar scale now changes in steps of 1% instead of 5%.
+- Dragging a spell whose name changes in the spellbook, like Call Pet, onto a button now makes a macro that works.
+- Macros made by dragging spells, mounts and pets no longer start with a "#autowrite" line.
 ]]

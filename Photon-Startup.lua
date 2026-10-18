@@ -34,6 +34,15 @@ function Photon:InitializeEmptyDatabase(DB)
 	end
 end
 
+function Photon:AddTotemBar(DB)
+	if Photon.registeredBarData.TotemBar and not DB.totemBarAdded then
+		DB.totemBarAdded = true
+		if #DB.TotemBar == 0 then
+			mergeIntoDB(DB.TotemBar, addonTable.defaultProfile.TotemBar)
+		end
+	end
+end
+
 function Photon:CreateBarsAndButtons(profileData)
 	-- remove blizzard controlled bars from the list of bars we will create
 	-- but still keep photon action bars regardless
@@ -52,8 +61,8 @@ function Photon:CreateBarsAndButtons(profileData)
 			if data ~= nil then
 				local newBar = Photon.Bar.new(barClass, id) --this calls the bar constructor
 
-				--create all the saved button objects for a given bar
-				for buttonID=1,#newBar.data.buttons do
+				--create the button objects the bar shows, the saved ones after wait for it to grow again
+				for buttonID=1,newBar:GetShownButtons() do
 					newBar.objTemplate.new(newBar, buttonID) --newBar.objTemplate is something like ActionButton or ExtraButton, we just need to code it agnostic
 				end
 			end

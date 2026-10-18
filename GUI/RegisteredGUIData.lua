@@ -146,6 +146,20 @@ function Photon:RegisterGUI()
 				LOCKBAR = false,
 			}
 		},
+		TotemBar = {
+			class = "TotemBar",
+			generalOptions = {
+				AUTOHIDE = true,
+				HIDDEN = true,
+			},
+			visualOptions = {
+				BINDTEXT = true,
+				CDTEXT = true,
+				CDALPHA = true,
+				TOOLTIPS = true,
+				SLOTCOLOR = true,
+			}
+		},
 	}
 	return allBars
 end

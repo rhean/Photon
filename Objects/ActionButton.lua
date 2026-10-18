@@ -675,7 +675,7 @@ function ActionButton:AutoWriteMacro(spell)
 		modifier = modifier.."[] "
 	end
 
-	return "#autowrite\n/cast"..modifier..spell.."()"
+	return "/cast"..modifier..spell.."()"
 end
 
 function ActionButton:GetPosition(relFrame)
@@ -706,92 +706,6 @@ function ActionButton:GetPosition(relFrame)
 
 	return point, x, y
 end
-
-
---This will update the modifier value in a macro when a bar is set with a target conditional
---@spell:  this is hte macro text to be updated
---return: updated macro text
---[[function ActionButton:AutoUpdateMacro(macro)
-
-	local DB = Photon.db.profile
-
-	if GetModifiedClick("SELFCAST") ~= "NONE"  then
-		macro = macro:gsub("%[@player,mod:%u+%]", "[@player,mod:"..GetModifiedClick("SELFCAST").."]")
-	else
-		macro = macro:gsub("%[@player,mod:%u+%]", "")
-	end
-
-	if GetModifiedClick("FOCUSCAST") ~= "NONE"  then
-		macro = macro:gsub("%[@focus,mod:%u+%]", "[@focus,exists,mod:"..GetModifiedClick("FOCUSCAST").."]")
-	else
-		macro = macro:gsub("%[@focus,mod:%u+%]", "")
-	end
-
-	if DB.mouseOverMod ~= "NONE"  then
-		macro = macro:gsub("%[@mouseover,mod:%u+%]", "[@mouseover,mod:"..DB.mouseOverMod .."]")
-		macro = macro:gsub("%[@mouseover,exists]", "[@mouseover,mod:"..DB.mouseOverMod .."]")
-	else
-		macro = macro:gsub("%[@mouseover,mod:%u+%]", "[@mouseover,exists]")
-	end
-
-	return macro
-end
-
-
--- This will iterate through a set of buttons. For any buttons that have the #autowrite flag in its macro, that
--- macro will then be updated to via AutoWriteMacro to include selected target macro option, or via AutoUpdateMacro
--- to update a current target macro's toggle modifier.
--- @param global(boolean): if true will go though all buttons, else it will just update the button set for the current bar
-function ActionButton:UpdateMacroCastTargets(global_update)
-
-	local button_list = {}
-
-	if global_update then
-
-		for _,bar in ipairs(Photon.bars) do
-			for _, object in ipairs(bar.buttons) do
-				table.insert(button_list, object)
-			end
-		end
-
-	else
-		local bar = Photon.currentBar
-		for i, object in ipairs(bar.buttons) do
-			table.insert(button_list, object)
-		end
-	end
-
-	for index, button in pairs(button_list) do
-		local cur_button = button.DB
-		local macro_update = false
-
-		for i = 1,2 do
-			for state, info in pairs(cur_button[i]) do
-				if info:GetMacroText() and info:GetMacroText():find("#autowrite\n/cast") then
-					local spell = ""
-
-					spell = info:GetMacroText():gsub("%[.*%]", "")
-					spell = spell:match("#autowrite\n/cast%s*(.+)%((.*)%)")
-
-					if spell then
-						if global_update then
-							info:SetMacroText(button:AutoUpdateMacro(info.macro_Text))
-						else
-							info:SetMacroText(button:AutoWriteMacro(spell))
-						end
-
-					end
-					macro_update = true
-				end
-			end
-		end
-
-		if macro_update then
-			button:UpdateFlyout()
-			button:InitializeButton()
-		end
-	end
-end]]
 
 
 -----------------------------------------------------
@@ -835,7 +749,7 @@ function ActionButton.PlainCastSpellID(macro)
 	for line in macro:gmatch("[^\n]+") do
 		line = line:match("^%s*(.-)%s*$")
 		if line == "" or line == "#autowrite" or line:find("^#showtooltip") then
-			--these change nothing about what is cast
+			--these change nothing about what is cast. older saved macros still start with #autowrite
 		elseif cast or not (line:find("^/cast%s") or line:find("^/spell%s")) then
 			return nil
 		else
@@ -898,7 +812,7 @@ function ActionButton.ExtractMacroData(macro)
 	local command, abilityOrItem, target
 	for cmd, content in gmatch(macro, "(%c%p%a+)(%C+)") do
 
-		--"cmd" is "/cast" or "/use" or "#autowrite" or "#showtooltip" etc
+		--"cmd" is "/cast" or "/use" or "#showtooltip" etc
 		--"content" is everything else, like "Chi Torpedo()"
 
 		if cmd then

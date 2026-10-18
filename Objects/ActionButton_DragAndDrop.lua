@@ -285,6 +285,11 @@ function ActionButton:PlaceSpell(action1, action2, spellID)
 		local spellBank = action2 == "pet" and Enum.SpellBookSpellBank.Pet or Enum.SpellBookSpellBank.Player
 		spell = C_SpellBook.GetSpellBookItemName(action1, spellBank):lower()
 		spellID = C_SpellBook.GetSpellBookItemInfo(action1, spellBank).spellID
+
+		--some spellbook names are display only and can't be cast, i.e. Call Pet 1 shows as "Call Bird of Prey"
+		if not C_Spell.GetSpellInfo(spell) then
+			spell = C_Spell.GetSpellName(spellID) or spell
+		end
 	end
 
 
@@ -433,7 +438,7 @@ function ActionButton:PlaceMount(action1, action2)
 
 	--The Summon Random Mount from the Mount Journal
 	if action1 == 268435455 then
-		self:SetMacroText("#autowrite\n/run C_MountJournal.SummonByID(0);")
+		self:SetMacroText("/run C_MountJournal.SummonByID(0);")
 		self:SetMacroIcon("Interface\\ICONS\\ACHIEVEMENT_GUILDPERK_MOUNTUP")
 		self:SetMacroName()
 	else
@@ -486,7 +491,7 @@ function ActionButton:PlaceBattlePet(action1, action2)
 
 	local _, _, _, _, _, _, _,petName, petIcon= C_PetJournal.GetPetInfoByPetID(action1)
 
-	self:SetMacroText("#autowrite\n/summonpet "..petName)
+	self:SetMacroText("/summonpet "..petName)
 	self:SetMacroIcon(petIcon) --need to set icon here, it won't pull it automatically
 	self:SetMacroName()
 	self:SetMacroNote()

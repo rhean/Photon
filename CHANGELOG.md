@@ -1,3 +1,14 @@
+## 0.4.2
+
+### New
+- Totem Bar for shamans on Forever: Its added as its own type of bar and covres all the totems and call of elements. You can rightclick the buttons to select your totem and use the call buttons as you usualy would.
+
+### Fixes and Tweaks
+- Bars keep their buttons when you shrink them, so a button comes back with its macro and keybind if you grow the bar again.
+- Bar scale now changes in steps of 1% instead of 5%.
+- Spells whose name changes in the spellbook, like Call Pet, now get the correct macro.
+- Macros made by dragging spells, mounts and pets no longer start with a "#autowrite" line.
+
 ## 0.4.1
 
 ### Fixes and Tweaks

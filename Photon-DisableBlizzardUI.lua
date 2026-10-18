@@ -181,6 +181,9 @@ function Photon:HideBlizzardUI(profileDatabase)
 	if not blizzBars.ZoneAbilityBar then
 		disableBarFrame(ZoneAbilityFrame)
 	end
+	if not blizzBars.TotemBar and Photon.registeredBarData.TotemBar then
+		disableBarFrame(MultiCastActionBarFrame)
+	end
 
 	----------------------------
 	----- Disable Tutorial -----

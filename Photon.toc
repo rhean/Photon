@@ -47,6 +47,7 @@ Objects\ExtraButton.lua
 Objects\MenuButton.lua
 Objects\PetButton.lua
 Objects\ZoneAbilityButton.lua
+Objects\TotemButton.lua
 Objects\Bar_Position.lua
 Objects\StatusButton.lua
 Objects\ExpButton.lua

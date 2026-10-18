@@ -297,6 +297,7 @@ addonTable.databaseDefaults = {
 			ExtraBar = false,
 			ExitBar = false,
 			ZoneAbilityBar = false,
+			TotemBar = false,
 		},
 
 		mouseOverMod= "NONE",
@@ -304,6 +305,7 @@ addonTable.databaseDefaults = {
 		fallbackOrder = "state",
 
 		firstRun = true,
+		totemBarAdded = false,
 
 		PhotonItemCache = {},
 		PhotonSpellCache = {},
@@ -319,6 +321,10 @@ addonTable.databaseDefaults = {
 		},
 
 		ExitBar ={
+			['*'] = CopyTable(genericBarData)
+		},
+
+		TotemBar = {
 			['*'] = CopyTable(genericBarData)
 		},
 
