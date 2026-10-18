@@ -438,7 +438,7 @@ function ActionButton:PlaceMount(action1, action2)
 
 	--The Summon Random Mount from the Mount Journal
 	if action1 == 268435455 then
-		self:SetMacroText("#autowrite\n/run C_MountJournal.SummonByID(0);")
+		self:SetMacroText("/run C_MountJournal.SummonByID(0);")
 		self:SetMacroIcon("Interface\\ICONS\\ACHIEVEMENT_GUILDPERK_MOUNTUP")
 		self:SetMacroName()
 	else
@@ -491,7 +491,7 @@ function ActionButton:PlaceBattlePet(action1, action2)
 
 	local _, _, _, _, _, _, _,petName, petIcon= C_PetJournal.GetPetInfoByPetID(action1)
 
-	self:SetMacroText("#autowrite\n/summonpet "..petName)
+	self:SetMacroText("/summonpet "..petName)
 	self:SetMacroIcon(petIcon) --need to set icon here, it won't pull it automatically
 	self:SetMacroName()
 	self:SetMacroNote()
