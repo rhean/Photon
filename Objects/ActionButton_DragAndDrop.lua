@@ -285,6 +285,11 @@ function ActionButton:PlaceSpell(action1, action2, spellID)
 		local spellBank = action2 == "pet" and Enum.SpellBookSpellBank.Pet or Enum.SpellBookSpellBank.Player
 		spell = C_SpellBook.GetSpellBookItemName(action1, spellBank):lower()
 		spellID = C_SpellBook.GetSpellBookItemInfo(action1, spellBank).spellID
+
+		--some spellbook names are display only and can't be cast, i.e. Call Pet 1 shows as "Call Bird of Prey"
+		if not C_Spell.GetSpellInfo(spell) then
+			spell = C_Spell.GetSpellName(spellID) or spell
+		end
 	end
 
 
