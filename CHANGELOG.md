@@ -1,7 +1,7 @@
 ## 0.4.2
 
 ### New
-- Totem Bar for shamans on Forever: Its added as its own type of bar and covres all the totems and call of elements. You can rightclick the buttons to select your totem and use the call buttons as you usualy would.
+- Totem Bar for shamans on Forever: It's added as its own type of bar and covers all the totems and Call of the Elements. You can right-click the buttons to select your totem and use the Call buttons as you usually would.
 
 ### Fixes and Tweaks
 - Bars keep their buttons when you shrink them, so a button comes back with its macro and keybind if you grow the bar again.

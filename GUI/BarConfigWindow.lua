@@ -9,6 +9,8 @@ local Photon = addonTable.Photon
 Photon.PhotonGUI = Photon.PhotonGUI or {}
 local PhotonGUI = Photon.PhotonGUI
 
+local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
+
 local UI = addonTable.ui
 local Style = UI.Style
 
@@ -387,9 +389,13 @@ CONTROLS.execute = function(parent)
 		end
 	end)
 
+	control.label = control:GetFontString()
+	labelTooltip(control)
+
 	function control:Bind(option)
 		self.option = option
 		self:SetText(resolve(option.name))
+		self:FitLabel()
 		self:SetEnabled(not resolve(option.disabled))
 	end
 
@@ -427,6 +433,9 @@ CONTROLS.description = function(parent)
 	control.text = UI.Text(control)
 	control.text:SetPoint("LEFT")
 	control.text:SetWordWrap(true)
+	
+	control.label = control.text
+	labelTooltip(control)
 
 	function control:Bind(option)
 		self.text:SetText(resolve(option.name) or "")
@@ -434,6 +443,7 @@ CONTROLS.description = function(parent)
 
 	function control:Measure(width)
 		self.text:SetWidth(width)
+		self.labelHover:SetWidth(math.max(1, math.min(width, self.text:GetStringWidth())))
 		return math.max(self.text:GetStringHeight(), Style.rowHeight)
 	end
 
@@ -550,7 +560,9 @@ local function buildRows(view, container, rows, entry)
 			elseif item.header then
 				addControl(view, container, line, "header", {name = defs.localized(item.header)}, UNITS)
 			elseif item.text then
-				table.insert(texts, addControl(view, container, line, "description", {name = defs.localized(item.text)}, widthUnits(item.width or "full")))
+				local described = item.descFor and entry.definitions[item.descFor]
+				local desc = item.desc and rawget(L, "BarDesc_"..item.desc) or described and described.desc
+				table.insert(texts, addControl(view, container, line, "description", {name = defs.localized(item.text), desc = desc}, widthUnits(item.width or "full")))
 			elseif item.spacer then
 				addControl(view, container, line, "spacer", {}, widthUnits(item.width))
 			else

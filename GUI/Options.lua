@@ -156,7 +156,7 @@ local function positionDefinitions(definitions)
 
 	definitions.anchorTo = {
 		type = "select",
-		name = L["Anchor To"],
+		name = L["Anchored To"],
 		values = targets,
 		sorting = targetOrder,
 		disabledValues = loops,
@@ -180,7 +180,7 @@ local function positionDefinitions(definitions)
 		function(value) current:SetAnchor(data.anchorTo, data.anchorPoint or "CENTER", value) end)
 	definitions.positionLocked = {
 		type = "toggle",
-		name = L["Bar Lock"],
+		name = L["Bar Locked"],
 		get = function() return current:GetPositionLocked() end,
 		set = function(_, value) current:SetPositionLocked(value) end,
 	}
@@ -202,7 +202,7 @@ end
 ---the Visuals box. target says what the settings read and change: the selected bar, or a
 ---button's own visuals. The bar and button configs should be kept in sync
 local function visualDefinitions(definitions, target)
-	definitions.keybindLabel = barToggle(L["Keybind Label"], "GetShowBindText", "SetShowBindText", unlessOption("visualOptions", "BINDTEXT"), target)
+	definitions.keybindLabel = barToggle(L["Keybind"], "GetShowBindText", "SetShowBindText", unlessOption("visualOptions", "BINDTEXT"), target)
 	definitions.keybindColor = barColor(L["Color"], "GetBindColor", "SetBindColor", unlessOption("visualOptions", "BINDTEXT"), target)
 	definitions.buttonName = barToggle(L["Button Label"], "GetShowButtonText", "SetShowButtonText", unlessOption("visualOptions", "BUTTONTEXT"), target)
 	definitions.buttonNameColor = barColor(L["Color"], "GetMacroColor", "SetMacroColor", unlessOption("visualOptions", "BUTTONTEXT"), target)
@@ -228,7 +228,7 @@ local function visualDefinitions(definitions, target)
 		hidden = unlessOption("visualOptions", "SLOTCOLOR"),
 		func = function() target.set():SetIconTint() end,
 	}
-	definitions.cooldownAlpha = barToggle(L["Fade on Cooldown"], "GetShowCooldownAlpha", "SetShowCooldownAlpha", unlessOption("visualOptions", "CDALPHA"), target)
+	definitions.cooldownAlpha = barToggle(L["Fade While on Cooldown"], "GetShowCooldownAlpha", "SetShowCooldownAlpha", unlessOption("visualOptions", "CDALPHA"), target)
 	definitions.spellAlerts = barSelect(L["Spell Alerts"],
 		{none = L["None"], alternate = L["Subdued Alert"], default = L["Default Alert"]},
 		{"none", "alternate", "default"},
@@ -308,7 +308,7 @@ local function barDefinitions()
 		horizontalPadding = barRange(L["Horizontal Padding"], -200, 200, 1, false, "GetHorizontalPad", "SetHorizontalPad"),
 		verticalPadding = barRange(L["Vertical Padding"], -200, 200, 1, false, "GetVerticalPad", "SetVerticalPad"),
 		alpha = barRange(L["Opacity"], 0.01, 1, 0.01, true, "GetBarAlpha", "SetBarAlpha"),
-		alphaUp = barSelect(L["Full Opacity On"],
+		alphaUp = barSelect(L["Force Full Opacity"],
 			{off = L["Off"], mouseover = L["Mouseover"], combat = L["Combat"], ["combat + mouseover"] = L["Combat + Mouseover"]},
 			{"off", "mouseover", "combat", "combat + mouseover"},
 			"GetAlphaUp", "SetAlphaUp"),
@@ -329,7 +329,7 @@ local function barDefinitions()
 		--not in a button's own visuals window, which has no definition for it
 		clearButtonOverrides = {
 			type = "execute",
-			name = L["Clear Button Overrides"],
+			name = L["Reset Changed Buttons"],
 			hidden = function() return bar().class ~= "ActionBar" end,
 			disabled = function()
 				for _, button in pairs(bar().buttons) do
