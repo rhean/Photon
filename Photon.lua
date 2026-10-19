@@ -456,15 +456,22 @@ function Photon:ToggleMainMenu()
 	Settings.OpenToCategory(Photon.optionsCategoryID)
 end
 
----/photon opens the interface menu, /photon bar and /photon button open the editors, /photon bind starts keybind mode
+---/photon opens the interface menu, /photon bar and /photon button open the editors, /photon bind starts keybind mode,
+---/photon changelog shows the What's New window
 function Photon:slashHandler(input)
+	local command = Photon:GetArgs(input, 1)
+	command = command and command:lower()
+
+	--the release notes touch nothing secure, so they open in combat too
+	if command == "changelog" then
+		Photon.PhotonGUI:ShowWhatsNew(LATEST_VERSION_NUM, WHATS_NEW_TEXT)
+		return
+	end
+
 	if InCombatLockdown() then
 		Photon:Print(ERR_NOT_IN_COMBAT)
 		return
 	end
-
-	local command = Photon:GetArgs(input, 1)
-	command = command and command:lower()
 
 	if command == "bar" then
 		Photon.PhotonGUI:OpenBarConfig()
