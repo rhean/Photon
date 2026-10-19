@@ -51,6 +51,12 @@ function PetButton:InitializeButton()
 
 	self:RegisterEvent("PET_SPECIALIZATION_CHANGED", "PLAYER_ENTERING_WORLD")
 
+	for _, event in ipairs({"PET_UI_UPDATE", "SPELLS_CHANGED"}) do
+		if not C_EventUtils or not C_EventUtils.IsEventValid or C_EventUtils.IsEventValid(event) then
+			self:RegisterEvent(event, "UpdateData")
+		end
+	end
+
 	self.actionID = self.id
 
 	self:SetAttribute("type1", "pet")

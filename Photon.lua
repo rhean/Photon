@@ -23,7 +23,7 @@ local DB
 local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
 
 --the What's New popup, shown once per account when LATEST_VERSION_NUM changes, see Photon:LoginMessage
-local LATEST_VERSION_NUM = "0.4.2" --change it with WhatsNew_Text in the locale, everyone sees the new release notes once
+local LATEST_VERSION_NUM = "0.4.3" --change it with WhatsNew_Text in the locale, everyone sees the new release notes once
 local SHOW_WHATS_NEW = true --false for a version that shouldn't pop up, like a small fix
 local WHATS_NEW_TEXT = "WhatsNew_Text" --the locale key it shows. another key, like "WhatsNew_Override", shows that text instead
 
@@ -456,15 +456,22 @@ function Photon:ToggleMainMenu()
 	Settings.OpenToCategory(Photon.optionsCategoryID)
 end
 
----/photon opens the interface menu, /photon bar and /photon button open the editors, /photon bind starts keybind mode
+---/photon opens the interface menu, /photon bar and /photon button open the editors, /photon bind starts keybind mode,
+---/photon changelog shows the What's New window
 function Photon:slashHandler(input)
+	local command = Photon:GetArgs(input, 1)
+	command = command and command:lower()
+
+	--the release notes touch nothing secure, so they open in combat too
+	if command == "changelog" then
+		Photon.PhotonGUI:ShowWhatsNew(LATEST_VERSION_NUM, WHATS_NEW_TEXT)
+		return
+	end
+
 	if InCombatLockdown() then
 		Photon:Print(ERR_NOT_IN_COMBAT)
 		return
 	end
-
-	local command = Photon:GetArgs(input, 1)
-	command = command and command:lower()
 
 	if command == "bar" then
 		Photon.PhotonGUI:OpenBarConfig()
@@ -609,6 +616,43 @@ function Photon:ToggleButtonEditMode(show)
 	end
 end
 
+--- Warns if Blizzard's key bindings take the key, or the key with a modifier does so.
+--- @param targetButton Button
+--- @param key string @The key to be used
+local function warnBlizzardBinding(targetButton, key)
+	--our override binding shadows Blizzard's on the plain key
+	local taken = {}
+	if GetBindingAction(key) ~= "" then
+		table.insert(taken, GetBindingText(key))
+	end
+
+	for _, modified in ipairs(Photon.Button.modifiedKeys(key, targetButton.bar)) do
+		if GetBindingAction(modified.key) ~= "" and not Photon.Button.boundToOther(targetButton, modified.key) then
+			table.insert(taken, GetBindingText(modified.key))
+		end
+	end
+
+	--on screen and in the chat, so the warning can be read again
+	if #taken > 0 then
+		local message = L["Bindings_Blizzard_Conflict"]:format(table.concat(taken, " "..L["and"].." "))
+		UIErrorsFrame:AddMessage(message, 1.0, 1.0, 0.0, 1.0, UIERRORS_HOLD_TIME)
+		Photon:Print(message)
+	end
+end
+
+--- Rebinds the buttons on bars with modifier pages, a key bound or freed changes which modified keys they get
+local function refreshModifiedBindings()
+	for _, bar in pairs(Photon.bars) do
+		if bar.data.alt or bar.data.ctrl or bar.data.shift then
+			for _, button in pairs(bar.buttons) do
+				if button.keys then
+					button:ApplyBindings()
+				end
+			end
+		end
+	end
+end
+
 --- Processes the change to a key bind
 --- @param targetButton Button
 --- @param key string @The key to be used
@@ -665,8 +709,12 @@ local function processKeyBinding(targetButton, key)
 			targetButton.keys.hotKeys = targetButton.keys.hotKeys..key..":"
 		end
 
+		warnBlizzardBinding(targetButton, key)
+
 		targetButton:ApplyBindings()
 	end
+
+	refreshModifiedBindings()
 end
 
 function Photon:ToggleBindingMode(show)

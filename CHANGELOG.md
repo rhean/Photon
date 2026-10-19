@@ -1,7 +1,21 @@
+## 0.4.3
+
+### New
+- Binding a key that is also bound in Blizzard's keybinds now tells you so, on screen and in the chat.
+- Bars that have pages for Shift, Control or Alt active will now bind those as well. So a button bound to 5 with Shift active as a page will override Shift+5 from Blizzard's config.
+- The What's New window has a button to show older releases and can be opened with /photon changelog.
+
+### Fixes and Tweaks
+- The pet bar updates when your pet learns a new ability.
+- The bar config has been edited to clarify some options.
+- New tooltips added and some have been changed.
+- Buttons in the bar config now show their tooltips.
+- The Stance hide condition only shows for classes with stances.
+
 ## 0.4.2
 
 ### New
-- Totem Bar for shamans on Forever: Its added as its own type of bar and covres all the totems and call of elements. You can rightclick the buttons to select your totem and use the call buttons as you usualy would.
+- Totem Bar for shamans on Forever: It's added as its own type of bar and covers all the totems and Call of the Elements. You can right-click the buttons to select your totem and use the Call buttons as you usually would.
 
 ### Fixes and Tweaks
 - Bars keep their buttons when you shrink them, so a button comes back with its macro and keybind if you grow the bar again.

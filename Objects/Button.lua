@@ -568,6 +568,47 @@ end
 ------------------------------------- Update Functions ----------------------------------
 -----------------------------------------------------------------------------------------
 
+--- Returns the key with each modifier the bar has in use
+--- @param key string @The key bound to the button
+--- @param bar Bar
+--- @return {key:string, modifier:string}[]
+function Button.modifiedKeys(key, bar)
+	local held = {}
+	local base = key
+	for _, modifier in ipairs({"ALT", "CTRL", "SHIFT"}) do
+		base = base:gsub("^(.-)"..modifier.."%-", function(before) held[modifier] = true return before end)
+	end
+
+	local modifiedKeys = {}
+	for _, modifier in ipairs({"ALT", "CTRL", "SHIFT"}) do
+		if bar.data[modifier:lower()] and not held[modifier] then
+			local modified = ""
+			for _, name in ipairs({"ALT", "CTRL", "SHIFT"}) do
+				if held[name] or name == modifier then
+					modified = modified..name.."-"
+				end
+			end
+			table.insert(modifiedKeys, {key = modified..base, modifier = modifier:lower()})
+		end
+	end
+	return modifiedKeys
+end
+
+--- Whether another Photon button has the key bound itself, which then keeps it over a modified key
+--- @param button Button
+--- @param key string
+--- @return boolean
+function Button.boundToOther(button, key)
+	for _, bar in pairs(Photon.bars) do
+		for _, other in pairs(bar.buttons) do
+			if other ~= button and other.keys and other.keys.hotKeys:find(":"..key..":", 1, true) then
+				return true
+			end
+		end
+	end
+	return false
+end
+
 --- Applies binding to button
 function Button:ApplyBindings()
 	local virtualKey
@@ -581,13 +622,26 @@ function Button:ApplyBindings()
 		virtualKey = DEFAULT_VIRTUAL_KEY
 	end
 
+	local hotKeys = self.keys.hotKeys
+	self.keys.hotKeys:gsub("[^:]+", function(key)
+		for _, modified in ipairs(Button.modifiedKeys(key, self.bar)) do
+			if not hotKeys:find(":"..modified.key..":", 1, true) and not Button.boundToOther(self, modified.key) then
+				hotKeys = hotKeys..modified.key..":"
+			end
+		end
+	end)
+
+	if not InCombatLockdown() then
+		ClearOverrideBindings(self)
+	end
+
 	if self:IsVisible() or self:GetParent():GetAttribute("concealed") then
-		self.keys.hotKeys:gsub("[^:]+", function(key) SetOverrideBindingClick(self, self.keys.hotKeyPri, key, self:GetName(), virtualKey) end)
+		hotKeys:gsub("[^:]+", function(key) SetOverrideBindingClick(self, self.keys.hotKeyPri, key, self:GetName(), virtualKey) end)
 	end
 
 	if not InCombatLockdown() then
 		self:SetAttribute("hotkeypri", self.keys.hotKeyPri)
-		self:SetAttribute("hotkeys", self.keys.hotKeys)
+		self:SetAttribute("hotkeys", hotKeys)
 	end
 
 	self.Hotkey:SetText(Button.hotKeyText(self.keys.hotKeys:match("^:([^:]+)") or ""))

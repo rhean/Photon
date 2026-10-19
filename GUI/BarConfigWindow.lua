@@ -9,6 +9,8 @@ local Photon = addonTable.Photon
 Photon.PhotonGUI = Photon.PhotonGUI or {}
 local PhotonGUI = Photon.PhotonGUI
 
+local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
+
 local UI = addonTable.ui
 local Style = UI.Style
 
@@ -93,6 +95,16 @@ StaticPopupDialogs["NEURON_BARCONFIG_CONFIRM"] = UI.RaisePopup{
 
 --the option's desc on hover, only over its label text. text gets no mouse, so a frame over it takes the hover.
 --FitLabel sizes it after the text changes
+local function showDesc(owner, option)
+	local desc = option and resolve(option.desc)
+	if desc and desc ~= "" then
+		GameTooltip:SetOwner(owner, "ANCHOR_TOPLEFT")
+		GameTooltip:SetText(resolve(option.title or option.name) or "", 1, 1, 1)
+		GameTooltip:AddLine(desc, nil, nil, nil, true)
+		GameTooltip:Show()
+	end
+end
+
 local function labelTooltip(control)
 	local hover = CreateFrame("Frame", nil, control)
 	hover:SetPoint("TOPLEFT", control.label)
@@ -104,13 +116,7 @@ local function labelTooltip(control)
 		hover:EnableMouse(true)
 	end
 	hover:SetScript("OnEnter", function(self)
-		local desc = control.option and resolve(control.option.desc)
-		if desc and desc ~= "" then
-			GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
-			GameTooltip:SetText(resolve(control.option.title or control.option.name) or "", 1, 1, 1)
-			GameTooltip:AddLine(desc, nil, nil, nil, true)
-			GameTooltip:Show()
-		end
+		showDesc(self, control.option)
 	end)
 	hover:SetScript("OnLeave", function()
 		GameTooltip:Hide()
@@ -387,6 +393,18 @@ CONTROLS.execute = function(parent)
 		end
 	end)
 
+	--on the button itself, a hover frame over its text would take the clicks there
+	--a greyed-out button still says what it does
+	if control.SetMotionScriptsWhileDisabled then
+		control:SetMotionScriptsWhileDisabled(true)
+	end
+	control:SetScript("OnEnter", function(self)
+		showDesc(self, self.option)
+	end)
+	control:SetScript("OnLeave", function()
+		GameTooltip:Hide()
+	end)
+
 	function control:Bind(option)
 		self.option = option
 		self:SetText(resolve(option.name))
@@ -427,6 +445,9 @@ CONTROLS.description = function(parent)
 	control.text = UI.Text(control)
 	control.text:SetPoint("LEFT")
 	control.text:SetWordWrap(true)
+	
+	control.label = control.text
+	labelTooltip(control)
 
 	function control:Bind(option)
 		self.text:SetText(resolve(option.name) or "")
@@ -434,6 +455,7 @@ CONTROLS.description = function(parent)
 
 	function control:Measure(width)
 		self.text:SetWidth(width)
+		self.labelHover:SetWidth(math.max(1, math.min(width, self.text:GetStringWidth())))
 		return math.max(self.text:GetStringHeight(), Style.rowHeight)
 	end
 
@@ -550,7 +572,9 @@ local function buildRows(view, container, rows, entry)
 			elseif item.header then
 				addControl(view, container, line, "header", {name = defs.localized(item.header)}, UNITS)
 			elseif item.text then
-				table.insert(texts, addControl(view, container, line, "description", {name = defs.localized(item.text)}, widthUnits(item.width or "full")))
+				local described = item.descFor and entry.definitions[item.descFor]
+				local desc = item.desc and rawget(L, "BarDesc_"..item.desc) or described and described.desc
+				table.insert(texts, addControl(view, container, line, "description", {name = defs.localized(item.text), desc = desc}, widthUnits(item.width or "full")))
 			elseif item.spacer then
 				addControl(view, container, line, "spacer", {}, widthUnits(item.width))
 			else

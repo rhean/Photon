@@ -32,7 +32,7 @@ L["Y"] = true
 L["How to use"] = true
 L["Option"] = true
 
-L["Custom_Option"] = "For custom states, add a desired state string (/photon state custom <state string>) where <state string> is a semicolon seperated list of state conditions"
+L["Custom_Option"] = "For custom states, add a desired state string (/photon state custom <state string>) where <state string> is a semicolon separated list of state conditions"
 
 
 
@@ -165,9 +165,9 @@ L["Override Visuals"] = true
 L["OverrideVisuals_Desc"] = "Gives this button its own visuals in place of its bar configuration. Untick to have it follow the bar again."
 L["Button Visuals"] = true
 L["VisualOverride_Own"] = "|cffffd200%s|r|cFFFFFFFF button %d has its own visuals."
-L["Clear Button Overrides"] = true
+L["Reset Changed Buttons"] = true
 L["ClearButtonOverrides_Confirm"] = "Clear the visuals of every button on this bar that has its own."
-L["BarDesc_clearButtonOverrides"] = "Buttons with Override Visuals ticked in the button editor keep their own visuals. This sends every button on the bar back to the bar's."
+L["BarDesc_clearButtonOverrides"] = "Reset any changes done on individual buttons and bring them back to following these settings"
 L["ButtonEditor_Inherits"] = "No macro of its own, this page uses %s. Type a macro to give it one."
 L["ButtonEditor_Empty"] = "No macro yet. Type one below."
 L["ButtonEditor_InheritsBlank"] = "No macro of its own, this page uses %s, which is forced blank."
@@ -200,6 +200,8 @@ L["None"] = true
 L["Locked"] = true
 L["Priority"] = true
 L["Bindings_Locked_Notice"]	= "This button's bindings are locked.\nLeft-Click button to unlock."
+L["Bindings_Blizzard_Conflict"] = "Button %s is bound in Blizzard's keybinds.\nPhoton will override it while the button is active."
+L["and"] = true
 
 L["Off"] = true
 L["Combat"] = true
@@ -280,7 +282,7 @@ L["Color"] = true
 L["Delete Bar"] = true
 L["DeleteBar_Confirm"] = "Warning: this will permanently delete the bar and all of its stored data."
 L["General Configuration"] = true
-L["Bar Conditions"] = true
+L["Condition and Visibility"] = true
 L["Secondary States"] = true
 L["Text"] = true
 L["Dangerous"] = true
@@ -304,10 +306,10 @@ L["Show Border Style"] = true
 -- bar editor labels, apart from the console command names above
 L["On Press"] = true
 L["Opacity"] = true
-L["Full Opacity On"] = true
+L["Force Full Opacity"] = true
 L["Fade Speed"] = true
 L["Layer"] = true
-L["Fade on Cooldown"] = true
+L["Fade While on Cooldown"] = true
 L["Button Label"] = true
 L["Action Bar Pages"] = true
 L["Last 5s"] = true
@@ -316,12 +318,12 @@ L["Rotation"] = true
 
 -- the position box, on the General Configuration tab
 L["Position"] = true
-L["Anchor To"] = true
+L["Anchored To"] = true
 L["AnchorTo_Loop"] = "%s is already positioned from %s. Anchoring to it would make a circular dependency."
 L["Screen"] = true
 L["Bar Point"] = true
 L["Target Point"] = true
-L["Bar Lock"] = true
+L["Bar Locked"] = true
 L["Lock All"] = true
 L["Unlock All"] = true
 L["Clear"] = true
@@ -345,7 +347,7 @@ L["Columns"] = true
 L["Arc Start"] = true
 L["Arc Length"] = true
 
-L["Keybind Label"] = true
+L["Keybind"] = true
 L["Keybind Label Color"] = true
 L["Button Name"] = true
 L["Stack/Charge"] = true
@@ -579,6 +581,8 @@ L["BarDesc_cooldownCounter"] = "Shows the time left on cooldowns as numbers on t
 L["BarDesc_cooldownColor1"] = "The color of the cooldown counter."
 L["BarDesc_cooldownColor2"] = "The color of the cooldown counter in the last 5 seconds."
 L["BarDesc_cooldownAlpha"] = "Fades the button while its ability is on cooldown."
+L["BarDesc_slotColor"] = "Tints the border around each button, the Masque skin's border too. Clear sets it back to white."
+L["BarDesc_iconTint"] = "Tints each button's icon. Darker colours make the icon darker, white leaves it as it is. Clear sets it back to white."
 L["BarDesc_tooltips"] = "Which tooltip to show when hovering a button: Off, Minimal (short) or Normal (the full tooltip)."
 L["BarDesc_tooltipsInCombat"] = "Also shows button tooltips while you are in combat."
 L["BarDesc_spellAlerts"] = "The glow shown on a button when its ability procs or is highlighted by the game."
@@ -662,6 +666,30 @@ L["BarDesc_visibility_outdoors1"] = "Hides the bar when you are outdoors."
 L["BarDesc_visibility_fishing0"] = "Hides the bar when you have no fishing pole equipped."
 L["BarDesc_visibility_fishing1"] = "Hides the bar when you have a fishing pole equipped."
 
+-- the hide condition rows, on hover over their name
+L["BarDesc_layer_paged"] = "The page Blizzard's main action bar is on, switched with its page arrows or the page keybinds."
+L["BarDesc_layer_shift"] = "Whether the Shift key is held."
+L["BarDesc_layer_ctrl"] = "Whether the Control key is held."
+L["BarDesc_layer_alt"] = "Whether the Alt key is held."
+L["BarDesc_layer_target"] = "Whether you have something targeted."
+L["BarDesc_layer_targetType"] = "Whether your target is something you can attack or help."
+L["BarDesc_layer_reaction"] = "Whether your target is friendly or hostile towards you."
+L["BarDesc_layer_stealth"] = "Whether you are stealthed."
+L["BarDesc_layer_stance"] = "Whether you are in a stance, form, aura or presence."
+L["BarDesc_layer_combat"] = "Whether you are in combat."
+L["BarDesc_layer_group"] = "Whether you are in a party or raid."
+L["BarDesc_layer_pet"] = "Whether you have a pet out."
+L["BarDesc_layer_mounted"] = "Whether you are mounted."
+L["BarDesc_layer_swimming"] = "Whether you are swimming."
+L["BarDesc_layer_vehicle"] = "Whether you are in a vehicle."
+L["BarDesc_layer_extrabar"] = "Whether the game is showing its extra action button."
+L["BarDesc_layer_possess"] = "Whether you are controlling another creature."
+L["BarDesc_layer_override"] = "Whether the game has replaced your action bar, like in some quests."
+L["BarDesc_layer_dragonriding"] = "Whether you are skyriding."
+L["BarDesc_layer_resting"] = "Whether you are resting in a city or inn."
+L["BarDesc_layer_location"] = "Whether you are indoors or outdoors."
+L["BarDesc_layer_fishing"] = "Whether you have a fishing pole equipped."
+
 
 -----------------------------------------------
 ---------------What's New----------------------
@@ -673,10 +701,57 @@ L["WhatsNew_Text"] = [[
 Welcome to the beta release of Photon!
 Please help out by posting any bugs and suggestions on Curse or github.com/rhean/Photon
 
+New in 0.4.3:
+- Binding a key that is also bound in Blizzard's keybinds now tells you so, on screen and in the chat.
+- Bars that have pages for Shift, Control or Alt active will now bind those as well. So a button bound to 5 with Shift active as a page will override Shift+5 from Blizzard's config.
+- The What's New window has a button to show older releases and can be opened with /photon changelog.
+- The pet bar updates when your pet learns a new ability.
+- The bar config has been edited to clarify some options.
+- New tooltips added and some have been changed.
+- Buttons in the bar config now show their tooltips.
+- The Stance hide condition only shows for classes with stances.
+]]
+L["WhatsNew_ShowOlder"] = "Show Older Changes"
+L["WhatsNew_HideOlder"] = "Hide Older Changes"
+
+L["WhatsNew_Older"] = [[
 New in 0.4.2:
 - Totem Bar for shamans on Forever: your Call of the Elements, the four totem slots and Totemic Recall as Photon buttons, with keybinds, skins and the usual bar options. Right-click a slot to choose its totem, or the Call button to switch between Calls. Empty slots show their element, and spells you haven't learned yet are greyed out.
 - Bars keep their buttons when you shrink them, so a button comes back with its macro and keybind if you grow the bar again.
 - Bar scale now changes in steps of 1% instead of 5%.
 - Dragging a spell whose name changes in the spellbook, like Call Pet, onto a button now makes a macro that works.
 - Macros made by dragging spells, mounts and pets no longer start with a "#autowrite" line.
+
+New in 0.4.1:
+- The greyed-out text in the button editor now updates while you type.
+- Buttons with only an icon and no macro can now be interacted with.
+- The Anchor To list shows every bar again. Bars that would anchor in a circle are greyed out.
+- The top of the button editor has been cleaned up: only the relevant elements show for each class, and they should no longer overflow.
+- The "?" help in the button editor only shows for classes with stances or forms.
+- The Stance option no longer shows for classes without stances.
+- More contrast in the button editor, so the info boxes should be clearer.
+
+New in 0.4:
+- The Button Backdrop colour can now be changed, to tint the border around action bar buttons.
+- The Icon Tint can now be changed, to change the overlay colour on action bar buttons.
+- It's now possible to override the visuals of individual buttons. The bar config has a button to reset all the buttons on its bar.
+- The default cast bar and mirror timers (breath, fatigue) are now hidden the same way as the other default bars.
+- The bar editor now always has a bar selected when it opens.
+- The editors have lighter backgrounds, grey buttons, a brighter selection highlight on bars and easier-to-read checkboxes.
+
+New in 0.3:
+- "Lock All" and "Unlock All" buttons in the bar options, to lock or unlock every bar at once.
+- Button editor: new Expand option that shows every stance or form side by side instead of in tabs, giving you a full overview of what a button does.
+- The replacement bars (vehicle, possess, override and dragonriding) now have their own Replacements category in Bar Conditions, to make it clear which bars have special functions.
+- Vehicle bars are back on Forever. The game has keybinds for them, so we can assume vehicles will be used in some form.
+- Fixed the default action bars sometimes becoming visible after a cinematic.
+- Bars with more than one column no longer squash their buttons together when placed at the edge of the screen.
+
+New in 0.2.5:
+- Button fallback order option: choose whether an empty modifier state in a stance or form uses the modifier's macro or the stance's (classes with more than one stance or form).
+- The options panel is slightly redesigned.
+- Fix for failure when dragging a single spell out of a flyout, like one portal from Teleports.
+- Fixed an error when using a flyout in combat.
+- Fixed a potential error message caused by Edit Mode in combat when the default action bars are hidden.
+- Fixed an error when moving a keybind with a few special characters to another button.
 ]]
