@@ -91,8 +91,11 @@ local function visibilityToggle(state)
 	return {
 		type = "toggle",
 		name = Photon.VISIBILITY_STATES[state],
-		--rogues get stealth as their home stance state instead
-		hidden = Photon.class == "ROGUE" and state:match("^stealth") ~= nil,
+		--rogues get stealth as their home stance state instead.1
+		hidden = function()
+			return (Photon.class == "ROGUE" and state:match("^stealth") ~= nil)
+				or (state:match("^stance") ~= nil and GetNumShapeshiftForms() == 0 and not bar().data.hidestates:find(state))
+		end,
 		get = function() return not not bar().data.hidestates:find(state) end,
 		set = function(_, value) bar():SetVisibility(state, not value) end,
 	}
