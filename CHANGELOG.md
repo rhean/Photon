@@ -1,3 +1,17 @@
+## 0.4.3
+
+### New
+- Binding a key that is also bound in Blizzard's keybinds now tells you so, on screen and in the chat.
+- Bars that have pages for Shift, Control or Alt active will now bind those as well. So a button bound to 5 with Shift active as a page will override Shift+5 from Blizzard's config.
+- The What's New window has a button to show older releases and can be opened with /photon changelog.
+
+### Fixes and Tweaks
+- The pet bar updates when your pet learns a new ability.
+- The bar config has been edited to clarify some options.
+- New tooltips added and some have been changed.
+- Buttons in the bar config now show their tooltips.
+- The Stance hide condition only shows for classes with stances.
+
 ## 0.4.2
 
 ### New
