@@ -95,6 +95,16 @@ StaticPopupDialogs["NEURON_BARCONFIG_CONFIRM"] = UI.RaisePopup{
 
 --the option's desc on hover, only over its label text. text gets no mouse, so a frame over it takes the hover.
 --FitLabel sizes it after the text changes
+local function showDesc(owner, option)
+	local desc = option and resolve(option.desc)
+	if desc and desc ~= "" then
+		GameTooltip:SetOwner(owner, "ANCHOR_TOPLEFT")
+		GameTooltip:SetText(resolve(option.title or option.name) or "", 1, 1, 1)
+		GameTooltip:AddLine(desc, nil, nil, nil, true)
+		GameTooltip:Show()
+	end
+end
+
 local function labelTooltip(control)
 	local hover = CreateFrame("Frame", nil, control)
 	hover:SetPoint("TOPLEFT", control.label)
@@ -106,13 +116,7 @@ local function labelTooltip(control)
 		hover:EnableMouse(true)
 	end
 	hover:SetScript("OnEnter", function(self)
-		local desc = control.option and resolve(control.option.desc)
-		if desc and desc ~= "" then
-			GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
-			GameTooltip:SetText(resolve(control.option.title or control.option.name) or "", 1, 1, 1)
-			GameTooltip:AddLine(desc, nil, nil, nil, true)
-			GameTooltip:Show()
-		end
+		showDesc(self, control.option)
 	end)
 	hover:SetScript("OnLeave", function()
 		GameTooltip:Hide()
@@ -389,13 +393,21 @@ CONTROLS.execute = function(parent)
 		end
 	end)
 
-	control.label = control:GetFontString()
-	labelTooltip(control)
+	--on the button itself, a hover frame over its text would take the clicks there
+	--a greyed-out button still says what it does
+	if control.SetMotionScriptsWhileDisabled then
+		control:SetMotionScriptsWhileDisabled(true)
+	end
+	control:SetScript("OnEnter", function(self)
+		showDesc(self, self.option)
+	end)
+	control:SetScript("OnLeave", function()
+		GameTooltip:Hide()
+	end)
 
 	function control:Bind(option)
 		self.option = option
 		self:SetText(resolve(option.name))
-		self:FitLabel()
 		self:SetEnabled(not resolve(option.disabled))
 	end
 
