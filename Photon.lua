@@ -609,6 +609,43 @@ function Photon:ToggleButtonEditMode(show)
 	end
 end
 
+--- Warns if Blizzard's key bindings take the key, or the key with a modifier does so.
+--- @param targetButton Button
+--- @param key string @The key to be used
+local function warnBlizzardBinding(targetButton, key)
+	--our override binding shadows Blizzard's on the plain key
+	local taken = {}
+	if GetBindingAction(key) ~= "" then
+		table.insert(taken, GetBindingText(key))
+	end
+
+	for _, modified in ipairs(Photon.Button.modifiedKeys(key, targetButton.bar)) do
+		if GetBindingAction(modified.key) ~= "" and not Photon.Button.boundToOther(targetButton, modified.key) then
+			table.insert(taken, GetBindingText(modified.key))
+		end
+	end
+
+	--on screen and in the chat, so the warning can be read again
+	if #taken > 0 then
+		local message = L["Bindings_Blizzard_Conflict"]:format(table.concat(taken, " "..L["and"].." "))
+		UIErrorsFrame:AddMessage(message, 1.0, 1.0, 0.0, 1.0, UIERRORS_HOLD_TIME)
+		Photon:Print(message)
+	end
+end
+
+--- Rebinds the buttons on bars with modifier pages, a key bound or freed changes which modified keys they get
+local function refreshModifiedBindings()
+	for _, bar in pairs(Photon.bars) do
+		if bar.data.alt or bar.data.ctrl or bar.data.shift then
+			for _, button in pairs(bar.buttons) do
+				if button.keys then
+					button:ApplyBindings()
+				end
+			end
+		end
+	end
+end
+
 --- Processes the change to a key bind
 --- @param targetButton Button
 --- @param key string @The key to be used
@@ -665,8 +702,12 @@ local function processKeyBinding(targetButton, key)
 			targetButton.keys.hotKeys = targetButton.keys.hotKeys..key..":"
 		end
 
+		warnBlizzardBinding(targetButton, key)
+
 		targetButton:ApplyBindings()
 	end
+
+	refreshModifiedBindings()
 end
 
 function Photon:ToggleBindingMode(show)

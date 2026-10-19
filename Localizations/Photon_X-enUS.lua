@@ -200,6 +200,8 @@ L["None"] = true
 L["Locked"] = true
 L["Priority"] = true
 L["Bindings_Locked_Notice"]	= "This button's bindings are locked.\nLeft-Click button to unlock."
+L["Bindings_Blizzard_Conflict"] = "Button %s is bound in Blizzard's keybinds.\nPhoton will override it while the button is active."
+L["and"] = true
 
 L["Off"] = true
 L["Combat"] = true

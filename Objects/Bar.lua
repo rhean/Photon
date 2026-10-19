@@ -1431,6 +1431,15 @@ function Bar:SetState(msg, gui, checked)
 		self.stateschanged = true
 		self:UpdateBarStatus()
 
+		--the buttons take the key with the modifier held as well.
+		if Photon.MANAGED_SECONDARY_STATES[state] then
+			for _, button in pairs(self.buttons) do
+				if button.keys then
+					button:ApplyBindings()
+				end
+			end
+		end
+
 	elseif not gui then
 		wipe(statetable)
 
