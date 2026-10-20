@@ -1,3 +1,10 @@
+## 0.4.4
+
+### Fixes and Tweaks
+- Keybinds with Shift, Control or Alt pages will only grab the input if the macro exists.
+- Button edit mode outlines each button instead of covering it with "Edit".
+- Button edit mode always shows the keybinds, even on bars that hide the bind text.
+
 ## 0.4.3
 
 ### New

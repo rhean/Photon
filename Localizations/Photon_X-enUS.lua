@@ -701,6 +701,15 @@ L["WhatsNew_Text"] = [[
 Welcome to the beta release of Photon!
 Please help out by posting any bugs and suggestions on Curse or github.com/rhean/Photon
 
+New in 0.4.4:
+- Keybinds with Shift, Control or Alt pages will only grab the input if the macro exists.
+- Button edit mode outlines each button instead of covering it with "Edit".
+- Button edit mode always shows the keybinds, even on bars that hide the bind text.
+]]
+L["WhatsNew_ShowOlder"] = "Show Older Changes"
+L["WhatsNew_HideOlder"] = "Hide Older Changes"
+
+L["WhatsNew_Older"] = [[
 New in 0.4.3:
 - Binding a key that is also bound in Blizzard's keybinds now tells you so, on screen and in the chat.
 - Bars that have pages for Shift, Control or Alt active will now bind those as well. So a button bound to 5 with Shift active as a page will override Shift+5 from Blizzard's config.
@@ -710,11 +719,7 @@ New in 0.4.3:
 - New tooltips added and some have been changed.
 - Buttons in the bar config now show their tooltips.
 - The Stance hide condition only shows for classes with stances.
-]]
-L["WhatsNew_ShowOlder"] = "Show Older Changes"
-L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
-L["WhatsNew_Older"] = [[
 New in 0.4.2:
 - Totem Bar for shamans on Forever: your Call of the Elements, the four totem slots and Totemic Recall as Photon buttons, with keybinds, skins and the usual bar options. Right-click a slot to choose its totem, or the Call button to switch between Calls. Empty slots show their element, and spells you haven't learned yet are greyed out.
 - Bars keep their buttons when you shrink them, so a button comes back with its macro and keybind if you grow the bar again.
