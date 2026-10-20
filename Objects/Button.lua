@@ -1011,7 +1011,7 @@ end
 -----------------------------------------------------------------------------------------
 
 function Button:UpdateUsable()
-	if Photon.buttonEditMode or Photon.bindingMode then
+	if Photon.bindingMode then
 		self.Icon:SetVertexColor(0.2, 0.2, 0.2)
 	elseif self.actionID then
 		self:UpdateUsableAction()

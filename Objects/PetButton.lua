@@ -277,7 +277,7 @@ end
 
 --overwrite function in parent class Button
 function PetButton:UpdateUsable()
-	if Photon.buttonEditMode or Photon.bindingMode then
+	if Photon.bindingMode then
 		self.Icon:SetVertexColor(0.2, 0.2, 0.2)
 	elseif self.actionID and GetPetActionSlotUsable(self.actionID) then
 		self.Icon:SetVertexColor(1.0, 1.0, 1.0)
