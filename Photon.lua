@@ -626,7 +626,7 @@ local function warnBlizzardBinding(targetButton, key)
 		table.insert(taken, GetBindingText(key))
 	end
 
-	for _, modified in ipairs(Photon.Button.modifiedKeys(key, targetButton.bar)) do
+	for _, modified in ipairs(Photon.Button.modifiedKeys(key, targetButton)) do
 		if GetBindingAction(modified.key) ~= "" and not Photon.Button.boundToOther(targetButton, modified.key) then
 			table.insert(taken, GetBindingText(modified.key))
 		end

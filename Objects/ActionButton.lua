@@ -550,6 +550,12 @@ end
 function ActionButton:RefreshStateData()
 	if self.class == "ActionBar" then
 		self:LoadDataFromDatabase(Spec.active(self.bar:GetMultiSpec()), self.activeState)
+
+		--a modifier page getting or losing its macro changes which modified keys the button takes
+		local barData = self.bar.data
+		if not InCombatLockdown() and (barData.alt or barData.ctrl or barData.shift) then
+			self:ApplyBindings()
+		end
 	end
 end
 

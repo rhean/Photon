@@ -973,6 +973,11 @@ function Bar:LoadObjects()
 		object:LoadDataFromDatabase(spec, self.handler:GetAttribute("activestate"))
 		object:InitializeButton()
 		object:UpdateVisibility()
+
+		--a modifier page getting or losing its macro changes which modified keys the button takes
+		if object.keys and not InCombatLockdown() and (self.data.alt or self.data.ctrl or self.data.shift) then
+			object:ApplyBindings()
+		end
 	end
 end
 

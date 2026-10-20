@@ -568,11 +568,34 @@ end
 ------------------------------------- Update Functions ----------------------------------
 -----------------------------------------------------------------------------------------
 
---- Returns the key with each modifier the bar has in use
+--- Whether the button has a macro on the modifier's page, an empty page leaves the modified key to Blizzard or the plain key
+--- @param modifier string @"alt", "ctrl" or "shift"
+--- @return boolean
+function Button:HasModifierPage(modifier)
+	--buttons other than action buttons have no pages of their own
+	if not self.statedata then
+		return true
+	end
+	local state = modifier.."1"
+	local trees = {self.statedata}
+	if not self:HasOwnTree(self.statedata) then
+		table.insert(trees, self.DB.default)
+	end
+	for _, states in ipairs(trees) do
+		for name, data in pairs(states) do
+			if (name == state or name:find("_"..state.."$")) and hasMacro(data) then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+--- Returns the key with each modifier the bar has in use and the button has a page for
 --- @param key string @The key bound to the button
---- @param bar Bar
+--- @param button Button
 --- @return {key:string, modifier:string}[]
-function Button.modifiedKeys(key, bar)
+function Button.modifiedKeys(key, button)
 	local held = {}
 	local base = key
 	for _, modifier in ipairs({"ALT", "CTRL", "SHIFT"}) do
@@ -581,7 +604,7 @@ function Button.modifiedKeys(key, bar)
 
 	local modifiedKeys = {}
 	for _, modifier in ipairs({"ALT", "CTRL", "SHIFT"}) do
-		if bar.data[modifier:lower()] and not held[modifier] then
+		if button.bar.data[modifier:lower()] and not held[modifier] and button:HasModifierPage(modifier:lower()) then
 			local modified = ""
 			for _, name in ipairs({"ALT", "CTRL", "SHIFT"}) do
 				if held[name] or name == modifier then
@@ -624,7 +647,7 @@ function Button:ApplyBindings()
 
 	local hotKeys = self.keys.hotKeys
 	self.keys.hotKeys:gsub("[^:]+", function(key)
-		for _, modified in ipairs(Button.modifiedKeys(key, self.bar)) do
+		for _, modified in ipairs(Button.modifiedKeys(key, self)) do
 			if not hotKeys:find(":"..modified.key..":", 1, true) and not Button.boundToOther(self, modified.key) then
 				hotKeys = hotKeys..modified.key..":"
 			end
