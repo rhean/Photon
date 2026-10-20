@@ -265,12 +265,8 @@ function ActionButton:InitializeButtonSettings()
 
 	local visuals = self:GetVisuals()
 
-	if visuals:GetShowBindText() then
-		self.Hotkey:Show()
-		self.Hotkey:SetTextColor(unpack(visuals:GetBindColor(), 1, 3))
-	else
-		self.Hotkey:Hide()
-	end
+	self:UpdateHotkeyShown()
+	self.Hotkey:SetTextColor(unpack(visuals:GetBindColor(), 1, 3))
 
 	if visuals:GetShowButtonText() then
 		self.Name:Show()

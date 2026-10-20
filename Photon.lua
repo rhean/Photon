@@ -584,6 +584,9 @@ function Photon:ToggleButtonEditMode(show)
 						end
 					end
 				)
+				if isActionBar(bar) then
+					button:UpdateHotkeyShown()
+				end
 			end
 
 			bar:UpdateObjectVisibility(true)
@@ -605,6 +608,9 @@ function Photon:ToggleButtonEditMode(show)
 				if button.editFrame then
 					ButtonEditor.free(button.editFrame)
 					button.editFrame = nil
+				end
+				if isActionBar(bar) then
+					button:UpdateHotkeyShown()
 				end
 			end
 

@@ -669,11 +669,11 @@ function Button:ApplyBindings()
 
 	self.Hotkey:SetText(Button.hotKeyText(self.keys.hotKeys:match("^:([^:]+)") or ""))
 
-	if self:GetVisuals():GetShowBindText() then
-		self.Hotkey:Show()
-	else
-		self.Hotkey:Hide()
-	end
+	self:UpdateHotkeyShown()
+end
+
+function Button:UpdateHotkeyShown()
+	self.Hotkey:SetShown(Photon.buttonEditMode or self:GetVisuals():GetShowBindText())
 end
 
 	-- spell in action, extra, pet, zone,
