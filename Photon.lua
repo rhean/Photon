@@ -23,7 +23,7 @@ local DB
 local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
 
 --the What's New popup, shown once per account when LATEST_VERSION_NUM changes, see Photon:LoginMessage
-local LATEST_VERSION_NUM = "0.4.3" --change it with WhatsNew_Text in the locale, everyone sees the new release notes once
+local LATEST_VERSION_NUM = "0.4.4" --change it with WhatsNew_Text in the locale, everyone sees the new release notes once
 local SHOW_WHATS_NEW = true --false for a version that shouldn't pop up, like a small fix
 local WHATS_NEW_TEXT = "WhatsNew_Text" --the locale key it shows. another key, like "WhatsNew_Override", shows that text instead
 
@@ -584,6 +584,9 @@ function Photon:ToggleButtonEditMode(show)
 						end
 					end
 				)
+				if isActionBar(bar) then
+					button:UpdateHotkeyShown()
+				end
 			end
 
 			bar:UpdateObjectVisibility(true)
@@ -606,6 +609,9 @@ function Photon:ToggleButtonEditMode(show)
 					ButtonEditor.free(button.editFrame)
 					button.editFrame = nil
 				end
+				if isActionBar(bar) then
+					button:UpdateHotkeyShown()
+				end
 			end
 
 			bar:UpdateObjectVisibility()
@@ -626,7 +632,7 @@ local function warnBlizzardBinding(targetButton, key)
 		table.insert(taken, GetBindingText(key))
 	end
 
-	for _, modified in ipairs(Photon.Button.modifiedKeys(key, targetButton.bar)) do
+	for _, modified in ipairs(Photon.Button.modifiedKeys(key, targetButton)) do
 		if GetBindingAction(modified.key) ~= "" and not Photon.Button.boundToOther(targetButton, modified.key) then
 			table.insert(taken, GetBindingText(modified.key))
 		end

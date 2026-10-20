@@ -19,6 +19,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
 ---@class ButtonOverlayFrame:Button,ScriptObject
 ---@field label FontString
 ---@field select OverlayFrameSelect
+---@field border? table<string, Texture> @the button editor's border, see setBorder
 
 ---@class ButtonOverlay
 ---@field active boolean
@@ -28,6 +29,42 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
 
 ---@type ButtonOverlayFrame[]
 local framePool = {}
+
+--light orange on every button, a sharp orange on the selected one.
+local BORDER = {1, 0.7, 0.3, 0.5, 1}
+local BORDER_SELECTED = {1, 0.5, 0, 1, 3}
+
+---colors the border around the overlay
+---@param frame ButtonOverlayFrame
+---@param style number[] @BORDER or BORDER_SELECTED
+local function setBorder(frame, style)
+	if not frame.border then
+		local border = {}
+		for _, side in ipairs({"TOP", "BOTTOM", "LEFT", "RIGHT"}) do
+			border[side] = frame:CreateTexture(nil, "OVERLAY")
+		end
+		border.TOP:SetPoint("TOPLEFT")
+		border.TOP:SetPoint("TOPRIGHT")
+		border.BOTTOM:SetPoint("BOTTOMLEFT")
+		border.BOTTOM:SetPoint("BOTTOMRIGHT")
+		border.LEFT:SetPoint("TOPLEFT")
+		border.LEFT:SetPoint("BOTTOMLEFT")
+		border.RIGHT:SetPoint("TOPRIGHT")
+		border.RIGHT:SetPoint("BOTTOMRIGHT")
+		frame.border = border
+	end
+
+	local r, g, b, a, thickness = unpack(style)
+	for side, line in pairs(frame.border) do
+		line:SetColorTexture(r, g, b, a)
+		if side == "TOP" or side == "BOTTOM" then
+			line:SetHeight(thickness)
+		else
+			line:SetWidth(thickness)
+		end
+		line:Show()
+	end
+end
 
 ---@param overlay ButtonOverlay
 local function onEnter(overlay)
@@ -72,7 +109,8 @@ local ButtonEditor= {
 		overlay.frame:SetScript("OnLeave", function() onLeave(overlay) end)
 		overlay.frame:SetScript("OnClick", function() onClick(overlay) end)
 
-		overlay.frame.label:SetText(L["Edit"])
+		overlay.frame.label:SetText("")
+		setBorder(overlay.frame, BORDER)
 
 		if recticle == "corners" then
 			overlay.frame.select.Left:Hide()
@@ -107,12 +145,14 @@ local ButtonEditor= {
 	activate = function(overlay)
 		overlay.active = true
 		overlay.frame.select:Show()
+		setBorder(overlay.frame, BORDER_SELECTED)
 	end,
 
 	---@param overlay ButtonOverlay
 	deactivate = function(overlay)
 		overlay.active = false
 		overlay.frame.select:Hide()
+		setBorder(overlay.frame, BORDER)
 	end,
 
 	---@param overlay ButtonOverlay
@@ -121,6 +161,9 @@ local ButtonEditor= {
 		overlay.frame:SetScript("OnLeave", nil)
 		overlay.frame:SetScript("OnClick", nil)
 		overlay.frame.select:Hide()
+		for _, line in pairs(overlay.frame.border) do
+			line:Hide()
+		end
 		overlay.frame:Hide()
 		table.insert(framePool, overlay.frame)
 

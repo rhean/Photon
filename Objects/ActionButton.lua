@@ -265,12 +265,8 @@ function ActionButton:InitializeButtonSettings()
 
 	local visuals = self:GetVisuals()
 
-	if visuals:GetShowBindText() then
-		self.Hotkey:Show()
-		self.Hotkey:SetTextColor(unpack(visuals:GetBindColor(), 1, 3))
-	else
-		self.Hotkey:Hide()
-	end
+	self:UpdateHotkeyShown()
+	self.Hotkey:SetTextColor(unpack(visuals:GetBindColor(), 1, 3))
 
 	if visuals:GetShowButtonText() then
 		self.Name:Show()
@@ -550,6 +546,12 @@ end
 function ActionButton:RefreshStateData()
 	if self.class == "ActionBar" then
 		self:LoadDataFromDatabase(Spec.active(self.bar:GetMultiSpec()), self.activeState)
+
+		--a modifier page getting or losing its macro changes which modified keys the button takes
+		local barData = self.bar.data
+		if not InCombatLockdown() and (barData.alt or barData.ctrl or barData.shift) then
+			self:ApplyBindings()
+		end
 	end
 end
 
