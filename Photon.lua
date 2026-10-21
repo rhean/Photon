@@ -306,6 +306,10 @@ function Photon:UPDATE_SHAPESHIFT_FORMS()
 	end
 	Photon:UnregisterEvent("PLAYER_REGEN_ENABLED")
 
+	--the bars read the old profile until the reload, see Photon:RefreshConfig
+	if Photon.pendingReload then
+		return
+	end
 	for _, bar in pairs(Photon.bars) do
 		bar:UpdateStanceRemap()
 	end
@@ -318,6 +322,15 @@ end
 
 function Photon:RefreshConfig(db, profile)
 	Photon.pendingReload = true
+	--the bars and buttons still read the old profile, whose tables lost their defaults in the change.
+	for _, bar in pairs(Photon.bars) do
+		bar:UnregisterAllEvents()
+		bar:CancelAllTimers()
+		for _, button in pairs(bar.buttons) do
+			button:UnregisterAllEvents()
+			button:CancelAllTimers()
+		end
+	end
 	C_Timer.After(0, function()
 		StaticPopup_Show("ReloadUI")
 	end)
@@ -326,7 +339,7 @@ end
 --an action button's macros, by spec and the default tree. the rest of a button, its look and keybinds, is layout
 local MACRO_TREES = {1, 2, 3, 4, "default"}
 
----makes a new profile with all of source's bars, settings and keybinds, but empty buttons, and switches to it
+---makes a new profile with all of source's bars, settings and keybinds, but empty buttons. switching to it is up to the caller
 function Photon:NewProfileFromLayout(source, name)
 	local layout = CopyTable(Photon.db.profiles[source])
 	layout.PhotonItemCache = nil
@@ -339,7 +352,6 @@ function Photon:NewProfileFromLayout(source, name)
 		end
 	end
 	Photon.db.profiles[name] = layout
-	Photon.db:SetProfile(name)
 end
 
 -----------------------------------------------------------------

@@ -26,15 +26,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
 local function profileOptions()
 	local options = LibStub("AceDBOptions-3.0"):GetOptionsTable(Photon.db)
 
-	--enhance the database object with per spec profile features
-	--LibDualSpec only loads on WOW_PROJECT_MAINLINE, so it's missing on Forever builds that report WOW_PROJECT_CAMELOT
-	--it reads AceDBOptions' new and choose options, so it goes before they are moved into the boxes below
-	local LibDualSpec = LibStub('LibDualSpec-1.0', true)
-	if LibDualSpec then
-		LibDualSpec:EnhanceDatabase(Photon.db, addonName)
-		LibDualSpec:EnhanceOptions(options, Photon.db) -- enhance the profiles config panel with per spec profile features
-	end
-
 	local shared = options.args
 	local function take(key)
 		local option = CopyTable(shared[key])
@@ -129,6 +120,7 @@ local function profileOptions()
 					func = function()
 						if validName(layoutName) then
 							Photon:NewProfileFromLayout(layoutSource, layoutName)
+							Photon.db:SetProfile(layoutName)
 							layoutSource, layoutName = nil, nil
 						end
 					end,
