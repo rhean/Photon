@@ -60,14 +60,34 @@ local function profileOptions()
 	--the intro stays at the top, the rest each get a box of their own
 	options.args = {
 		desc = take("desc"),
-		current = take("current"),
-		choose = {
-			order = 50,
+		--the dropdown shows the current profile and switches to another
+		current = {
+			order = 40,
 			type = "group",
 			name = L["Current Profile"],
 			args = {
-				choosedesc = take("choosedesc"),
 				choose = take("choose"),
+			},
+		},
+		copy = {
+			order = 50,
+			type = "group",
+			name = L["Copy Profile"],
+			args = {
+				copydesc = take("copydesc"),
+				copyfrom = take("copyfrom"),
+			},
+		},
+		new = {
+			order = 60,
+			type = "group",
+			name = L["New Profile"],
+			args = {
+				newdesc = {
+					order = 1,
+					type = "description",
+					name = L["Create a new profile with default settings."],
+				},
 				newcreate = {
 					order = 41,
 					type = "execute",
@@ -90,8 +110,6 @@ local function profileOptions()
 					set = function(_, text) newName = text end,
 					width = NAME_WIDTH,
 				},
-				copydesc = take("copydesc"),
-				copyfrom = take("copyfrom"),
 			},
 		},
 		layout = {
@@ -134,7 +152,7 @@ local function profileOptions()
 					live = true,
 					get = function() return layoutName end,
 					set = function(_, text) layoutName = text end,
-					--a line of its own under the dropdown, like New under Existing Profiles
+					--a line of its own under the dropdown
 					spaceBefore = Style.padding,
 					width = NAME_WIDTH,
 				},
@@ -145,7 +163,12 @@ local function profileOptions()
 			type = "group",
 			name = L["Delete Profile"],
 			args = {
-				deldesc = take("deldesc"),
+				--AceDBOptions' own text says cleanup where it means clean up
+				deldesc = {
+					order = 70,
+					type = "description",
+					name = L["Delete existing and unused profiles from the database to save space, and clean up the SavedVariables file."],
+				},
 				delete = take("delete"),
 			},
 		},
@@ -158,20 +181,18 @@ local function profileOptions()
 				descreset = {
 					order = 9,
 					type = "description",
-					name = L["Reset the current profile back to its default values."],
+					name = L["Reset the current profile to its default values."],
 				},
 				reset = take("reset"),
 			},
 		},
 	}
 
-	--the current profile stands out, and existing comes before new with some room between them and the copying
-	options.args.current.fontSize = "large"
-	local choosing = options.args.choose.args
-	choosing.choose.order = 30
-	choosing.new.spaceBefore = Style.padding
-	choosing.copydesc.spaceBefore = Style.padding
-	choosing.copyfrom.set = function(_, source)
+	--the reset button's tooltip, said the same way as the text above it
+	options.args.reset.args.reset.desc = L["Reset the current profile to its default values."]
+
+	--copying overwrites the current profile, so it asks first and reloads right after
+	options.args.copy.args.copyfrom.set = function(_, source)
 		StaticPopup_Show("PhotonCopyProfile", source, nil, source)
 	end
 	return options
