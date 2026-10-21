@@ -778,6 +778,9 @@ end
 
 ---the active state's cast type, see PlainCastSpellID. the secure state code does the same in combat
 function ActionButton:ApplyCastType()
+	if Photon.pendingReload then
+		return
+	end
 	if InCombatLockdown() or self:GetAttribute("HasActionID") then
 		return
 	end
@@ -788,6 +791,10 @@ end
 
 --macro conditions like [flyable] or [outdoors] can change without an event, so the range timer looks at them again
 function ActionButton:UpdateTick()
+	if Photon.pendingReload then
+		return
+	end
+
 	local macro = self:GetMacroText()
 	if not self.actionID and macro and macro:find("[", 1, true) then
 		local data = self.ExtractMacroData(self.SanitizedMacro(macro))
