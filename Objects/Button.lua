@@ -497,6 +497,11 @@ end
 ---the data the button currently shows, which may come from the default tree
 ---@return GenericSpecData
 function Button:GetActiveData()
+	--after a profile change the old profile's tables lose their defaults, so until the reload buttons show nothing.
+	--events and timers still come in, like UPDATE_MACROS when another addon edits a macro
+	if Photon.pendingReload then
+		return BLANK_DATA
+	end
 	if self.statedata and self.activeState then
 		local data = self:GetResolvedData(self.activeState)
 		return data.forceBlank and BLANK_DATA or data

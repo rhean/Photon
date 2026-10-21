@@ -260,6 +260,15 @@ L["Action Data"] = true
 L["Options"] = true
 L["Revert"] = true
 L["ReloadUI"] = "This action will cause the UI to reload."
+L["Current Profile"] = true
+L["Copy Layout"] = true
+L["Delete Profile"] = true
+L["Reset Profile"] = true
+L["Reset the current profile back to its default values."] = true
+L["Make a new profile with the bars, settings and keybinds of an existing profile, but with empty buttons."] = true
+L["Layout From"] = true
+L["New Profile Name"] = true
+L["Pick a new name, at most 50 characters."] = true
 
 L["Click here to edit macro note"] = true
 L["Use macro note as button tooltip"] = true

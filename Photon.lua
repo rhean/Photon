@@ -303,7 +303,28 @@ end
 
 function Photon:RefreshConfig(db, profile)
 	Photon.pendingReload = true
-	StaticPopup_Show("ReloadUI")
+	C_Timer.After(0, function()
+		StaticPopup_Show("ReloadUI")
+	end)
+end
+
+--an action button's macros, by spec and the default tree. the rest of a button, its look and keybinds, is layout
+local MACRO_TREES = {1, 2, 3, 4, "default"}
+
+---makes a new profile with all of source's bars, settings and keybinds, but empty buttons, and switches to it
+function Photon:NewProfileFromLayout(source, name)
+	local layout = CopyTable(Photon.db.profiles[source])
+	layout.PhotonItemCache = nil
+	layout.PhotonSpellCache = nil
+	for _, bar in pairs(layout.ActionBar or {}) do
+		for _, button in pairs(bar.buttons or {}) do
+			for _, tree in ipairs(MACRO_TREES) do
+				button[tree] = nil
+			end
+		end
+	end
+	Photon.db.profiles[name] = layout
+	Photon.db:SetProfile(name)
 end
 
 -----------------------------------------------------------------

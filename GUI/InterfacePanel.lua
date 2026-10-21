@@ -28,11 +28,149 @@ local function profileOptions()
 
 	--enhance the database object with per spec profile features
 	--LibDualSpec only loads on WOW_PROJECT_MAINLINE, so it's missing on Forever builds that report WOW_PROJECT_CAMELOT
+	--it reads AceDBOptions' new and choose options, so it goes before they are moved into the boxes below
 	local LibDualSpec = LibStub('LibDualSpec-1.0', true)
 	if LibDualSpec then
 		LibDualSpec:EnhanceDatabase(Photon.db, addonName)
 		LibDualSpec:EnhanceOptions(options, Photon.db) -- enhance the profiles config panel with per spec profile features
 	end
+
+	local shared = options.args
+	local function take(key)
+		local option = CopyTable(shared[key])
+		if type(option.name) == "string" then
+			option.name = strtrim(option.name)
+		end
+		return option
+	end
+
+	local newName, layoutName
+	local layoutSource
+
+	local NAME_WIDTH = 2 - 0.5 - Style.gap / 180
+
+	--a name AceDB takes that isn't a profile already. else it says why on screen
+	local function validName(name)
+		local length = name and strlenutf8(name) or 0
+		if length > 0 and length <= 50 and not name:find("^ +$") and not Photon.db.profiles[name] then
+			return true
+		end
+		UIErrorsFrame:AddMessage(L["Pick a new name, at most 50 characters."], 1, 0.1, 0.1)
+	end
+
+	--the intro stays at the top, the rest each get a box of their own
+	options.args = {
+		desc = take("desc"),
+		current = take("current"),
+		choose = {
+			order = 50,
+			type = "group",
+			name = L["Current Profile"],
+			args = {
+				choosedesc = take("choosedesc"),
+				choose = take("choose"),
+				newcreate = {
+					order = 41,
+					type = "execute",
+					name = L["Create"],
+					func = function()
+						if validName(newName) then
+							Photon.db:SetProfile(newName)
+							newName = nil
+						end
+					end,
+					width = "half",
+				},
+				new = {
+					order = 40,
+					type = "input",
+					name = shared.new.name,
+					desc = shared.new.desc,
+					live = true,
+					get = function() return newName end,
+					set = function(_, text) newName = text end,
+					width = NAME_WIDTH,
+				},
+				copydesc = take("copydesc"),
+				copyfrom = take("copyfrom"),
+			},
+		},
+		layout = {
+			order = 200,
+			type = "group",
+			name = L["Copy Layout"],
+			args = {
+				layoutdesc = {
+					order = 1,
+					type = "description",
+					name = L["Make a new profile with the bars, settings and keybinds of an existing profile, but with empty buttons."],
+				},
+				layoutfrom = {
+					order = 2,
+					type = "select",
+					name = L["Layout From"],
+					get = function() return layoutSource end,
+					set = function(_, value) layoutSource = value end,
+					values = "ListProfiles",
+					width = 2,
+				},
+				layoutcreate = {
+					order = 5,
+					type = "execute",
+					name = L["Create"],
+					func = function()
+						if validName(layoutName) then
+							Photon:NewProfileFromLayout(layoutSource, layoutName)
+							layoutSource, layoutName = nil, nil
+						end
+					end,
+					disabled = function() return not layoutSource end,
+					width = "half",
+				},
+				layoutnew = {
+					order = 4,
+					type = "input",
+					name = L["New Profile Name"],
+					live = true,
+					get = function() return layoutName end,
+					set = function(_, text) layoutName = text end,
+					--a line of its own under the dropdown, like New under Existing Profiles
+					spaceBefore = Style.padding,
+					width = NAME_WIDTH,
+				},
+			},
+		},
+		delete = {
+			order = 400,
+			type = "group",
+			name = L["Delete Profile"],
+			args = {
+				deldesc = take("deldesc"),
+				delete = take("delete"),
+			},
+		},
+		reset = {
+			order = 300,
+			type = "group",
+			name = L["Reset Profile"],
+			args = {
+				--AceDBOptions' own text goes on about starting over
+				descreset = {
+					order = 9,
+					type = "description",
+					name = L["Reset the current profile back to its default values."],
+				},
+				reset = take("reset"),
+			},
+		},
+	}
+
+	--the current profile stands out, and existing comes before new with some room between them and the copying
+	options.args.current.fontSize = "large"
+	local choosing = options.args.choose.args
+	choosing.choose.order = 30
+	choosing.new.spaceBefore = Style.padding
+	choosing.copydesc.spaceBefore = Style.padding
 	return options
 end
 
@@ -244,6 +382,9 @@ local function adapt(groups, path, option, refresh)
 		type = option.type,
 		width = option.width,
 		multiline = option.multiline,
+		fontSize = option.fontSize,
+		live = option.live,
+		enterOnly = true,
 		min = option.min,
 		max = option.max,
 		step = option.step,

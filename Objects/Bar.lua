@@ -385,6 +385,10 @@ end
 
 ---this function is set via a repeating scheduled timer in SetAutoHide()
 function Bar:AutoHideUpdate()
+	if Photon.pendingReload then
+		return
+	end
+
 	if self:GetAutoHide() and self.handler~=nil then
 		if not Photon.buttonEditMode and not Photon.barEditMode and not Photon.bindingMode then
 			if self:IsShown() then
@@ -414,6 +418,10 @@ function Bar:AutoHideUpdate()
 end
 
 function Bar:AlphaUpUpdate()
+	if Photon.pendingReload then
+		return
+	end
+
 	if self:GetAlphaUp() == "combat" then
 		if InCombatLockdown() then
 			if self.handler:GetAlpha() < 1 then

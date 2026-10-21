@@ -544,6 +544,10 @@ end
 
 --the secure state code swaps in the state attributes set on load, so they have to follow a drag or drop
 function ActionButton:RefreshStateData()
+	--the old profile's tables lose their defaults on a profile change, see Button:GetActiveData
+	if Photon.pendingReload then
+		return
+	end
 	if self.class == "ActionBar" then
 		self:LoadDataFromDatabase(Spec.active(self.bar:GetMultiSpec()), self.activeState)
 
