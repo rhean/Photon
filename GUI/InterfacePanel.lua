@@ -171,6 +171,9 @@ local function profileOptions()
 	choosing.choose.order = 30
 	choosing.new.spaceBefore = Style.padding
 	choosing.copydesc.spaceBefore = Style.padding
+	choosing.copyfrom.set = function(_, source)
+		StaticPopup_Show("PhotonCopyProfile", source, nil, source)
+	end
 	return options
 end
 

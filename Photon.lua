@@ -129,6 +129,21 @@ function Photon:OnInitialize()
 		preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
 	}
 
+	--Copy From in the profile options asks first, the profile to copy is the popup's data
+	StaticPopupDialogs["PhotonCopyProfile"] = {
+		text = L["Copy \"%s\" into the current profile? The current profile will be overwritten, and the UI will reload."],
+		button1 = YES,
+		button2 = NO,
+		OnAccept = function(_, source)
+			Photon.db:CopyProfile(source)
+			ReloadUI()
+		end,
+		timeout = 0,
+		whileDead = true,
+		hideOnEscape = true,
+		preferredIndex = 3,
+	}
+
 	--Initialize the Minimap Icon
 	Photon:Minimap_IconInitialize()
 

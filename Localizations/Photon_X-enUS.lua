@@ -260,6 +260,7 @@ L["Action Data"] = true
 L["Options"] = true
 L["Revert"] = true
 L["ReloadUI"] = "This action will cause the UI to reload."
+L["Copy \"%s\" into the current profile? The current profile will be overwritten, and the UI will reload."] = true
 L["Current Profile"] = true
 L["Copy Layout"] = true
 L["Delete Profile"] = true
