@@ -49,13 +49,21 @@ local function profileOptions()
 
 	local NAME_WIDTH = 2 - 0.5 - Style.gap / 180
 
-	--a name AceDB takes that isn't a profile already. else it says why on screen
+	--a name AceDB takes that isn't a profile already. else it says why on screen.
+	--the lists show some profiles by another name, like the class profile HUNTER as Hunter, so it can't be either one in any case
 	local function validName(name)
 		local length = name and strlenutf8(name) or 0
-		if length > 0 and length <= 50 and not name:find("^ +$") and not Photon.db.profiles[name] then
-			return true
+		if length == 0 or length > 50 or name:find("^ +$") then
+			UIErrorsFrame:AddMessage(L["Pick a new name, at most 50 characters."], 1, 0.1, 0.1)
+			return
 		end
-		UIErrorsFrame:AddMessage(L["Pick a new name, at most 50 characters."], 1, 0.1, 0.1)
+		for key, shown in pairs(options.handler:ListProfiles({})) do
+			if name:lower() == key:lower() or name:lower() == tostring(shown):lower() then
+				UIErrorsFrame:AddMessage(L["That profile name is already taken."], 1, 0.1, 0.1)
+				return
+			end
+		end
+		return true
 	end
 
 	--the intro stays at the top, the rest each get a box of their own

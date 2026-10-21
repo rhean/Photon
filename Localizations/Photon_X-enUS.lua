@@ -270,6 +270,7 @@ L["Make a new profile with the bars, settings and keybinds of an existing profil
 L["Layout From"] = true
 L["New Profile Name"] = true
 L["Pick a new name, at most 50 characters."] = true
+L["That profile name is already taken."] = true
 
 L["Click here to edit macro note"] = true
 L["Use macro note as button tooltip"] = true
