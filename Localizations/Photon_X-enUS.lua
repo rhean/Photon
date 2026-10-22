@@ -315,6 +315,7 @@ L["Action Bar Pages"] = true
 L["Last 5s"] = true
 L["Reload UI"] = true
 L["Rotation"] = true
+L["True Circle"] = true
 
 -- the position box, on the General Configuration tab
 L["Position"] = true
@@ -559,6 +560,7 @@ L["BarDesc_horizontalPadding"] = "The space between buttons side by side."
 L["BarDesc_verticalPadding"] = "The space between rows of buttons."
 L["BarDesc_shape"] = "How the buttons are laid out."
 L["BarDesc_rotation"] = "Turns the buttons around the bar's middle, in degrees. Not for the linear shape."
+L["BarDesc_circleLocked"] = "Keeps a circle round: the vertical padding follows the horizontal padding. Only for the circle shapes."
 L["BarDesc_alpha"] = "How visible the bar normally is. Lower is more transparent."
 L["BarDesc_alphaUp"] = "When the bar becomes fully visible: on mouseover, in combat, or both."
 L["BarDesc_alphaUpSpeed"] = "How fast the bar fades in and out."
@@ -701,15 +703,24 @@ L["WhatsNew_Text"] = [[
 Welcome to the beta release of Photon!
 Please help out by posting any bugs and suggestions on Curse or github.com/rhean/Photon
 
-New in 0.4.4:
-- Keybinds with Shift, Control or Alt pages will only grab the input if the macro exists.
-- Button edit mode outlines each button instead of covering it with "Edit".
-- Button edit mode always shows the keybinds, even on bars that hide the bind text.
+New in 0.4.5:
+- True Circle option for circle shapes, which locks the vertical and horizontal padding together.
+- Macros with conditions like [mounted], [flyable] or [outdoors] change the icon more reliably.
+- Macros with a target condition, like [@focus], check range against the right target when it changes.
+- Fixed an error when changing profiles.
+- Fixed an error when changing the number of buttons on a menu bar.
+- A new pet bar gets all its buttons and the other settings of the default pet bar when created.
+- Fixed a potential issue where removing multiple bars in a row could remove the wrong one.
 ]]
 L["WhatsNew_ShowOlder"] = "Show Older Changes"
 L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
 L["WhatsNew_Older"] = [[
+New in 0.4.4:
+- Keybinds with Shift, Control or Alt pages will only grab the input if the macro exists.
+- Button edit mode outlines each button instead of covering it with "Edit".
+- Button edit mode always shows the keybinds, even on bars that hide the bind text.
+
 New in 0.4.3:
 - Binding a key that is also bound in Blizzard's keybinds now tells you so, on screen and in the chat.
 - Bars that have pages for Shift, Control or Alt active will now bind those as well. So a button bound to 5 with Shift active as a page will override Shift+5 from Blizzard's config.

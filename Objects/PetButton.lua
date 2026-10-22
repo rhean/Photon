@@ -78,6 +78,8 @@ function PetButton:InitializeButton()
 	self.bar:SetShowGrid(true)
 
 	self:InitializeButtonSettings()
+
+	self:UpdateAll()
 end
 
 function PetButton:InitializeButtonSettings()
