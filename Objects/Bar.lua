@@ -253,6 +253,13 @@ function Bar:DeleteBar()
 		end
 	end
 
+	--the bars still on screen need the new ids too, or deleting another one this session removes the wrong bar's data
+	for _, other in ipairs(Photon.bars) do
+		if other ~= self and other.barDB == self.barDB and other.data.id then
+			other.id = other.data.id
+		end
+	end
+
 	local index --find the location of our bar in the bar table
 	for i,v in ipairs(Photon.bars) do
 		if v == self then
@@ -1017,6 +1024,11 @@ function Bar:SetObjectLoc()
 	local width, height, num, origCol = 0, 0, 0, self:GetColumns()
 	local x, y, placed
 	local shape, padH, padV, arcStart, arcLength = self:GetBarShape(), self:GetHorizontalPad(), self:GetVerticalPad(), self:GetArcStart(), self:GetArcLength()
+
+	--a locked circle goes by the horizontal padding both ways, unequal padding stretches it to an oval
+	if self:GetCircleLocked() and (shape == "circle" or shape == "circle + one") then
+		padV = padH
+	end
 	local cAdjust, rAdjust = 0.5, 1
 	local columns, rows
 	local count = #self.buttons
@@ -1670,6 +1682,19 @@ end
 
 function Bar:GetBarShape()
 	return self.data.shape
+end
+
+function Bar:SetCircleLocked(checked)
+	self.data.circleLocked = checked and true or nil
+
+	self:SetObjectLoc()
+	self:SetPerimeter()
+	self:SetSize()
+	self:UpdateBarStatus()
+end
+
+function Bar:GetCircleLocked()
+	return self.data.circleLocked
 end
 
 function Bar:SetColumns(option)

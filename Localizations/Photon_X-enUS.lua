@@ -315,6 +315,7 @@ L["Action Bar Pages"] = true
 L["Last 5s"] = true
 L["Reload UI"] = true
 L["Rotation"] = true
+L["True Circle"] = true
 
 -- the position box, on the General Configuration tab
 L["Position"] = true
@@ -559,6 +560,7 @@ L["BarDesc_horizontalPadding"] = "The space between buttons side by side."
 L["BarDesc_verticalPadding"] = "The space between rows of buttons."
 L["BarDesc_shape"] = "How the buttons are laid out."
 L["BarDesc_rotation"] = "Turns the buttons around the bar's middle, in degrees. Not for the linear shape."
+L["BarDesc_circleLocked"] = "Keeps a circle round: the vertical padding follows the horizontal padding. Only for the circle shapes."
 L["BarDesc_alpha"] = "How visible the bar normally is. Lower is more transparent."
 L["BarDesc_alphaUp"] = "When the bar becomes fully visible: on mouseover, in combat, or both."
 L["BarDesc_alphaUpSpeed"] = "How fast the bar fades in and out."

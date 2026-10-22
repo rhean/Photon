@@ -87,6 +87,9 @@ addonTable.barConfigLayout = {
 						{
 							{ id = "shape", width = "normal" },
 						},
+						{
+							{ id = "circleLocked", width = "normal" },
+						},
 					}},
 					{ id = "rotationBox", box = true, name = "", light = true, width = "normal", rows = {
 						{
