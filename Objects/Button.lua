@@ -117,6 +117,12 @@ function Button.ChangeSelectedButton(newButton)
 end
 
 function Button:CancelCooldownTimer(stopAnimation)
+	--menu buttons and the like have no cooldown to clean up
+	if not self.Cooldown then
+		self:UpdateVisibility()
+		return
+	end
+
 	--cleanup so on state changes the cooldowns don't persist
 	if self:TimeLeft(self.Cooldown.cooldownTimer) ~= 0 then
 		self:CancelTimer(self.Cooldown.cooldownTimer)
@@ -667,13 +673,20 @@ function Button:ApplyBindings()
 		self:SetAttribute("hotkeys", hotKeys)
 	end
 
+	--menu buttons and the like have no bind text to show
+	if not self.Hotkey then
+		return
+	end
+
 	self.Hotkey:SetText(Button.hotKeyText(self.keys.hotKeys:match("^:([^:]+)") or ""))
 
 	self:UpdateHotkeyShown()
 end
 
 function Button:UpdateHotkeyShown()
-	self.Hotkey:SetShown(Photon.buttonEditMode or self:GetVisuals():GetShowBindText())
+	if self.Hotkey then
+		self.Hotkey:SetShown(Photon.buttonEditMode or self:GetVisuals():GetShowBindText())
+	end
 end
 
 	-- spell in action, extra, pet, zone,
