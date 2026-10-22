@@ -78,6 +78,8 @@ function PetButton:InitializeButton()
 	self.bar:SetShowGrid(true)
 
 	self:InitializeButtonSettings()
+
+	self:UpdateAll()
 end
 
 function PetButton:InitializeButtonSettings()
@@ -145,6 +147,7 @@ function PetButton:OnDragStart()
 
 	if drag then
 		self:SetChecked(0)
+		Photon.ActionButton.SetPickedPetAction(self.actionID)
 		PickupPetAction(self.actionID)
 		self:UpdateData()
 	end
@@ -162,6 +165,7 @@ function PetButton:OnReceiveDrag()
 
 	if GetCursorInfo() == "petaction" then
 		self:SetChecked(0)
+		Photon.ActionButton.SetPickedPetAction(self.actionID) --swapping puts this slot's ability on the cursor
 		PickupPetAction(self.actionID)
 		self:UpdateData()
 	else

@@ -308,6 +308,7 @@ local function barDefinitions()
 			{linear = L["Linear"], circle = L["Circle"], ["circle + one"] = L["Circle + One"], square = L["Square"], diamond = L["Diamond"]},
 			{"linear", "circle", "circle + one", "square", "diamond"},
 			"GetBarShape", "SetBarShape"),
+		circleLocked = barToggle(L["True Circle"], "GetCircleLocked", "SetCircleLocked"),
 		rotation = barRange(L["Rotation"], 0, 359, 1, false, "GetArcStart", "SetArcStart"),
 		horizontalPadding = barRange(L["Horizontal Padding"], -200, 200, 1, false, "GetHorizontalPad", "SetHorizontalPad"),
 		verticalPadding = barRange(L["Vertical Padding"], -200, 200, 1, false, "GetVerticalPad", "SetVerticalPad"),
@@ -408,6 +409,26 @@ local function barDefinitions()
 	--only a line has rows
 	definitions.columns.disabled = function()
 		return bar():GetBarShape() ~= "linear"
+	end
+
+	local function isCircle()
+		local shape = bar():GetBarShape()
+		return shape == "circle" or shape == "circle + one"
+	end
+
+	definitions.circleLocked.disabled = function()
+		return not isCircle()
+	end
+
+	--a locked circle follows the horizontal padding, the slider shows it moving along
+	definitions.verticalPadding.disabled = function()
+		return isCircle() and bar():GetCircleLocked()
+	end
+	definitions.verticalPadding.get = function()
+		if isCircle() and bar():GetCircleLocked() then
+			return bar():GetHorizontalPad()
+		end
+		return bar():GetVerticalPad()
 	end
 
 	positionDefinitions(definitions)

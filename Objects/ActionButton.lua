@@ -251,7 +251,7 @@ function ActionButton:InitializeButton()
 	--this is a direct replacement to the old "onUpdate" code that did this job
 
 	if self:TimeLeft(self.rangeTimer) == 0 then
-		self.rangeTimer = self:ScheduleRepeatingTimer("UpdateUsable", 0.5)
+		self.rangeTimer = self:ScheduleRepeatingTimer("UpdateTick", 0.5)
 	end
 
 	self:UpdateAll()
@@ -343,6 +343,14 @@ function ActionButton:SetupEvents()
 	self:RegisterEvent("UNIT_EXITED_VEHICLE", "UpdateAll")
 	self:RegisterEvent("PLAYER_FOCUS_CHANGED", "UpdateAll")
 	self:RegisterEvent("COMPANION_UPDATE", "UpdateAll")
+
+	--macro conditions like [mounted], [outdoors] and [flyable] change with these
+	if not C_EventUtils or not C_EventUtils.IsEventValid or C_EventUtils.IsEventValid("PLAYER_MOUNT_DISPLAY_CHANGED") then
+		self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED", "UpdateAll")
+	end
+	self:RegisterEvent("ZONE_CHANGED", "UpdateAll")
+	self:RegisterEvent("ZONE_CHANGED_INDOORS", "UpdateAll")
+	self:RegisterEvent("ZONE_CHANGED_NEW_AREA", "UpdateAll")
 
 	self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW", "UpdateGlow")
 	self:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE", "UpdateGlow")
@@ -774,12 +782,32 @@ end
 
 ---the active state's cast type, see PlainCastSpellID. the secure state code does the same in combat
 function ActionButton:ApplyCastType()
+	if Photon.pendingReload then
+		return
+	end
 	if InCombatLockdown() or self:GetAttribute("HasActionID") then
 		return
 	end
 	local spell = self.PlainCastSpellID(self:GetMacroText())
 	self:SetAttribute("type", spell and "spell" or "macro")
 	self:SetAttribute("*spell*", spell)
+end
+
+--macro conditions like [flyable] or [outdoors] can change without an event, so the range timer looks at them again
+function ActionButton:UpdateTick()
+	if Photon.pendingReload then
+		return
+	end
+
+	local macro = self:GetMacroText()
+	if not self.actionID and macro and macro:find("[", 1, true) then
+		local data = self.ExtractMacroData(self.SanitizedMacro(macro))
+		if data.spell ~= self.spell or data.item ~= self.item or data.unit ~= self.unit then
+			self:UpdateAll()
+			return
+		end
+	end
+	self:UpdateUsable()
 end
 
 --a spell learned or a talent changed can change what a plain /cast is. the attributes can only change out of combat

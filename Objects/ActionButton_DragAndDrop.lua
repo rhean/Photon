@@ -43,6 +43,49 @@ if C_MountJournal and C_MountJournal.Pickup then
 	end)
 end
 
+--pet commands (Attack, Follow, Passive...) have no spell, they become their slash command
+local petCommands = {
+	PET_ACTION_ATTACK = "/petattack",
+	PET_ACTION_FOLLOW = "/petfollow",
+	PET_ACTION_WAIT = "/petstay",
+	PET_ACTION_MOVE_TO = "/petmoveto",
+	PET_MODE_PASSIVE = "/petpassive",
+	PET_MODE_DEFENSIVE = "/petdefensive",
+	PET_MODE_ASSIST = "/petassist",
+	PET_MODE_AGGRESSIVE = "/petaggressive",
+}
+
+--the cursor can't tell commands apart (Stay and Passive both come back as 0), so we note which one was picked up
+local pickedPetCommand
+
+--Photon's pet bar calls this before it picks up, see PetButton:OnDragStart
+function ActionButton.SetPickedPetAction(slot)
+	local name, texture, isToken = GetPetActionInfo(slot)
+	pickedPetCommand = isToken and petCommands[name] and {token = name, icon = _G[texture]} or nil
+end
+
+--the spellbook names a command with its localized text, which is the global string of the same token
+local function pickedFromSpellBook(index, bank)
+	pickedPetCommand = nil
+	if bank ~= Enum.SpellBookSpellBank.Pet then
+		return
+	end
+	local info = addonTable.utilities.SpellBook.GetSpellBookItemInfo(index, bank)
+	for token in pairs(petCommands) do
+		if info and info.name == _G[token] then
+			pickedPetCommand = {token = token, icon = info.iconID}
+		end
+	end
+end
+
+if C_SpellBook and C_SpellBook.PickupSpellBookItem then
+	hooksecurefunc(C_SpellBook, "PickupSpellBookItem", pickedFromSpellBook)
+elseif PickupSpellBookItem then
+	hooksecurefunc("PickupSpellBookItem", function(index, book)
+		pickedFromSpellBook(index, book == (BOOKTYPE_PET or "pet") and Enum.SpellBookSpellBank.Pet or Enum.SpellBookSpellBank.Player)
+	end)
+end
+
 --------------------------------------
 --------------------------------------
 
@@ -166,7 +209,7 @@ function ActionButton:OnReceiveDrag()
 	elseif cursorType == "companion" then
 		self:PlaceCompanion(action1, action2, journalMountID)
 	elseif cursorType == "petaction" then
-		self:PlacePetAbility(action1, action2)
+		self:PlacePetAbility(action1, action2, pickedPetCommand)
 	end
 
 	wipe(macroDrag)
@@ -313,14 +356,15 @@ function ActionButton:PlaceSpell(action1, action2, spellID)
 	self:SetMacroEquipmentSet()
 end
 
-function ActionButton:PlacePetAbility(action1, action2)
+function ActionButton:PlacePetAbility(action1, action2, petCommand)
 
 	local spellID = action1
 	local spellIndex = action2
 
-	if spellIndex then --if the ability doesn't have a spellIndex, i.e (passive, follow, defensive, etc, print a warning)
-		local spellInfoName = C_Spell.GetSpellName(spellID)
+	--passive, follow, defensive etc. have no spellIndex, and on some clients action1 isn't a spell we can name
+	local spellInfoName = spellIndex and C_Spell.GetSpellName(spellID)
 
+	if spellInfoName then
 		self:SetMacroText(self:AutoWriteMacro(spellInfoName))
 		self:SetMacroIcon() --will pull icon automatically unless explicitly overridden
 		self:SetMacroName()
@@ -329,7 +373,16 @@ function ActionButton:PlacePetAbility(action1, action2)
 		self:SetMacroBlizzMacro()
 		self:SetMacroEquipmentSet()
 
-	else
+	elseif petCommand then --a command (passive, follow, defensive, etc) has no spell, it gets its slash command
+		self:SetMacroText(petCommands[petCommand.token])
+		self:SetMacroIcon(petCommand.icon) --need to set icon here, it won't pull it automatically
+		self:SetMacroName()
+		self:SetMacroNote()
+		self:SetMacroUseNote()
+		self:SetMacroBlizzMacro()
+		self:SetMacroEquipmentSet()
+
+	else --not a spell or a command we know, print a warning
 		Photon:Print(L["DragDrop_Error_Message"])
 	end
 end
