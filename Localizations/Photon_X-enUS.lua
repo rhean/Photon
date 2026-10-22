@@ -703,15 +703,24 @@ L["WhatsNew_Text"] = [[
 Welcome to the beta release of Photon!
 Please help out by posting any bugs and suggestions on Curse or github.com/rhean/Photon
 
-New in 0.4.4:
-- Keybinds with Shift, Control or Alt pages will only grab the input if the macro exists.
-- Button edit mode outlines each button instead of covering it with "Edit".
-- Button edit mode always shows the keybinds, even on bars that hide the bind text.
+New in 0.4.5:
+- True Circle option for circle shapes, which locks the vertical and horizontal padding together.
+- Macros with conditions like [mounted], [flyable] or [outdoors] change the icon more reliably.
+- Macros with a target condition, like [@focus], check range against the right target when it changes.
+- Fixed an error when changing profiles.
+- Fixed an error when changing the number of buttons on a menu bar.
+- A new pet bar gets all its buttons and the other settings of the default pet bar when created.
+- Fixed a potential issue where removing multiple bars in a row could remove the wrong one.
 ]]
 L["WhatsNew_ShowOlder"] = "Show Older Changes"
 L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
 L["WhatsNew_Older"] = [[
+New in 0.4.4:
+- Keybinds with Shift, Control or Alt pages will only grab the input if the macro exists.
+- Button edit mode outlines each button instead of covering it with "Edit".
+- Button edit mode always shows the keybinds, even on bars that hide the bind text.
+
 New in 0.4.3:
 - Binding a key that is also bound in Blizzard's keybinds now tells you so, on screen and in the chat.
 - Bars that have pages for Shift, Control or Alt active will now bind those as well. So a button bound to 5 with Shift active as a page will override Shift+5 from Blizzard's config.

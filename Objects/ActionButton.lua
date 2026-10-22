@@ -798,7 +798,7 @@ function ActionButton:UpdateTick()
 	local macro = self:GetMacroText()
 	if not self.actionID and macro and macro:find("[", 1, true) then
 		local data = self.ExtractMacroData(self.SanitizedMacro(macro))
-		if data.spell ~= self.spell or data.item ~= self.item then
+		if data.spell ~= self.spell or data.item ~= self.item or data.unit ~= self.unit then
 			self:UpdateAll()
 			return
 		end
