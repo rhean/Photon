@@ -171,10 +171,14 @@ function Bar:CreateNewBar(class)
 	local newBar = Bar.new(class, barID) --create new bar
 
 	--add at least 1 button to a new bar, a menu bar gets all of them since it can't hold part of the menu
-	--and a totem bar since each of its buttons has its own job
-	local numButtons = (class == "MenuBar" or class == "TotemBar") and newBar.objMax or 1
+	--and a totem or pet bar since each of its buttons has its own job
+	local numButtons = (class == "MenuBar" or class == "TotemBar" or class == "PetBar") and newBar.objMax or 1
 	for buttonID = 1, numButtons do
 		newBar.objTemplate.new(newBar, buttonID)
+	end
+
+	if class == "PetBar" then
+		newBar.data.hidestates = ":pet0:"
 	end
 	newBar:Load() --load the bar
 
