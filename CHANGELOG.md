@@ -1,3 +1,16 @@
+## 0.4.5
+
+### New
+- True Circle option for circle shapes, which locks the vertical and horizontal padding together.
+
+### Fixes and Tweaks
+- Macros with conditions like [mounted], [flyable] or [outdoors] change the icon more reliably.
+- Macros with a target condition, like [@focus], check range against the right target when it changes.
+- Fixed an error when changing profiles.
+- Fixed an error when changing the number of buttons on a menu bar.
+- A new pet bar gets all its buttons and the other settings of the default pet bar when created.
+- Fixed a potential issue where removing multiple bars in a row could remove the wrong one.
+
 ## 0.4.4
 
 ### Fixes and Tweaks
