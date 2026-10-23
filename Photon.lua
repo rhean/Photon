@@ -113,6 +113,12 @@ function Photon:OnInitialize()
 	Photon.itemCache = DB.PhotonItemCache
 	Photon.spellCache = DB.PhotonSpellCache
 
+	for name, data in pairs(Photon.spellCache) do
+		if type(data) == "table" and type(data.spellID) == "number" and data.spellID >= 0x1000000 then
+			Photon.spellCache[name] = nil
+		end
+	end
+
 	Photon.class = select(2, UnitClass("player"))
 	Photon:UpdateStanceStrings()
 
@@ -464,6 +470,25 @@ function Photon:UpdateSpellCache()
 				Photon.spellCache[(altName):lower().."()"] = altSpellData
 			end
 
+		end
+	end
+
+	--the pet's spells, like /cast Growl, shows the pet's spell and not another class's of the same name.
+	local playerKnows = _G.C_SpellBook and _G.C_SpellBook.IsSpellKnown or IsPlayerSpell
+	for i = 1, 100 do
+		local itemInfo = C_SpellBook.GetSpellBookItemInfo(i, Enum.SpellBookSpellBank.Pet)
+		if not itemInfo or not itemInfo.name then
+			break
+		end
+
+		local spellID = itemInfo.spellID
+		local cached = Photon.spellCache[itemInfo.name:lower()]
+		local playerHasIt = cached and cached.booktype == Enum.SpellBookSpellBank.Player and playerKnows and playerKnows(cached.spellID)
+
+		if spellID and not playerHasIt then
+			local spellData = Photon:SetSpellInfo(i, Enum.SpellBookSpellBank.Pet, itemInfo.itemType, itemInfo.name, spellID, C_Spell.GetSpellTexture(spellID))
+			Photon.spellCache[itemInfo.name:lower()] = spellData
+			Photon.spellCache[itemInfo.name:lower().."()"] = spellData
 		end
 	end
 

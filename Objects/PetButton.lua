@@ -163,7 +163,12 @@ function PetButton:OnReceiveDrag()
 		return
 	end
 
-	if GetCursorInfo() == "petaction" then
+	--a Photon macro from a regular bar is turned away and goes back to its button
+	local turnedAway = Photon.ActionButton.DropOnPetBar()
+
+	if turnedAway then
+		self:UpdateData()
+	elseif GetCursorInfo() == "petaction" then
 		self:SetChecked(0)
 		Photon.ActionButton.SetPickedPetAction(self.actionID) --swapping puts this slot's ability on the cursor
 		PickupPetAction(self.actionID)

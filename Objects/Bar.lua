@@ -1693,6 +1693,11 @@ function Bar:GetBarShape()
 end
 
 function Bar:SetCircleLocked(checked)
+	--unlocking keeps the circle as it is: the vertical padding takes the horizontal one it was following
+	local shape = self:GetBarShape()
+	if not checked and self:GetCircleLocked() and (shape == "circle" or shape == "circle + one") then
+		self.data.padV = self:GetHorizontalPad()
+	end
 	self.data.circleLocked = checked and true or nil
 
 	self:SetObjectLoc()
