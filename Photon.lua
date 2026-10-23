@@ -23,7 +23,7 @@ local DB
 local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
 
 --the What's New popup, shown once per account when LATEST_VERSION_NUM changes, see Photon:LoginMessage
-local LATEST_VERSION_NUM = "0.4.5" --change it with WhatsNew_Text in the locale, everyone sees the new release notes once
+local LATEST_VERSION_NUM = "0.5" --change it with WhatsNew_Text in the locale, everyone sees the new release notes once
 local SHOW_WHATS_NEW = true --false for a version that shouldn't pop up, like a small fix
 local WHATS_NEW_TEXT = "WhatsNew_Text" --the locale key it shows. another key, like "WhatsNew_Override", shows that text instead
 
@@ -113,20 +113,50 @@ function Photon:OnInitialize()
 	Photon.itemCache = DB.PhotonItemCache
 	Photon.spellCache = DB.PhotonSpellCache
 
+	for name, data in pairs(Photon.spellCache) do
+		if type(data) == "table" and type(data.spellID) == "number" and data.spellID >= 0x1000000 then
+			Photon.spellCache[name] = nil
+		end
+	end
+
 	Photon.class = select(2, UnitClass("player"))
 	Photon:UpdateStanceStrings()
 
 	StaticPopupDialogs["ReloadUI"] = {
 		text = L["ReloadUI"],
 		button1 = YES,
-		button2 = NO,
 		OnAccept = function()
 			ReloadUI()
 		end,
 		timeout = 0,
 		whileDead = true,
-		hideOnEscape = true,
+		hideOnEscape = false,
 		preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+	}
+
+	--once per character that had profiles by spec, the text gets the specs and their profiles
+	StaticPopupDialogs["PhotonDualSpecRemoved"] = {
+		text = L["DualSpec_Removed_Message"],
+		button1 = OKAY,
+		timeout = 0,
+		whileDead = true,
+		hideOnEscape = true,
+		preferredIndex = 3,
+	}
+
+	--Copy From in the profile options asks first, the profile to copy is the popup's data
+	StaticPopupDialogs["PhotonCopyProfile"] = {
+		text = L["Copy \"%s\" into the current profile? The current profile will be overwritten, and the UI will reload."],
+		button1 = YES,
+		button2 = NO,
+		OnAccept = function(_, source)
+			Photon.db:CopyProfile(source)
+			ReloadUI()
+		end,
+		timeout = 0,
+		whileDead = true,
+		hideOnEscape = true,
+		preferredIndex = 3,
 	}
 
 	--Initialize the Minimap Icon
@@ -291,6 +321,10 @@ function Photon:UPDATE_SHAPESHIFT_FORMS()
 	end
 	Photon:UnregisterEvent("PLAYER_REGEN_ENABLED")
 
+	--the bars read the old profile until the reload, see Photon:RefreshConfig
+	if Photon.pendingReload then
+		return
+	end
 	for _, bar in pairs(Photon.bars) do
 		bar:UpdateStanceRemap()
 	end
@@ -303,7 +337,36 @@ end
 
 function Photon:RefreshConfig(db, profile)
 	Photon.pendingReload = true
-	StaticPopup_Show("ReloadUI")
+	--the bars and buttons still read the old profile, whose tables lost their defaults in the change.
+	for _, bar in pairs(Photon.bars) do
+		bar:UnregisterAllEvents()
+		bar:CancelAllTimers()
+		for _, button in pairs(bar.buttons) do
+			button:UnregisterAllEvents()
+			button:CancelAllTimers()
+		end
+	end
+	C_Timer.After(0, function()
+		StaticPopup_Show("ReloadUI")
+	end)
+end
+
+--an action button's macros, by spec and the default tree. the rest of a button, its look and keybinds, is layout
+local MACRO_TREES = {1, 2, 3, 4, "default"}
+
+---makes a new profile with all of source's bars, settings and keybinds, but empty buttons. switching to it is up to the caller
+function Photon:NewProfileFromLayout(source, name)
+	local layout = CopyTable(Photon.db.profiles[source])
+	layout.PhotonItemCache = nil
+	layout.PhotonSpellCache = nil
+	for _, bar in pairs(layout.ActionBar or {}) do
+		for _, button in pairs(bar.buttons or {}) do
+			for _, tree in ipairs(MACRO_TREES) do
+				button[tree] = nil
+			end
+		end
+	end
+	Photon.db.profiles[name] = layout
 end
 
 -----------------------------------------------------------------
@@ -320,6 +383,31 @@ function Photon:LoginMessage()
 			C_Timer.After(2, function()
 				Photon.PhotonGUI:ShowWhatsNew(LATEST_VERSION_NUM, WHATS_NEW_TEXT)
 				Photon.db.global.whatsNewSeen = LATEST_VERSION_NUM
+			end)
+		end)
+	end
+
+	--profiles by spec (LibDualSpec) went away in 0.5. a character that had them on is told once, with the profiles it used.
+	local dualSpec = Photon.db.sv.namespaces and Photon.db.sv.namespaces["LibDualSpec-1.0"]
+	local charData = dualSpec and dualSpec.char and dualSpec.char[Photon.db.keys.char]
+	local lines = {}
+	if charData and charData.enabled and not charData.photonNoticeShown then
+		for spec = 1, 4 do
+			if charData[spec] then
+				local specName = not Photon.hasTalentGroups and GetSpecializationInfo and select(2, GetSpecializationInfo(spec))
+				table.insert(lines, (specName or L["Specialization"].." "..spec)..": "..charData[spec])
+			end
+		end
+	end
+	if #lines > 0 then
+		local option = Photon.hasTalentGroups and L["Dual Spec"] or L["Multi Spec"]
+		local waiter = CreateFrame("Frame")
+		waiter:RegisterEvent("PLAYER_ENTERING_WORLD")
+		waiter:SetScript("OnEvent", function(self)
+			self:UnregisterAllEvents()
+			C_Timer.After(2, function()
+				StaticPopup_Show("PhotonDualSpecRemoved", table.concat(lines, "\n"), option)
+				charData.photonNoticeShown = true
 			end)
 		end)
 	end
@@ -416,6 +504,27 @@ function Photon:UpdateSpellCache()
 				Photon.spellCache[(altName):lower().."()"] = altSpellData
 			end
 
+		end
+	end
+
+	--the pet's spells, like /cast Growl, shows the pet's spell and not another class's of the same name.
+	local playerKnows = _G.C_SpellBook and _G.C_SpellBook.IsSpellKnown or IsPlayerSpell
+	for i = 1, 100 do
+		local itemInfo = C_SpellBook.GetSpellBookItemInfo(i, Enum.SpellBookSpellBank.Pet)
+		if not itemInfo or not itemInfo.name then
+			break
+		end
+
+		local spellID = itemInfo.spellID
+		local cached = Photon.spellCache[itemInfo.name:lower()]
+		--an alt entry holds the override, which often isn't known on its own. its altSpellID is the known base spell
+		local playerHasIt = cached and cached.booktype == Enum.SpellBookSpellBank.Player and playerKnows
+			and (playerKnows(cached.spellID) or (cached.altSpellID and playerKnows(cached.altSpellID)))
+
+		if spellID and not playerHasIt then
+			local spellData = Photon:SetSpellInfo(i, Enum.SpellBookSpellBank.Pet, itemInfo.itemType, itemInfo.name, spellID, C_Spell.GetSpellTexture(spellID))
+			Photon.spellCache[itemInfo.name:lower()] = spellData
+			Photon.spellCache[itemInfo.name:lower().."()"] = spellData
 		end
 	end
 

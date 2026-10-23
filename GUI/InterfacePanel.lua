@@ -26,12 +26,174 @@ local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
 local function profileOptions()
 	local options = LibStub("AceDBOptions-3.0"):GetOptionsTable(Photon.db)
 
-	--enhance the database object with per spec profile features
-	--LibDualSpec only loads on WOW_PROJECT_MAINLINE, so it's missing on Forever builds that report WOW_PROJECT_CAMELOT
-	local LibDualSpec = LibStub('LibDualSpec-1.0', true)
-	if LibDualSpec then
-		LibDualSpec:EnhanceDatabase(Photon.db, addonName)
-		LibDualSpec:EnhanceOptions(options, Photon.db) -- enhance the profiles config panel with per spec profile features
+	local shared = options.args
+	local function take(key)
+		local option = CopyTable(shared[key])
+		if type(option.name) == "string" then
+			option.name = strtrim(option.name)
+		end
+		return option
+	end
+
+	local newName, layoutName
+	local layoutSource
+
+	local NAME_WIDTH = 2 - 0.5 - Style.gap / 180
+
+	--a name AceDB takes that isn't a profile already. else it says why on screen.
+	--the lists show some profiles by another name, like the class profile HUNTER as Hunter, so it can't be either one in any case
+	local function validName(name)
+		local length = name and strlenutf8(name) or 0
+		if length == 0 or length > 50 or name:find("^ +$") then
+			UIErrorsFrame:AddMessage(L["Pick a new name, at most 50 characters."], 1, 0.1, 0.1)
+			return
+		end
+		for key, shown in pairs(options.handler:ListProfiles({})) do
+			if name:lower() == key:lower() or name:lower() == tostring(shown):lower() then
+				UIErrorsFrame:AddMessage(L["That profile name is already taken."], 1, 0.1, 0.1)
+				return
+			end
+		end
+		return true
+	end
+
+	--the intro stays at the top, the rest each get a box of their own
+	options.args = {
+		desc = take("desc"),
+		--the dropdown shows the current profile and switches to another
+		current = {
+			order = 40,
+			type = "group",
+			name = L["Current Profile"],
+			args = {
+				choose = take("choose"),
+			},
+		},
+		copy = {
+			order = 50,
+			type = "group",
+			name = L["Copy Profile"],
+			args = {
+				copydesc = take("copydesc"),
+				copyfrom = take("copyfrom"),
+			},
+		},
+		new = {
+			order = 60,
+			type = "group",
+			name = L["New Profile"],
+			args = {
+				newdesc = {
+					order = 1,
+					type = "description",
+					name = L["Create a new profile with default settings."],
+				},
+				newcreate = {
+					order = 41,
+					type = "execute",
+					name = L["Create"],
+					func = function()
+						if validName(newName) then
+							Photon.db:SetProfile(newName)
+							newName = nil
+						end
+					end,
+					width = "half",
+				},
+				new = {
+					order = 40,
+					type = "input",
+					name = shared.new.name,
+					desc = shared.new.desc,
+					live = true,
+					get = function() return newName end,
+					set = function(_, text) newName = text end,
+					width = NAME_WIDTH,
+				},
+			},
+		},
+		layout = {
+			order = 200,
+			type = "group",
+			name = L["Copy Layout"],
+			args = {
+				layoutdesc = {
+					order = 1,
+					type = "description",
+					name = L["Make a new profile with the bars, settings and keybinds of an existing profile, but with empty buttons."],
+				},
+				layoutfrom = {
+					order = 2,
+					type = "select",
+					name = L["Layout From"],
+					get = function() return layoutSource end,
+					set = function(_, value) layoutSource = value end,
+					values = "ListProfiles",
+					width = 2,
+				},
+				layoutcreate = {
+					order = 5,
+					type = "execute",
+					name = L["Create"],
+					func = function()
+						if validName(layoutName) then
+							Photon:NewProfileFromLayout(layoutSource, layoutName)
+							Photon.db:SetProfile(layoutName)
+							layoutSource, layoutName = nil, nil
+						end
+					end,
+					disabled = function() return not layoutSource end,
+					width = "half",
+				},
+				layoutnew = {
+					order = 4,
+					type = "input",
+					name = L["New Profile Name"],
+					live = true,
+					get = function() return layoutName end,
+					set = function(_, text) layoutName = text end,
+					--a line of its own under the dropdown
+					spaceBefore = Style.padding,
+					width = NAME_WIDTH,
+				},
+			},
+		},
+		delete = {
+			order = 400,
+			type = "group",
+			name = L["Delete Profile"],
+			args = {
+				--AceDBOptions' own text says cleanup where it means clean up
+				deldesc = {
+					order = 70,
+					type = "description",
+					name = L["Delete existing and unused profiles from the database to save space, and clean up the SavedVariables file."],
+				},
+				delete = take("delete"),
+			},
+		},
+		reset = {
+			order = 300,
+			type = "group",
+			name = L["Reset Profile"],
+			args = {
+				--AceDBOptions' own text goes on about starting over
+				descreset = {
+					order = 9,
+					type = "description",
+					name = L["Reset the current profile to its default values."],
+				},
+				reset = take("reset"),
+			},
+		},
+	}
+
+	--the reset button's tooltip, said the same way as the text above it
+	options.args.reset.args.reset.desc = L["Reset the current profile to its default values."]
+
+	--copying overwrites the current profile, so it asks first and reloads right after
+	options.args.copy.args.copyfrom.set = function(_, source)
+		StaticPopup_Show("PhotonCopyProfile", source, nil, source)
 	end
 	return options
 end
@@ -244,6 +406,9 @@ local function adapt(groups, path, option, refresh)
 		type = option.type,
 		width = option.width,
 		multiline = option.multiline,
+		fontSize = option.fontSize,
+		live = option.live,
+		enterOnly = true,
 		min = option.min,
 		max = option.max,
 		step = option.step,

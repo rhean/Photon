@@ -316,28 +316,51 @@ CONTROLS.input = function(parent)
 	labelTooltip(control)
 	control.box = box
 
-	--saved on enter or when leaving the box, escape puts it back
-	box:HookScript("OnEditFocusLost", function(self)
+	local function commit(self)
 		if control.commit and self:GetText() ~= control.committed then
 			control.committed = self:GetText()
 			control.commit(control.committed)
+		end
+	end
+	box:HookScript("OnEditFocusLost", function(self)
+		if not control.enterOnly then
+			commit(self)
+		end
+	end)
+	box:HookScript("OnEnterPressed", function(self)
+		if control.enterOnly then
+			commit(self)
 		end
 	end)
 	box:SetScript("OnEscapePressed", function(self)
 		self:SetText(control.committed or "")
 		self:ClearFocus()
 	end)
+	--an option with live gets the text as it is typed, and something else, like a button beside it, does the work
+	box:HookScript("OnTextChanged", function(self)
+		if control.live then
+			control.live(self:GetText())
+		end
+	end)
 
 	function control:Bind(option)
 		self.label:SetText(resolve(option.name))
 		self:FitLabel()
 		self.commit = nil
+		self.live = nil
+		self.enterOnly = option.enterOnly
 		self.committed = option.get({}) or ""
 		box:SetText(self.committed)
 		box:SetEnabled(not resolve(option.disabled))
-		self.commit = function(text)
-			option.set({}, text)
-			self.changed()
+		if option.live then
+			self.live = function(text)
+				option.set({}, text)
+			end
+		else
+			self.commit = function(text)
+				option.set({}, text)
+				self.changed()
+			end
 		end
 	end
 
@@ -449,7 +472,12 @@ CONTROLS.description = function(parent)
 	control.label = control.text
 	labelTooltip(control)
 
+	local FONTS = {small = Style.fontSmall, large = Style.fontLarge}
+
 	function control:Bind(option)
+		--a font object brings its own color
+		self.text:SetFontObject(FONTS[option.fontSize] or Style.font)
+		self.text:SetTextColor(unpack(Style.text))
 		self.text:SetText(resolve(option.name) or "")
 	end
 

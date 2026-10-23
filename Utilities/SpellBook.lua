@@ -42,10 +42,16 @@ local SpellBook = {
     local book = bookType(bank)
     local itemType, actionID = GetSpellBookItemInfo(index, book)
     if itemType then
+      local spellID = itemType ~= "FLYOUT" and actionID or nil --like C_SpellBook, a flyout has no spell
+      --the pet book gives its action ID: the spell in the low 24 bits, the kind above it. commands like Attack (0x06, 0x07) have no spell
+      if spellID and book == (BOOKTYPE_PET or "pet") and spellID >= 0x1000000 then
+        local kind, id = math.floor(spellID / 0x1000000), spellID % 0x1000000
+        spellID = kind ~= 6 and kind ~= 7 and id > 0 and id or nil
+      end
       return {
         itemType = ITEM_TYPES[itemType],
         actionID = actionID,
-        spellID = itemType ~= "FLYOUT" and actionID or nil, --like C_SpellBook, a flyout has no spell
+        spellID = spellID,
         name = GetSpellBookItemName(index, book),
         iconID = GetSpellBookItemTexture(index, book),
       }

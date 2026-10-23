@@ -45,6 +45,10 @@ local function disableFrameSlidingAnimation(frame)
 end
 
 function Photon:HideBlizzardUI(profileDatabase)
+	--profileDatabase is still the old profile until the reload, see Photon:RefreshConfig. what's hidden now stays so
+	if Photon.pendingReload then
+		return
+	end
 	local blizzBars = profileDatabase.blizzBars
 	----------------------------
 	----- Disable Buttons ------

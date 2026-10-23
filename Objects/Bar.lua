@@ -350,16 +350,18 @@ function Bar.ChangeSelectedBar(newBar)
 		return
 	end
 
+	--set first, the overlays show their resize handles on the selected bar only
+	local oldBar = Photon.currentBar
+	Photon.currentBar = newBar
+
 	--the overlays only exist in bar edit mode
-	if Photon.currentBar and Photon.currentBar.editFrame then
-		BarEditor.deactivate(Photon.currentBar.editFrame)
+	if oldBar and oldBar.editFrame then
+		BarEditor.deactivate(oldBar.editFrame)
 	end
 
 	if newBar and newBar.editFrame then
 		BarEditor.activate(newBar.editFrame)
 	end
-
-	Photon.currentBar = newBar
 end
 
 -----------------------------------
@@ -396,6 +398,10 @@ end
 
 ---this function is set via a repeating scheduled timer in SetAutoHide()
 function Bar:AutoHideUpdate()
+	if Photon.pendingReload then
+		return
+	end
+
 	if self:GetAutoHide() and self.handler~=nil then
 		if not Photon.buttonEditMode and not Photon.barEditMode and not Photon.bindingMode then
 			if self:IsShown() then
@@ -425,6 +431,10 @@ function Bar:AutoHideUpdate()
 end
 
 function Bar:AlphaUpUpdate()
+	if Photon.pendingReload then
+		return
+	end
+
 	if self:GetAlphaUp() == "combat" then
 		if InCombatLockdown() then
 			if self.handler:GetAlpha() < 1 then
@@ -960,6 +970,11 @@ function Bar:UpdateBarStatus(show)
 	-- possibly autohide is broken as well and that will go here
 	self.Text:SetText(self:GetBarName())
 	self.handler:SetAlpha(self:GetBarAlpha())
+
+	--the shape, columns or anchor may have changed which resize handles the bar has
+	if self.editFrame then
+		BarEditor.refresh(self.editFrame)
+	end
 end
 
 -------------------------------------------------------
@@ -1020,18 +1035,48 @@ local function ringPosition(shape, index, count)
 	return starts[side][1] + slot*dir[1], starts[side][2] + slot*dir[2]
 end
 
+---where an arc's buttons go, its middle up and turned by the rotation.
+---@return number[][]
+local function arcPositions(count, size, padH, padV, rotation, span)
+	local positions = {}
+	local steps = math.max(count - 1, 1)
+	local radius = steps * 360 / (math.pi * span)
+	local angle = 90 + rotation + span / 2
+	local minX, maxX, minY, maxY = math.huge, -math.huge, math.huge, -math.huge
+
+	for i = 1, count do
+		local x = (size + padH) * radius * cos(angle)
+		local y = (size + padV) * radius * sin(angle)
+		positions[i] = {x, y}
+		minX, maxX = math.min(minX, x), math.max(maxX, x)
+		minY, maxY = math.min(minY, y), math.max(maxY, y)
+		angle = angle - span / steps
+	end
+
+	for _, position in ipairs(positions) do
+		position[1] = position[1] - (minX + maxX) / 2
+		position[2] = position[2] - (minY + maxY) / 2
+	end
+	return positions
+end
+
 function Bar:SetObjectLoc()
 	local width, height, num, origCol = 0, 0, 0, self:GetColumns()
 	local x, y, placed
 	local shape, padH, padV, arcStart, arcLength = self:GetBarShape(), self:GetHorizontalPad(), self:GetVerticalPad(), self:GetArcStart(), self:GetArcLength()
 
 	--a locked circle goes by the horizontal padding both ways, unequal padding stretches it to an oval
+	local flatten = self:GetFlatten()
 	if self:GetCircleLocked() and (shape == "circle" or shape == "circle + one") then
 		padV = padH
+		flatten = 0 --a True Circle stays round
 	end
 	local cAdjust, rAdjust = 0.5, 1
 	local columns, rows
 	local count = #self.buttons
+
+	local arc = shape == "arc" and count > 0
+		and arcPositions(count, self.buttons[1]:GetWidth(), padH, padV, arcStart, self:GetArcSpan())
 
 	if origCol == 0 then
 		origCol = count
@@ -1056,13 +1101,15 @@ function Bar:SetObjectLoc()
 				columns = origCol/2
 			end
 
+			--the rotation is where the buttons start around the circle. flattening squeezes it towards a diagonal
+			--of its box while it keeps touching all four sides, at 90 it would be the diagonal itself
 			if shape == "circle" then
 				if not placed then
 					placed = arcStart
 				end
 
 				x = ((width+padH)*(count/math.pi))*(cos(placed))
-				y = ((width+padV)*(count/math.pi))*(sin(placed))
+				y = ((width+padV)*(count/math.pi))*(sin(placed + flatten))
 
 				object:SetPoint("CENTER", self, "CENTER", x, y)
 
@@ -1076,11 +1123,14 @@ function Bar:SetObjectLoc()
 
 				else
 					x = ((width+padH)*(count/math.pi))*(cos(placed))
-					y = ((width+padV)*(count/math.pi))*(sin(placed))
+					y = ((width+padV)*(count/math.pi))*(sin(placed + flatten))
 
 					object:SetPoint("CENTER", self, "CENTER", x, y)
 					placed = placed - (arcLength/(count-1))
 				end
+			elseif arc then
+				object:SetPoint("CENTER", self, "CENTER", arc[num+1][1], arc[num+1][2])
+
 			elseif shape == "square" or shape == "diamond" then
 				local cx, cy = ringPosition(shape, num+1, count)
 				cx, cy = cx*(width+padH), cy*(height+padV)
@@ -1665,7 +1715,7 @@ end
 
 function Bar:SetBarShape(option)
 	if option then
-		if option == "linear" or option == "circle" or option == "circle + one" or option == "square" or option == "diamond" then
+		if option == "linear" or option == "circle" or option == "circle + one" or option == "arc" or option == "square" or option == "diamond" then
 			self.data.shape = option
 		else
 			self.data.shape = "linear"
@@ -1685,6 +1735,11 @@ function Bar:GetBarShape()
 end
 
 function Bar:SetCircleLocked(checked)
+	--unlocking keeps the circle as it is: the vertical padding takes the horizontal one it was following
+	local shape = self:GetBarShape()
+	if not checked and self:GetCircleLocked() and (shape == "circle" or shape == "circle + one") then
+		self.data.padV = self:GetHorizontalPad()
+	end
 	self.data.circleLocked = checked and true or nil
 
 	self:SetObjectLoc()
@@ -1735,6 +1790,34 @@ function Bar:GetArcStart()
 	return self.data.arcStart
 end
 
+--squeezes a circle towards a diagonal of its box, in degrees: up to 90 bottom left to top right, down to -90 the other one
+function Bar:SetFlatten(option)
+	self.data.flatten = option ~= 0 and option or nil
+
+	self:SetObjectLoc()
+	self:SetPerimeter()
+	self:SetSize()
+	self:UpdateBarStatus()
+end
+
+function Bar:GetFlatten()
+	return self.data.flatten or 0
+end
+
+--how far around the circle the arc shape goes, in degrees. its own value, the circles still use arcLength
+function Bar:SetArcSpan(option)
+	self.data.arcSpan = option ~= 180 and option or nil
+
+	self:SetObjectLoc()
+	self:SetPerimeter()
+	self:SetSize()
+	self:UpdateBarStatus()
+end
+
+function Bar:GetArcSpan()
+	return self.data.arcSpan or 180
+end
+
 function Bar:SetArcLength(option)
 	if option then
 		self.data.arcLength = option
@@ -1753,6 +1836,16 @@ function Bar:GetArcLength()
 end
 
 
+
+---both paddings with one layout, for the bar editor's resize handles
+function Bar:SetPadding(padH, padV)
+	self.data.padH, self.data.padV = padH, padV
+
+	self:SetObjectLoc()
+	self:SetPerimeter()
+	self:SetSize()
+	self:UpdateBarStatus()
+end
 
 function Bar:SetHorizontalPad(option)
 	if option then

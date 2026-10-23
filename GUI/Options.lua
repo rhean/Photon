@@ -305,11 +305,13 @@ local function barDefinitions()
 		columns = barRange(L["Columns"], 0, math.max(numObjects, 1), 1, false, "GetColumns", "SetColumns"),
 		scale = barRange(L["Scale"], 0.1, 2, 0.01, true, "GetBarScale", "SetBarScale"),
 		shape = barSelect(L["Shape"],
-			{linear = L["Linear"], circle = L["Circle"], ["circle + one"] = L["Circle + One"], square = L["Square"], diamond = L["Diamond"]},
-			{"linear", "circle", "circle + one", "square", "diamond"},
+			{linear = L["Linear"], circle = L["Circle"], ["circle + one"] = L["Circle + One"], arc = L["Arc"], square = L["Square"], diamond = L["Diamond"]},
+			{"linear", "circle", "circle + one", "arc", "square", "diamond"},
 			"GetBarShape", "SetBarShape"),
 		circleLocked = barToggle(L["True Circle"], "GetCircleLocked", "SetCircleLocked"),
 		rotation = barRange(L["Rotation"], 0, 359, 1, false, "GetArcStart", "SetArcStart"),
+		flatten = barRange(L["Flatten"], -85, 85, 1, false, "GetFlatten", "SetFlatten"),
+		arcSpan = barRange(L["Arc Length"], 30, 359, 1, false, "GetArcSpan", "SetArcSpan"),
 		horizontalPadding = barRange(L["Horizontal Padding"], -200, 200, 1, false, "GetHorizontalPad", "SetHorizontalPad"),
 		verticalPadding = barRange(L["Vertical Padding"], -200, 200, 1, false, "GetVerticalPad", "SetVerticalPad"),
 		alpha = barRange(L["Opacity"], 0.01, 1, 0.01, true, "GetBarAlpha", "SetBarAlpha"),
@@ -416,8 +418,17 @@ local function barDefinitions()
 		return shape == "circle" or shape == "circle + one"
 	end
 
+	definitions.arcSpan.disabled = function()
+		return bar():GetBarShape() ~= "arc"
+	end
+
 	definitions.circleLocked.disabled = function()
 		return not isCircle()
+	end
+
+	--a True Circle stays round
+	definitions.flatten.disabled = function()
+		return not isCircle() or bar():GetCircleLocked()
 	end
 
 	--a locked circle follows the horizontal padding, the slider shows it moving along

@@ -147,6 +147,7 @@ function PetButton:OnDragStart()
 
 	if drag then
 		self:SetChecked(0)
+		Photon.ActionButton.SetPickedPetAction(self.actionID)
 		PickupPetAction(self.actionID)
 		self:UpdateData()
 	end
@@ -162,8 +163,14 @@ function PetButton:OnReceiveDrag()
 		return
 	end
 
-	if GetCursorInfo() == "petaction" then
+	--a Photon macro from a regular bar is turned away and goes back to its button
+	local turnedAway = Photon.ActionButton.DropOnPetBar()
+
+	if turnedAway then
+		self:UpdateData()
+	elseif GetCursorInfo() == "petaction" then
 		self:SetChecked(0)
+		Photon.ActionButton.SetPickedPetAction(self.actionID) --swapping puts this slot's ability on the cursor
 		PickupPetAction(self.actionID)
 		self:UpdateData()
 	else
@@ -171,8 +178,11 @@ function PetButton:OnReceiveDrag()
 		Photon:Print(L["DragDrop_Error_Message"])
 	end
 
+	--a turned away macro that couldn't go back is still being dragged
+	local holding = turnedAway and GetCursorInfo() ~= nil
+
 	for i,bar in pairs(Photon.bars) do
-		bar:ACTIONBAR_SHOWHIDEGRID()
+		bar:ACTIONBAR_SHOWHIDEGRID(holding or nil)
 	end
 end
 

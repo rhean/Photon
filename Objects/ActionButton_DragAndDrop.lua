@@ -15,6 +15,8 @@ local ActionButton = Photon.ActionButton
 local macroDrag = {} --this is a table that holds onto the contents of the  current macro being dragged
 local macroCache = {} --this will hold onto any previous contents of our button
 local standIn = {} --what SetMouseCursor put on the cursor to show macroDrag
+local dragSource --the button macroDrag was taken from, a drop that can't be placed goes back there
+local dragSourceData --the state macroDrag was taken from, the button may show another page or stance by the time it goes back
 
 --picking something else up replaces our stand-in on the cursor, but nothing tells macroDrag.
 --type and ID only, an item's link changes once the client has loaded it
@@ -43,12 +45,137 @@ if C_MountJournal and C_MountJournal.Pickup then
 	end)
 end
 
+--pet commands (Attack, Follow, Passive...) have no spell, they become their slash command
+local petCommands = {
+	PET_ACTION_ATTACK = "/petattack",
+	PET_ACTION_FOLLOW = "/petfollow",
+	PET_ACTION_WAIT = "/petstay",
+	PET_ACTION_MOVE_TO = "/petmoveto",
+	PET_MODE_PASSIVE = "/petpassive",
+	PET_MODE_DEFENSIVE = "/petdefensive",
+	PET_MODE_ASSIST = "/petassist",
+	PET_MODE_AGGRESSIVE = "/petaggressive",
+}
+
+--the cursor can't tell commands apart (Stay and Passive both come back as 0), so we note which one was picked up
+local pickedPetCommand
+
+--a command let go of shouldn't be placed for a later pet ability
+local petCursorWatcher = CreateFrame("Frame")
+if not C_EventUtils or not C_EventUtils.IsEventValid or C_EventUtils.IsEventValid("CURSOR_CHANGED") then
+	petCursorWatcher:RegisterEvent("CURSOR_CHANGED")
+end
+petCursorWatcher:SetScript("OnEvent", function()
+	if not GetCursorInfo() then
+		pickedPetCommand = nil
+	end
+end)
+
+--what Photon's pet bar is about to pick up, PickupPetAction below takes it on
+local pendingPetCommand
+
+--Photon's pet bar calls this before it picks up, see PetButton:OnDragStart
+function ActionButton.SetPickedPetAction(slot)
+	local name, texture, isToken = GetPetActionInfo(slot)
+	--most clients name the icon by a global, some give the texture itself
+	pendingPetCommand = isToken and petCommands[name] and {token = name, icon = _G[texture] or texture} or nil
+end
+
+hooksecurefunc("PickupPetAction", function()
+	pickedPetCommand = pendingPetCommand
+	pendingPetCommand = nil
+end)
+
+--the spellbook names a command with its localized text, which is the global string of the same token
+local function pickedFromSpellBook(index, bank)
+	pickedPetCommand = nil
+	if bank ~= Enum.SpellBookSpellBank.Pet then
+		return
+	end
+	local info = addonTable.utilities.SpellBook.GetSpellBookItemInfo(index, bank)
+	for token in pairs(petCommands) do
+		if info and info.name == _G[token] then
+			pickedPetCommand = {token = token, icon = info.iconID}
+		end
+	end
+end
+
+--a client can have both, and its spellbook may pick up with either
+if C_SpellBook and C_SpellBook.PickupSpellBookItem then
+	hooksecurefunc(C_SpellBook, "PickupSpellBookItem", pickedFromSpellBook)
+end
+if PickupSpellBookItem then
+	hooksecurefunc("PickupSpellBookItem", function(index, book)
+		local isPet = book == (BOOKTYPE_PET or "pet") or book == Enum.SpellBookSpellBank.Pet
+		pickedFromSpellBook(index, isPet and Enum.SpellBookSpellBank.Pet or Enum.SpellBookSpellBank.Player)
+	end)
+end
+
 --------------------------------------
 --------------------------------------
+
+---by spell ID, older clients only have IsPassiveSpell
+local function isPassiveSpell(spellID)
+	if not spellID or spellID == 0 or not C_Spell.GetSpellName(spellID) then
+		return false
+	end
+	if C_Spell.IsSpellPassive then
+		return C_Spell.IsSpellPassive(spellID)
+	end
+	return IsPassiveSpell and IsPassiveSpell(spellID) or false
+end
+
+---whether the cursor holds a passive spell, from the spellbook, the pet spellbook or a pet bar
+local function passiveOnCursor(cursorType, action1, action2, spellID)
+	if cursorType == "spell" then
+		if action1 and action1 ~= 0 then
+			local bank = action2 == "pet" and Enum.SpellBookSpellBank.Pet or Enum.SpellBookSpellBank.Player
+			--falls back to the older functions on Classic Era, see Utilities/SpellBook.lua
+			return addonTable.utilities.SpellBook.IsSpellBookItemPassive(action1, bank)
+		end
+		return isPassiveSpell(spellID)
+	elseif cursorType == "petaction" then
+		--action1 is the spell, commands have none we can name
+		return action2 and isPassiveSpell(action1)
+	end
+	return false
+end
 
 --a macro, or only an icon picked in the button editor, both move with a drag
 local function hasContent(self)
 	return self:GetMacroText() ~= "" or not not self:GetMacroIcon()
+end
+
+---a Photon macro dropped on the pet bar can't go there, pet abilities only come from the pet spellbook.
+---@return boolean
+function ActionButton.DropOnPetBar()
+	if #macroDrag == 0 or not holdingStandIn(GetCursorInfo()) then
+		return false
+	end
+
+	Photon:Print(L["DragDrop_PetBar_Message"])
+
+	--its state may have taken something else since, then it can't go back and stays on the cursor.
+	--a deleted bar, or a button the bar shrank away, isn't shown anywhere to go back to
+	local data = dragSourceData
+	local onBar = dragSource and dragSource.bar and tContains(Photon.bars, dragSource.bar) and tContains(dragSource.bar.buttons, dragSource)
+	if not onBar or not data or Photon.pendingReload or (data.macro_Text and data.macro_Text ~= "") or data.macro_Icon then
+		return true
+	end
+
+	ClearCursor()
+	--PlaceMacro writes to the state the button shows now, point it at the one the macro came from
+	local shown = dragSource.data
+	dragSource.data = data
+	dragSource:PlaceMacro()
+	dragSource.data = shown
+	dragSource:RefreshStateData()
+	dragSource:InitializeButton()
+	dragSource:UpdateAll()
+
+	wipe(macroDrag)
+	Photon.dragging = false
+	return true
 end
 
 --this is the function that fires when you begin dragging an item
@@ -85,6 +212,8 @@ function ActionButton:OnDragStart()
 		end
 
 		self:PickUpMacro()
+		dragSource = self
+		dragSourceData = self.data
 		self:RefreshStateData()
 
 		self:InitializeButton()
@@ -107,8 +236,9 @@ function ActionButton:OnReceiveDrag()
 
 	local cursorType, action1, action2, spellID = GetCursorInfo()
 
-	--read before SetMouseCursor below clears the cursor, that can wipe pickedMount, see cursorWatcher
+	--read before SetMouseCursor below clears the cursor, that can wipe pickedMount and pickedPetCommand, see cursorWatcher and petCursorWatcher
 	local journalMountID = cursorType == "companion" and action2 == "MOUNT" and pickedMount.index == action1 and pickedMount.mountID
+	local petCommand = cursorType == "petaction" and pickedPetCommand or nil
 
 	--the macro was swapped off a button and something else picked up since, place that instead
 	if #macroDrag > 0 and not holdingStandIn(cursorType, action1) then
@@ -121,6 +251,20 @@ function ActionButton:OnReceiveDrag()
 			return
 		end
 	end
+
+	--a passive can't be cast, so it doesn't go on a button. it stays on the cursor, from the pet bar it would be gone otherwise
+	if #macroDrag == 0 and passiveOnCursor(cursorType, action1, action2, spellID) then
+		Photon:Print(L["DragDrop_Passive_Message"])
+		return
+	end
+
+	--an empty page, like Shift held with no Shift macro, shows the page it falls back on.
+	local target = self:GetAttribute("droptarget")
+	if target and target ~= self.activeState and not self:GetAttribute("HasActionID") then
+		self:SetAttribute("activestate", target)
+	end
+
+	local home, homeData = #macroDrag > 0 and dragSource, dragSourceData
 
 	if hasContent(self) and self:GetActiveData() == self.data then --if our button being dropped onto already has content, we need to cache that content. inherited content stays where it is
 		macroCache[1] = self:GetDragAction()
@@ -166,13 +310,16 @@ function ActionButton:OnReceiveDrag()
 	elseif cursorType == "companion" then
 		self:PlaceCompanion(action1, action2, journalMountID)
 	elseif cursorType == "petaction" then
-		self:PlacePetAbility(action1, action2)
+		self:PlacePetAbility(action1, action2, petCommand)
 	end
 
 	wipe(macroDrag)
 
 	if #macroCache>0 then
 		self:OnDragStart() --If we picked up a new ability after dropping this one we have to manually call OnDragStart
+		if home then
+			dragSource, dragSourceData = home, homeData
+		end
 		for _,bar in pairs(Photon.bars) do
 			bar:ACTIONBAR_SHOWHIDEGRID(true) --show the button grid if we have something picked up (i.e if macroDrag contains something)
 		end
@@ -313,14 +460,26 @@ function ActionButton:PlaceSpell(action1, action2, spellID)
 	self:SetMacroEquipmentSet()
 end
 
-function ActionButton:PlacePetAbility(action1, action2)
+function ActionButton:PlacePetAbility(action1, action2, petCommand)
 
 	local spellID = action1
 	local spellIndex = action2
 
-	if spellIndex then --if the ability doesn't have a spellIndex, i.e (passive, follow, defensive, etc, print a warning)
-		local spellInfoName = C_Spell.GetSpellName(spellID)
+	--passive, follow, defensive etc. have no spellIndex, and on some clients action1 isn't a spell we can name
+	local spellInfoName = spellIndex and C_Spell.GetSpellName(spellID)
 
+	--a command (passive, follow, defensive, etc) gets its slash command. checked first, the cursor
+	--can carry another spell for one, like Move To coming as "Word of Recall Other" on Forever
+	if petCommand then
+		self:SetMacroText(petCommands[petCommand.token])
+		self:SetMacroIcon(petCommand.icon) --need to set icon here, it won't pull it automatically
+		self:SetMacroName()
+		self:SetMacroNote()
+		self:SetMacroUseNote()
+		self:SetMacroBlizzMacro()
+		self:SetMacroEquipmentSet()
+
+	elseif spellInfoName then
 		self:SetMacroText(self:AutoWriteMacro(spellInfoName))
 		self:SetMacroIcon() --will pull icon automatically unless explicitly overridden
 		self:SetMacroName()
@@ -329,7 +488,7 @@ function ActionButton:PlacePetAbility(action1, action2)
 		self:SetMacroBlizzMacro()
 		self:SetMacroEquipmentSet()
 
-	else
+	else --not a spell or a command we know, print a warning
 		Photon:Print(L["DragDrop_Error_Message"])
 	end
 end

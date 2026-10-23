@@ -211,6 +211,8 @@ L["Combat + Mouseover"] = true
 L["Linear"] = true
 L["Circle"] = true
 L["Circle + One"] = true
+L["Arc"] = true
+L["Arc Length"] = true
 L["Square"] = true
 L["Diamond"] = true
 L["Bar_Strata_List"] = "\n1=BACKGROUND\n2=LOW\n3=MEDIUM\n4=HIGH\n5=DIALOG"
@@ -232,6 +234,8 @@ L["Timer_Limit_Set_Message"] = "Timer limit set to %d seconds"
 L["Timer_Limit_Invalid_Message"] = "Invalid timer limit"
 
 L["DragDrop_Error_Message"] = "Sorry, we were unable to place that ability or item."
+L["DragDrop_Passive_Message"] = "Passive abilities can't be cast, so they can't go on a button."
+L["DragDrop_PetBar_Message"] = "Pet abilities can only be dragged onto it directly from the pet spellbook."
 L["DragDrop_Inherited_Message"] = "This button inherits its ability from another page. You can override it in the button editor"
 
 
@@ -260,6 +264,22 @@ L["Action Data"] = true
 L["Options"] = true
 L["Revert"] = true
 L["ReloadUI"] = "This action will cause the UI to reload."
+L["DualSpec_Removed_Message"] = "Photon no longer changes profile when you change specialization. This character used:\n\n%s\n\nAll your profiles are still there, you can switch between them in the profile options. To keep different buttons for each specialization on one profile, turn on %s in a bar's settings."
+L["Copy \"%s\" into the current profile? The current profile will be overwritten, and the UI will reload."] = true
+L["Current Profile"] = true
+L["New Profile"] = true
+L["Create a new profile with default settings."] = true
+L["Copy Profile"] = true
+L["Copy Layout"] = true
+L["Delete Profile"] = true
+L["Reset Profile"] = true
+L["Reset the current profile to its default values."] = true
+L["Delete existing and unused profiles from the database to save space, and clean up the SavedVariables file."] = true
+L["Make a new profile with the bars, settings and keybinds of an existing profile, but with empty buttons."] = true
+L["Layout From"] = true
+L["New Profile Name"] = true
+L["Pick a new name, at most 50 characters."] = true
+L["That profile name is already taken."] = true
 
 L["Click here to edit macro note"] = true
 L["Use macro note as button tooltip"] = true
@@ -315,6 +335,7 @@ L["Action Bar Pages"] = true
 L["Last 5s"] = true
 L["Reload UI"] = true
 L["Rotation"] = true
+L["Flatten"] = true
 L["True Circle"] = true
 
 -- the position box, on the General Configuration tab
@@ -559,8 +580,10 @@ L["BarDesc_scale"] = "The size of the bar and its buttons."
 L["BarDesc_horizontalPadding"] = "The space between buttons side by side."
 L["BarDesc_verticalPadding"] = "The space between rows of buttons."
 L["BarDesc_shape"] = "How the buttons are laid out."
-L["BarDesc_rotation"] = "Turns the buttons around the bar's middle, in degrees. Not for the linear shape."
-L["BarDesc_circleLocked"] = "Keeps a circle round: the vertical padding follows the horizontal padding. Only for the circle shapes."
+L["BarDesc_rotation"] = "In degrees. On a circle it moves where the buttons start around it, on an arc, square or diamond it turns the whole shape."
+L["BarDesc_circleLocked"] = "Keeps a circle round: the vertical padding follows the horizontal padding."
+L["BarDesc_arcSpan"] = "How far around a circle the arc goes, in degrees: 180 is a half circle. It bulges up, the rotation turns it."
+L["BarDesc_flatten"] = "Squeezes the circle towards a corner-to-corner line of the bar, keeping it inside the bar. Above 0 it leans from bottom left to top right, below 0 the other way."
 L["BarDesc_alpha"] = "How visible the bar normally is. Lower is more transparent."
 L["BarDesc_alphaUp"] = "When the bar becomes fully visible: on mouseover, in combat, or both."
 L["BarDesc_alphaUpSpeed"] = "How fast the bar fades in and out."
@@ -703,6 +726,26 @@ L["WhatsNew_Text"] = [[
 Welcome to the beta release of Photon!
 Please help out by posting any bugs and suggestions on Curse or github.com/rhean/Photon
 
+New in 0.5:
+- A new shape has been added: Arc
+- In bar edit mode you can drag the handles on the selected bar's corners and edges to change its padding.
+- Circles have a new Flatten option that squeezes the circle towards a corner-to-corner line.
+- The profile page has been redesigned. A new profile can copy just the layout of another profile: its bars, settings and keybinds, with empty buttons.
+- Clearer warnings when copying over a profile or making one with a name that is already taken.
+- Pet abilities and pet commands (Attack, Follow, Passive and so on) can be dragged onto regular bars from the pet spellbook or the pet bar.
+- Holding Shift, Ctrl or Alt while dropping something on a button puts it on that modifier's page, also when the page is empty.
+- A macro dropped on the pet bar goes back to the button it came from.
+- Passive abilities can no longer be put on buttons.
+- Turning off True Circle keeps the circle's current shape.
+- Fixed a login error on Mists of Pandaria Classic.
+- Changing profile always reloads the UI.
+- Macros that cast a pet spell, like /cast Growl, show the pet's spell.
+- Profile switching by specialization has been removed. Your profiles are all still there, and characters that used it are told once which profiles they had. To keep different buttons for each specialization, turn on Multi Spec in a bar's settings.
+]]
+L["WhatsNew_ShowOlder"] = "Show Older Changes"
+L["WhatsNew_HideOlder"] = "Hide Older Changes"
+
+L["WhatsNew_Older"] = [[
 New in 0.4.5:
 - True Circle option for circle shapes, which locks the vertical and horizontal padding together.
 - Macros with conditions like [mounted], [flyable] or [outdoors] change the icon more reliably.
@@ -711,11 +754,7 @@ New in 0.4.5:
 - Fixed an error when changing the number of buttons on a menu bar.
 - A new pet bar gets all its buttons and the other settings of the default pet bar when created.
 - Fixed a potential issue where removing multiple bars in a row could remove the wrong one.
-]]
-L["WhatsNew_ShowOlder"] = "Show Older Changes"
-L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
-L["WhatsNew_Older"] = [[
 New in 0.4.4:
 - Keybinds with Shift, Control or Alt pages will only grab the input if the macro exists.
 - Button edit mode outlines each button instead of covering it with "Edit".

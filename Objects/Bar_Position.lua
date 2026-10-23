@@ -150,6 +150,10 @@ end
 ---a locked bar can't be dragged, the bar editor can still move it
 function Bar:SetPositionLocked(locked)
 	self.data.positionLocked = locked or nil
+
+	if self.editFrame then
+		addonTable.overlay.BarEditor.refresh(self.editFrame)
+	end
 end
 
 function Bar:GetPositionLocked()

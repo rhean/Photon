@@ -17,8 +17,6 @@
 ## X-WoWI-ID: 27259
 
 Libs\embeds.xml
-# LibDualSpec errors on Classic Era, which has no dual spec, so it is left out there
-Libs\LibDualSpec-1.0\LibDualSpec-1.0.lua [AllowLoadGameType mainline, tbc, wrath, cata, mists]
 Localizations\Photon_Localizations.xml
 
 Utilities\Array.lua
