@@ -726,6 +726,26 @@ L["WhatsNew_Text"] = [[
 Welcome to the beta release of Photon!
 Please help out by posting any bugs and suggestions on Curse or github.com/rhean/Photon
 
+New in 0.5:
+- A new shape has been added: Arc
+- In bar edit mode you can drag the handles on the selected bar's corners and edges to change its padding.
+- Circles have a new Flatten option that squeezes the circle towards a corner-to-corner line.
+- The profile page has been redesigned. A new profile can copy just the layout of another profile: its bars, settings and keybinds, with empty buttons.
+- Clearer warnings when copying over a profile or making one with a name that is already taken.
+- Pet abilities and pet commands (Attack, Follow, Passive and so on) can be dragged onto regular bars from the pet spellbook or the pet bar.
+- Holding Shift, Ctrl or Alt while dropping something on a button puts it on that modifier's page, also when the page is empty.
+- A macro dropped on the pet bar goes back to the button it came from.
+- Passive abilities can no longer be put on buttons.
+- Turning off True Circle keeps the circle's current shape.
+- Fixed a login error on Mists of Pandaria Classic.
+- Changing profile always reloads the UI.
+- Macros that cast a pet spell, like /cast Growl, show the pet's spell.
+- Profile switching by specialization has been removed. Your profiles are all still there, and characters that used it are told once which profiles they had. To keep different buttons for each specialization, turn on Multi Spec in a bar's settings.
+]]
+L["WhatsNew_ShowOlder"] = "Show Older Changes"
+L["WhatsNew_HideOlder"] = "Hide Older Changes"
+
+L["WhatsNew_Older"] = [[
 New in 0.4.5:
 - True Circle option for circle shapes, which locks the vertical and horizontal padding together.
 - Macros with conditions like [mounted], [flyable] or [outdoors] change the icon more reliably.
@@ -734,11 +754,7 @@ New in 0.4.5:
 - Fixed an error when changing the number of buttons on a menu bar.
 - A new pet bar gets all its buttons and the other settings of the default pet bar when created.
 - Fixed a potential issue where removing multiple bars in a row could remove the wrong one.
-]]
-L["WhatsNew_ShowOlder"] = "Show Older Changes"
-L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
-L["WhatsNew_Older"] = [[
 New in 0.4.4:
 - Keybinds with Shift, Control or Alt pages will only grab the input if the macro exists.
 - Button edit mode outlines each button instead of covering it with "Edit".

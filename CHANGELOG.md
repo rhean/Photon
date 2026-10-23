@@ -1,3 +1,29 @@
+## 0.5
+
+### New Shapes and configuration
+- A new shape has been added: Arc
+- In bar edit mode you can drag the handles on the selected bar's corners and edges to change its padding.
+- Circles have a new Flatten option that squeezes the circle towards a corner-to-corner line.
+
+### Profiles
+- The profile page has been redesigned. A new profile can copy just the layout of another profile: its bars, settings and keybinds, with empty buttons.
+- Clearer warnings when copying over a profile or making one with a name that is already taken.
+
+### Pet changes
+- Pet abilities and pet commands (Attack, Follow, Passive and so on) can be dragged onto regular bars from the pet spellbook or the pet bar.
+
+### Fixes and Tweaks
+- Holding Shift, Ctrl or Alt while dropping something on a button puts it on that modifier's page, also when the page is empty.
+- A macro dropped on the pet bar goes back to the button it came from.
+- Passive abilities can no longer be put on buttons.
+- Turning off True Circle keeps the circle's current shape.
+- Fixed a login error on Mists of Pandaria Classic.
+- Changing profile always reloads the UI.
+- Macros that cast a pet spell, like /cast Growl, show the pet's spell.
+
+### Removed
+- Profile switching by specialization. Your profiles are all still there, and characters that used it are told once which profiles they had. To keep different buttons for each specialization, turn on Multi Spec in a bar's settings.
+
 ## 0.4.5
 
 ### New
