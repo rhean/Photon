@@ -49,7 +49,15 @@ local function resizableAxes(bar)
 	local shape, count = bar:GetBarShape(), #bar.buttons
 	if shape == "circle" or shape == "circle + one" then
 		return true, not bar:GetCircleLocked()
-	elseif shape == "square" or shape == "diamond" then
+	elseif shape == "arc" and count < 3 then
+		--three points on a circle are never in a line, but two are, and padding across that line moves nothing
+		if count < 2 then
+			return false, false
+		end
+		local first = 90 + bar:GetArcStart() + bar:GetArcSpan() / 2
+		local last = first - bar:GetArcSpan()
+		return math.abs(cos(first) - cos(last)) > 0.01, math.abs(sin(first) - sin(last)) > 0.01
+	elseif shape == "arc" or shape == "square" or shape == "diamond" then
 		return true, true
 	end
 
@@ -165,8 +173,10 @@ resizeDriver:SetScript("OnUpdate", function()
 	if dir[2] ~= 0 and r.centeredY then
 		y = r.y + dir[2] * (bar:GetHeight() - r.height) / 2
 	end
-	if x ~= r.x or y ~= r.y then
-		bar:SetOffset(round(x), round(y))
+	--back at the start the offset has to go back too
+	x, y = round(x), round(y)
+	if x ~= bar:GetXAxis() or y ~= bar:GetYAxis() then
+		bar:SetOffset(x, y)
 	end
 end)
 

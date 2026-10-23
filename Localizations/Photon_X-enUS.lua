@@ -211,6 +211,8 @@ L["Combat + Mouseover"] = true
 L["Linear"] = true
 L["Circle"] = true
 L["Circle + One"] = true
+L["Arc"] = true
+L["Arc Length"] = true
 L["Square"] = true
 L["Diamond"] = true
 L["Bar_Strata_List"] = "\n1=BACKGROUND\n2=LOW\n3=MEDIUM\n4=HIGH\n5=DIALOG"
@@ -331,6 +333,7 @@ L["Action Bar Pages"] = true
 L["Last 5s"] = true
 L["Reload UI"] = true
 L["Rotation"] = true
+L["Flatten"] = true
 L["True Circle"] = true
 
 -- the position box, on the General Configuration tab
@@ -575,8 +578,10 @@ L["BarDesc_scale"] = "The size of the bar and its buttons."
 L["BarDesc_horizontalPadding"] = "The space between buttons side by side."
 L["BarDesc_verticalPadding"] = "The space between rows of buttons."
 L["BarDesc_shape"] = "How the buttons are laid out."
-L["BarDesc_rotation"] = "Turns the buttons around the bar's middle, in degrees. Not for the linear shape."
-L["BarDesc_circleLocked"] = "Keeps a circle round: the vertical padding follows the horizontal padding. Only for the circle shapes."
+L["BarDesc_rotation"] = "In degrees. On a circle it moves where the buttons start around it, on an arc, square or diamond it turns the whole shape."
+L["BarDesc_circleLocked"] = "Keeps a circle round: the vertical padding follows the horizontal padding."
+L["BarDesc_arcSpan"] = "How far around a circle the arc goes, in degrees: 180 is a half circle. It bulges up, the rotation turns it."
+L["BarDesc_flatten"] = "Squeezes the circle towards a corner-to-corner line of the bar, keeping it inside the bar. Above 0 it leans from bottom left to top right, below 0 the other way."
 L["BarDesc_alpha"] = "How visible the bar normally is. Lower is more transparent."
 L["BarDesc_alphaUp"] = "When the bar becomes fully visible: on mouseover, in combat, or both."
 L["BarDesc_alphaUpSpeed"] = "How fast the bar fades in and out."

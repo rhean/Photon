@@ -83,17 +83,29 @@ addonTable.barConfigLayout = {
 					{ id = "alphaUpSpeed", width = "normal" },
 				},
 				{
+					{ id = "arcSpanBox", box = true, name = "", light = true, width = "normal", rows = {
+						{
+							{ id = "arcSpan", width = "normal" },
+						},
+					}},
+					{ id = "rotationBox", box = true, name = "", light = true, width = "normal", rows = {
+						{
+							{ id = "rotation", width = "normal" },
+						},
+					}},
+					{ id = "flattenBox", box = true, name = "", light = true, width = "normal", rows = {
+						{
+							{ id = "flatten", width = "normal" },
+						},
+					}},
+				},
+				{
 					{ id = "shapeBox", box = true, name = "", light = true, width = "normal", rows = {
 						{
 							{ id = "shape", width = "normal" },
 						},
 						{
 							{ id = "circleLocked", width = "normal" },
-						},
-					}},
-					{ id = "rotationBox", box = true, name = "", light = true, width = "normal", rows = {
-						{
-							{ id = "rotation", width = "normal" },
 						},
 					}},
 				},
