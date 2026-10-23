@@ -178,8 +178,11 @@ function PetButton:OnReceiveDrag()
 		Photon:Print(L["DragDrop_Error_Message"])
 	end
 
+	--a turned away macro that couldn't go back is still being dragged
+	local holding = turnedAway and GetCursorInfo() ~= nil
+
 	for i,bar in pairs(Photon.bars) do
-		bar:ACTIONBAR_SHOWHIDEGRID()
+		bar:ACTIONBAR_SHOWHIDEGRID(holding or nil)
 	end
 end
 
