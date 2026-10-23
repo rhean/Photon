@@ -483,7 +483,9 @@ function Photon:UpdateSpellCache()
 
 		local spellID = itemInfo.spellID
 		local cached = Photon.spellCache[itemInfo.name:lower()]
-		local playerHasIt = cached and cached.booktype == Enum.SpellBookSpellBank.Player and playerKnows and playerKnows(cached.spellID)
+		--an alt entry holds the override, which often isn't known on its own. its altSpellID is the known base spell
+		local playerHasIt = cached and cached.booktype == Enum.SpellBookSpellBank.Player and playerKnows
+			and (playerKnows(cached.spellID) or (cached.altSpellID and playerKnows(cached.altSpellID)))
 
 		if spellID and not playerHasIt then
 			local spellData = Photon:SetSpellInfo(i, Enum.SpellBookSpellBank.Pet, itemInfo.itemType, itemInfo.name, spellID, C_Spell.GetSpellTexture(spellID))
