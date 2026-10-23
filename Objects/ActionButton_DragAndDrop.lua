@@ -258,6 +258,12 @@ function ActionButton:OnReceiveDrag()
 		return
 	end
 
+	--an empty page, like Shift held with no Shift macro, shows the page it falls back on.
+	local target = self:GetAttribute("droptarget")
+	if target and target ~= self.activeState and not self:GetAttribute("HasActionID") then
+		self:SetAttribute("activestate", target)
+	end
+
 	local home, homeData = #macroDrag > 0 and dragSource, dragSourceData
 
 	if hasContent(self) and self:GetActiveData() == self.data then --if our button being dropped onto already has content, we need to cache that content. inherited content stays where it is

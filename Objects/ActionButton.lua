@@ -126,6 +126,9 @@ function ActionButton:InitializeButton()
 					--"state:form:page", form being the stance or pet page and page the action bar page
 					local msg, form, page = (":"):split(message)
 
+					--set again below, a vehicle or override has no page to drop on
+					self:SetAttribute("droptarget", nil)
+
 					if msg:find("vehicle") then
 						if not self:GetAttribute(msg.."-actionID") then
 							self:SetAttribute("type", "action")
@@ -166,6 +169,20 @@ function ActionButton:InitializeButton()
 
 						--the profile's fallbackOrder "stance" tries stance1 before alt1, see Button:GetResolvedData
 						local stanceFirst = self:GetAttribute("fallbackOrder") == "stance"
+
+						--a drop goes on the page itself, the first one tried below, even while it is empty and shows what it falls back on.
+						--see ActionButton:OnReceiveDrag
+						--out of form is like no form, as for the home state below, unless it has a macro of its own
+						local formPage = inForm and not (form == "stance0" and not self:GetAttribute("stance0-own"))
+						local target = msg
+						if page and page:find("^paged%d") and page ~= "paged1" then
+							target = page.."_"..(formPage and form.."_" or "")..msg
+						elseif formPage then
+							target = form.."_"..msg
+						elseif msg == "stance0" and not self:GetAttribute("stance0-own") then
+							target = "homestate"
+						end
+						self:SetAttribute("droptarget", target)
 
 						--page 2-6 falls back the same way within the page, then on its default, then page 1's
 						if page and page:find("^paged%d") and page ~= "paged1" then
