@@ -16,6 +16,7 @@ local macroDrag = {} --this is a table that holds onto the contents of the  curr
 local macroCache = {} --this will hold onto any previous contents of our button
 local standIn = {} --what SetMouseCursor put on the cursor to show macroDrag
 local dragSource --the button macroDrag was taken from, a drop that can't be placed goes back there
+local dragSourceData --the state macroDrag was taken from, the button may show another page or stance by the time it goes back
 
 --picking something else up replaces our stand-in on the cursor, but nothing tells macroDrag.
 --type and ID only, an item's link changes once the client has loaded it
@@ -126,13 +127,18 @@ function ActionButton.DropOnPetBar()
 
 	Photon:Print(L["DragDrop_PetBar_Message"])
 
-	--its button may have taken something else since, then it can't go back and stays on the cursor
-	if not dragSource or hasContent(dragSource) then
+	--its state may have taken something else since, then it can't go back and stays on the cursor.
+	local data = dragSourceData
+	if not dragSource or not data or Photon.pendingReload or (data.macro_Text and data.macro_Text ~= "") or data.macro_Icon then
 		return true
 	end
 
 	ClearCursor()
+	--PlaceMacro writes to the state the button shows now, point it at the one the macro came from
+	local shown = dragSource.data
+	dragSource.data = data
 	dragSource:PlaceMacro()
+	dragSource.data = shown
 	dragSource:RefreshStateData()
 	dragSource:InitializeButton()
 	dragSource:UpdateAll()
@@ -177,6 +183,7 @@ function ActionButton:OnDragStart()
 
 		self:PickUpMacro()
 		dragSource = self
+		dragSourceData = self.data
 		self:RefreshStateData()
 
 		self:InitializeButton()
@@ -215,7 +222,7 @@ function ActionButton:OnReceiveDrag()
 		end
 	end
 
-	local home = #macroDrag > 0 and dragSource
+	local home, homeData = #macroDrag > 0 and dragSource, dragSourceData
 
 	if hasContent(self) and self:GetActiveData() == self.data then --if our button being dropped onto already has content, we need to cache that content. inherited content stays where it is
 		macroCache[1] = self:GetDragAction()
@@ -269,7 +276,7 @@ function ActionButton:OnReceiveDrag()
 	if #macroCache>0 then
 		self:OnDragStart() --If we picked up a new ability after dropping this one we have to manually call OnDragStart
 		if home then
-			dragSource = home
+			dragSource, dragSourceData = home, homeData
 		end
 		for _,bar in pairs(Photon.bars) do
 			bar:ACTIONBAR_SHOWHIDEGRID(true) --show the button grid if we have something picked up (i.e if macroDrag contains something)
