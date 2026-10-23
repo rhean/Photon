@@ -350,16 +350,18 @@ function Bar.ChangeSelectedBar(newBar)
 		return
 	end
 
+	--set first, the overlays show their resize handles on the selected bar only
+	local oldBar = Photon.currentBar
+	Photon.currentBar = newBar
+
 	--the overlays only exist in bar edit mode
-	if Photon.currentBar and Photon.currentBar.editFrame then
-		BarEditor.deactivate(Photon.currentBar.editFrame)
+	if oldBar and oldBar.editFrame then
+		BarEditor.deactivate(oldBar.editFrame)
 	end
 
 	if newBar and newBar.editFrame then
 		BarEditor.activate(newBar.editFrame)
 	end
-
-	Photon.currentBar = newBar
 end
 
 -----------------------------------
@@ -968,6 +970,11 @@ function Bar:UpdateBarStatus(show)
 	-- possibly autohide is broken as well and that will go here
 	self.Text:SetText(self:GetBarName())
 	self.handler:SetAlpha(self:GetBarAlpha())
+
+	--the shape, columns or anchor may have changed which resize handles the bar has
+	if self.editFrame then
+		BarEditor.refresh(self.editFrame)
+	end
 end
 
 -------------------------------------------------------
@@ -1766,6 +1773,16 @@ function Bar:GetArcLength()
 end
 
 
+
+---both paddings with one layout, for the bar editor's resize handles
+function Bar:SetPadding(padH, padV)
+	self.data.padH, self.data.padV = padH, padV
+
+	self:SetObjectLoc()
+	self:SetPerimeter()
+	self:SetSize()
+	self:UpdateBarStatus()
+end
 
 function Bar:SetHorizontalPad(option)
 	if option then
