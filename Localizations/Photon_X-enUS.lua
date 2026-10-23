@@ -234,6 +234,7 @@ L["Timer_Limit_Set_Message"] = "Timer limit set to %d seconds"
 L["Timer_Limit_Invalid_Message"] = "Invalid timer limit"
 
 L["DragDrop_Error_Message"] = "Sorry, we were unable to place that ability or item."
+L["DragDrop_Passive_Message"] = "Passive abilities can't be cast, so they can't go on a button."
 L["DragDrop_PetBar_Message"] = "Pet abilities can only be dragged onto it directly from the pet spellbook."
 L["DragDrop_Inherited_Message"] = "This button inherits its ability from another page. You can override it in the button editor"
 
@@ -263,6 +264,7 @@ L["Action Data"] = true
 L["Options"] = true
 L["Revert"] = true
 L["ReloadUI"] = "This action will cause the UI to reload."
+L["DualSpec_Removed_Message"] = "Photon no longer changes profile when you change specialization. This character used:\n\n%s\n\nAll your profiles are still there, you can switch between them in the profile options. To keep different buttons for each specialization on one profile, turn on %s in a bar's settings."
 L["Copy \"%s\" into the current profile? The current profile will be overwritten, and the UI will reload."] = true
 L["Current Profile"] = true
 L["New Profile"] = true

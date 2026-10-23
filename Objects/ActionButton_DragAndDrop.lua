@@ -77,7 +77,8 @@ local pendingPetCommand
 --Photon's pet bar calls this before it picks up, see PetButton:OnDragStart
 function ActionButton.SetPickedPetAction(slot)
 	local name, texture, isToken = GetPetActionInfo(slot)
-	pendingPetCommand = isToken and petCommands[name] and {token = name, icon = _G[texture]} or nil
+	--most clients name the icon by a global, some give the texture itself
+	pendingPetCommand = isToken and petCommands[name] and {token = name, icon = _G[texture] or texture} or nil
 end
 
 hooksecurefunc("PickupPetAction", function()
@@ -113,6 +114,33 @@ end
 --------------------------------------
 --------------------------------------
 
+---by spell ID, older clients only have IsPassiveSpell
+local function isPassiveSpell(spellID)
+	if not spellID or spellID == 0 or not C_Spell.GetSpellName(spellID) then
+		return false
+	end
+	if C_Spell.IsSpellPassive then
+		return C_Spell.IsSpellPassive(spellID)
+	end
+	return IsPassiveSpell and IsPassiveSpell(spellID) or false
+end
+
+---whether the cursor holds a passive spell, from the spellbook, the pet spellbook or a pet bar
+local function passiveOnCursor(cursorType, action1, action2, spellID)
+	if cursorType == "spell" then
+		if action1 and action1 ~= 0 then
+			local bank = action2 == "pet" and Enum.SpellBookSpellBank.Pet or Enum.SpellBookSpellBank.Player
+			--falls back to the older functions on Classic Era, see Utilities/SpellBook.lua
+			return addonTable.utilities.SpellBook.IsSpellBookItemPassive(action1, bank)
+		end
+		return isPassiveSpell(spellID)
+	elseif cursorType == "petaction" then
+		--action1 is the spell, commands have none we can name
+		return action2 and isPassiveSpell(action1)
+	end
+	return false
+end
+
 --a macro, or only an icon picked in the button editor, both move with a drag
 local function hasContent(self)
 	return self:GetMacroText() ~= "" or not not self:GetMacroIcon()
@@ -128,8 +156,10 @@ function ActionButton.DropOnPetBar()
 	Photon:Print(L["DragDrop_PetBar_Message"])
 
 	--its state may have taken something else since, then it can't go back and stays on the cursor.
+	--a deleted bar, or a button the bar shrank away, isn't shown anywhere to go back to
 	local data = dragSourceData
-	if not dragSource or not data or Photon.pendingReload or (data.macro_Text and data.macro_Text ~= "") or data.macro_Icon then
+	local onBar = dragSource and dragSource.bar and tContains(Photon.bars, dragSource.bar) and tContains(dragSource.bar.buttons, dragSource)
+	if not onBar or not data or Photon.pendingReload or (data.macro_Text and data.macro_Text ~= "") or data.macro_Icon then
 		return true
 	end
 
@@ -220,6 +250,12 @@ function ActionButton:OnReceiveDrag()
 			end
 			return
 		end
+	end
+
+	--a passive can't be cast, so it doesn't go on a button. it stays on the cursor, from the pet bar it would be gone otherwise
+	if #macroDrag == 0 and passiveOnCursor(cursorType, action1, action2, spellID) then
+		Photon:Print(L["DragDrop_Passive_Message"])
+		return
 	end
 
 	local home, homeData = #macroDrag > 0 and dragSource, dragSourceData

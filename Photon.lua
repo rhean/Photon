@@ -125,14 +125,23 @@ function Photon:OnInitialize()
 	StaticPopupDialogs["ReloadUI"] = {
 		text = L["ReloadUI"],
 		button1 = YES,
-		button2 = NO,
 		OnAccept = function()
 			ReloadUI()
 		end,
 		timeout = 0,
 		whileDead = true,
-		hideOnEscape = true,
+		hideOnEscape = false,
 		preferredIndex = 3,  -- avoid some UI taint, see http://www.wowace.com/announcements/how-to-avoid-some-ui-taint/
+	}
+
+	--once per character that had profiles by spec, the text gets the specs and their profiles
+	StaticPopupDialogs["PhotonDualSpecRemoved"] = {
+		text = L["DualSpec_Removed_Message"],
+		button1 = OKAY,
+		timeout = 0,
+		whileDead = true,
+		hideOnEscape = true,
+		preferredIndex = 3,
 	}
 
 	--Copy From in the profile options asks first, the profile to copy is the popup's data
@@ -374,6 +383,31 @@ function Photon:LoginMessage()
 			C_Timer.After(2, function()
 				Photon.PhotonGUI:ShowWhatsNew(LATEST_VERSION_NUM, WHATS_NEW_TEXT)
 				Photon.db.global.whatsNewSeen = LATEST_VERSION_NUM
+			end)
+		end)
+	end
+
+	--profiles by spec (LibDualSpec) went away in 0.5. a character that had them on is told once, with the profiles it used.
+	local dualSpec = Photon.db.sv.namespaces and Photon.db.sv.namespaces["LibDualSpec-1.0"]
+	local charData = dualSpec and dualSpec.char and dualSpec.char[Photon.db.keys.char]
+	local lines = {}
+	if charData and charData.enabled and not charData.photonNoticeShown then
+		for spec = 1, 4 do
+			if charData[spec] then
+				local specName = not Photon.hasTalentGroups and GetSpecializationInfo and select(2, GetSpecializationInfo(spec))
+				table.insert(lines, (specName or L["Specialization"].." "..spec)..": "..charData[spec])
+			end
+		end
+	end
+	if #lines > 0 then
+		local option = Photon.hasTalentGroups and L["Dual Spec"] or L["Multi Spec"]
+		local waiter = CreateFrame("Frame")
+		waiter:RegisterEvent("PLAYER_ENTERING_WORLD")
+		waiter:SetScript("OnEvent", function(self)
+			self:UnregisterAllEvents()
+			C_Timer.After(2, function()
+				StaticPopup_Show("PhotonDualSpecRemoved", table.concat(lines, "\n"), option)
+				charData.photonNoticeShown = true
 			end)
 		end)
 	end
