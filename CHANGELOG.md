@@ -1,3 +1,9 @@
+## 0.5.1
+
+### Fixes and Tweaks
+- Skyriding abilities can be rearranged on Photon bars by dragging them.
+- Skyriding, Vehicle, Possess and Override now always take over the bar, even when another condition is on at the same time.
+
 ## 0.5
 
 ### New Shapes and configuration

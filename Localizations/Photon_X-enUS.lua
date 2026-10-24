@@ -726,6 +726,14 @@ L["WhatsNew_Text"] = [[
 Welcome to the beta release of Photon!
 Please help out by posting any bugs and suggestions on Curse or github.com/rhean/Photon
 
+New in 0.5.1:
+- Skyriding abilities can be rearranged on Photon bars by dragging them.
+- Skyriding, Vehicle, Possess and Override now always take over the bar, even when another condition is on at the same time.
+]]
+L["WhatsNew_ShowOlder"] = "Show Older Changes"
+L["WhatsNew_HideOlder"] = "Hide Older Changes"
+
+L["WhatsNew_Older"] = [[
 New in 0.5:
 - A new shape has been added: Arc
 - In bar edit mode you can drag the handles on the selected bar's corners and edges to change its padding.
@@ -741,11 +749,7 @@ New in 0.5:
 - Changing profile always reloads the UI.
 - Macros that cast a pet spell, like /cast Growl, show the pet's spell.
 - Profile switching by specialization has been removed. Your profiles are all still there, and characters that used it are told once which profiles they had. To keep different buttons for each specialization, turn on Multi Spec in a bar's settings.
-]]
-L["WhatsNew_ShowOlder"] = "Show Older Changes"
-L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
-L["WhatsNew_Older"] = [[
 New in 0.4.5:
 - True Circle option for circle shapes, which locks the vertical and horizontal padding together.
 - Macros with conditions like [mounted], [flyable] or [outdoors] change the icon more reliably.
