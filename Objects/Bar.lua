@@ -716,25 +716,44 @@ function Bar:CreateHandler()
 
 	elseif self:GetAttribute("state-<MODIFIER>") then
 
+		--the game's bars stay on top of the other states, mounting turns on mounted and skyriding in no set order
+		local replacements = ";vehicle;possess;override;dragonriding;"
+		local above = ""
+
 		if self:GetAttribute("statestack") then
 
 			if self:GetAttribute("statestack"):find("<MODIFIER>") then
 				self:SetAttribute("statestack", self:GetAttribute("statestack"):gsub("<MODIFIER>%d+", self:GetAttribute("state-<MODIFIER>")))
 			else
-				self:SetAttribute("statestack", self:GetAttribute("state-<MODIFIER>")..";"..self:GetAttribute("statestack"))
+				local rest = self:GetAttribute("statestack")
+				if not replacements:find(";<MODIFIER>;") then
+					while true do
+						local entry, name, after = rest:match("^((%a+)%d+;)(.*)$")
+						if entry and replacements:find(";"..name..";") then
+							above = above..entry
+							rest = after
+						else
+							break
+						end
+					end
+				end
+				self:SetAttribute("statestack", above..self:GetAttribute("state-<MODIFIER>")..";"..rest)
 			end
 
 		else
 			self:SetAttribute("statestack", self:GetAttribute("state-<MODIFIER>"))
 		end
 
-		self:SetAttribute("state-current", self:GetAttribute("state-<MODIFIER>"))
-		self:SetAttribute("assertstate", "<MODIFIER>")
+		--under a game's bar it waits in the stack until that bar goes away
+		if above == "" then
+			self:SetAttribute("state-current", self:GetAttribute("state-<MODIFIER>"))
+			self:SetAttribute("assertstate", "<MODIFIER>")
 
-		if self:GetAttribute("state-priority") then
-			control:ChildUpdate("<MODIFIER>", self:GetAttribute("state-priority"))
-		else
-			control:ChildUpdate("<MODIFIER>", self:GetAttribute("state-<MODIFIER>")..":"..(form or "")..":"..page)
+			if self:GetAttribute("state-priority") then
+				control:ChildUpdate("<MODIFIER>", self:GetAttribute("state-priority"))
+			else
+				control:ChildUpdate("<MODIFIER>", self:GetAttribute("state-<MODIFIER>")..":"..(form or "")..":"..page)
+			end
 		end
 
 	end
