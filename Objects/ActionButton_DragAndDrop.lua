@@ -146,6 +146,11 @@ local function hasContent(self)
 	return self:GetMacroText() ~= "" or not not self:GetMacroIcon()
 end
 
+--skyriding shows blizzard's bonus bar 5 slots, which can be rearranged like on blizzard's bar. see dragonridingID_Offset
+local function onSkyridingSlot(self)
+	return self.actionID and self.actionID > 120 and self.actionID <= 132
+end
+
 ---a Photon macro dropped on the pet bar can't go there, pet abilities only come from the pet spellbook.
 ---@return boolean
 function ActionButton.DropOnPetBar()
@@ -180,7 +185,7 @@ end
 
 --this is the function that fires when you begin dragging an item
 function ActionButton:OnDragStart()
-	if InCombatLockdown() or not self.bar or self.actionID then
+	if InCombatLockdown() or not self.bar or (self.actionID and not onSkyridingSlot(self)) then
 		return
 	end
 
@@ -196,6 +201,11 @@ function ActionButton:OnDragStart()
 		drag = true
 	else
 		drag = false
+	end
+
+	if drag and onSkyridingSlot(self) then
+		PickupAction(self.actionID)
+		return
 	end
 
 	if drag and hasContent(self) then
@@ -231,6 +241,11 @@ end
 --This is the function that fires when a button is receiving a dragged item
 function ActionButton:OnReceiveDrag()
 	if InCombatLockdown() then --don't allow moving or changing macros while in combat. This will cause taint
+		return
+	end
+
+	if onSkyridingSlot(self) and #macroDrag == 0 then
+		PlaceAction(self.actionID)
 		return
 	end
 
