@@ -120,6 +120,8 @@ function Photon:OnInitialize()
 	end
 
 	Photon.class = select(2, UnitClass("player"))
+	--the class that last loaded the profile. copying it to another class drops its stance macros, see Photon:RemoveStanceMacros
+	DB.class = Photon.class
 	Photon:UpdateStanceStrings()
 
 	StaticPopupDialogs["ReloadUI"] = {
@@ -150,7 +152,11 @@ function Photon:OnInitialize()
 		button1 = YES,
 		button2 = NO,
 		OnAccept = function(_, source)
+			local sourceClass = Photon.db.profiles[source].class
 			Photon.db:CopyProfile(source)
+			if sourceClass and sourceClass ~= Photon.class then
+				Photon:RemoveStanceMacros(Photon.db.profile)
+			end
 			ReloadUI()
 		end,
 		timeout = 0,
@@ -367,6 +373,22 @@ function Photon:NewProfileFromLayout(source, name)
 		end
 	end
 	Photon.db.profiles[name] = layout
+end
+
+---removes the macros of every stance and form state, they belong to the class that made them.
+function Photon:RemoveStanceMacros(profile)
+	for _, bar in pairs(rawget(profile, "ActionBar") or {}) do
+		for _, button in pairs(rawget(bar, "buttons") or {}) do
+			for _, tree in ipairs(MACRO_TREES) do
+				local states = rawget(button, tree)
+				for state in pairs(states or {}) do
+					if type(state) == "string" and state:find("stance%d") then
+						states[state] = nil
+					end
+				end
+			end
+		end
+	end
 end
 
 -----------------------------------------------------------------
