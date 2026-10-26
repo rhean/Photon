@@ -1059,6 +1059,36 @@ local function ringPosition(shape, index, count)
 	return starts[side][1] + slot*dir[1], starts[side][2] + slot*dir[2]
 end
 
+---a rectangle button's place in grid steps from the bar's center, clockwise from the top left.
+---its top and bottom are as wide as the columns, the sides take the rest
+---@return number, number
+local function rectanglePosition(index, count, columns)
+	if columns == 0 or columns > count then
+		columns = count
+	end
+	if columns == 1 then
+		return 0, (count+1)/2 - index
+	end
+
+	local sides = math.max(0, math.ceil((count - 2*columns)/2))
+	local w = (columns-1)/2
+	local h = count > columns and (sides+1)/2 or 0
+
+	if index <= columns then 
+		return index-1 - w, h
+	end
+	index = index - columns
+	if index <= sides then 
+		return w, h - index
+	end
+	index = index - sides
+	if index <= columns then 
+		return w - (index-1), -h
+	end
+	index = index - columns
+	return -w, -h + index
+end
+
 ---where an arc's buttons go, its middle up and turned by the rotation.
 ---@return number[][]
 local function arcPositions(count, size, padH, padV, rotation, span)
@@ -1155,8 +1185,13 @@ function Bar:SetObjectLoc()
 			elseif arc then
 				object:SetPoint("CENTER", self, "CENTER", arc[num+1][1], arc[num+1][2])
 
-			elseif shape == "square" or shape == "diamond" then
-				local cx, cy = ringPosition(shape, num+1, count)
+			elseif shape == "square" or shape == "diamond" or shape == "rectangle" then
+				local cx, cy
+				if shape == "rectangle" then
+					cx, cy = rectanglePosition(num+1, count, origCol)
+				else
+					cx, cy = ringPosition(shape, num+1, count)
+				end
 				cx, cy = cx*(width+padH), cy*(height+padV)
 
 				--turned around the middle like the circles, counterclockwise in degrees
@@ -1739,7 +1774,7 @@ end
 
 function Bar:SetBarShape(option)
 	if option then
-		if option == "linear" or option == "circle" or option == "circle + one" or option == "arc" or option == "square" or option == "diamond" then
+		if option == "linear" or option == "circle" or option == "circle + one" or option == "arc" or option == "square" or option == "diamond" or option == "rectangle" then
 			self.data.shape = option
 		else
 			self.data.shape = "linear"

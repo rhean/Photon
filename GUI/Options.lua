@@ -305,8 +305,8 @@ local function barDefinitions()
 		columns = barRange(L["Columns"], 0, math.max(numObjects, 1), 1, false, "GetColumns", "SetColumns"),
 		scale = barRange(L["Scale"], 0.1, 2, 0.01, true, "GetBarScale", "SetBarScale"),
 		shape = barSelect(L["Shape"],
-			{linear = L["Linear"], circle = L["Circle"], ["circle + one"] = L["Circle + One"], arc = L["Arc"], square = L["Square"], diamond = L["Diamond"]},
-			{"linear", "circle", "circle + one", "arc", "square", "diamond"},
+			{linear = L["Linear"], circle = L["Circle"], ["circle + one"] = L["Circle + One"], arc = L["Arc"], square = L["Square"], diamond = L["Diamond"], rectangle = L["Rectangle"]},
+			{"linear", "circle", "circle + one", "arc", "square", "diamond", "rectangle"},
 			"GetBarShape", "SetBarShape"),
 		circleLocked = barToggle(L["True Circle"], "GetCircleLocked", "SetCircleLocked"),
 		rotation = barRange(L["Rotation"], 0, 359, 1, false, "GetArcStart", "SetArcStart"),
@@ -408,9 +408,13 @@ local function barDefinitions()
 		return bar():GetBarShape() == "linear"
 	end
 
-	--only a line has rows
+	--only a line has rows, and a rectangle is as wide as them
 	definitions.columns.disabled = function()
-		return bar():GetBarShape() ~= "linear"
+		local shape = bar():GetBarShape()
+		return shape ~= "linear" and shape ~= "rectangle"
+	end
+	definitions.columns.desc = function()
+		return L[bar():GetBarShape() == "rectangle" and "BarDesc_columns_rectangle" or "BarDesc_columns"]
 	end
 
 	local function isCircle()
