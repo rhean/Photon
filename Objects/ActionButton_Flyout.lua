@@ -56,9 +56,10 @@ local CLICK = [[
 		point, relPoint, dx, dy = "LEFT", "RIGHT", 1, 0
 	end
 
-	--on the button, so it takes the button's scale, layer and visibility
+	--on the button, so it takes the button's scale and visibility. raised above unit frames and other bars
 	POPUP:Hide()
 	POPUP:SetParent(self)
+	POPUP:SetFrameStrata("DIALOG")
 	POPUP:ClearAllPoints()
 	POPUP:SetAllPoints(self)
 

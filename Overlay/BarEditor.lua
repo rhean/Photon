@@ -57,7 +57,7 @@ local function resizableAxes(bar)
 		local first = 90 + bar:GetArcStart() + bar:GetArcSpan() / 2
 		local last = first - bar:GetArcSpan()
 		return math.abs(cos(first) - cos(last)) > 0.01, math.abs(sin(first) - sin(last)) > 0.01
-	elseif shape == "arc" or shape == "square" or shape == "diamond" then
+	elseif shape == "arc" or shape == "square" or shape == "diamond" or shape == "rectangle" then
 		return true, true
 	end
 

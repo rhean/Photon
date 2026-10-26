@@ -215,6 +215,7 @@ L["Arc"] = true
 L["Arc Length"] = true
 L["Square"] = true
 L["Diamond"] = true
+L["Rectangle"] = true
 L["Bar_Strata_List"] = "\n1=BACKGROUND\n2=LOW\n3=MEDIUM\n4=HIGH\n5=DIALOG"
 L["Bar_Alpha_Instructions"] = "Alpha value must be between zero(0) and one(1)"
 L["Bar_ArcStart_Instructions"] = "Arc start must be between 0 and 359"
@@ -275,7 +276,10 @@ L["Delete Profile"] = true
 L["Reset Profile"] = true
 L["Reset the current profile to its default values."] = true
 L["Delete existing and unused profiles from the database to save space, and clean up the SavedVariables file."] = true
-L["Make a new profile with the bars, settings and keybinds of an existing profile, but with empty buttons."] = true
+L["Copy an existing profile into the current profile, or into a new profile."] = true
+L["Copy the bars, settings and keybinds of an existing profile into the current profile, or into a new profile. The buttons are left empty."] = true
+L["Copy the layout of \"%s\" into the current profile? The current profile will be overwritten with empty buttons, and the UI will reload."] = true
+L["Copy to Current"] = true
 L["Layout From"] = true
 L["New Profile Name"] = true
 L["Pick a new name, at most 50 characters."] = true
@@ -575,12 +579,13 @@ L["BarDesc_applyReload"] = "Reloads the UI so every change takes full effect."
 
 -- Size and Shape
 L["BarDesc_numButtons"] = "How many buttons the bar has."
-L["BarDesc_columns"] = "How many buttons per row. 0 puts them all in one row. Only for the linear shape."
+L["BarDesc_columns"] = "How many buttons per row. 0 puts them all in one row. Only for the linear and rectangle shapes."
+L["BarDesc_columns_rectangle"] = "How many buttons across the top and bottom of the rectangle, the sides take the rest. 0 puts them all in one row."
 L["BarDesc_scale"] = "The size of the bar and its buttons."
 L["BarDesc_horizontalPadding"] = "The space between buttons side by side."
 L["BarDesc_verticalPadding"] = "The space between rows of buttons."
 L["BarDesc_shape"] = "How the buttons are laid out."
-L["BarDesc_rotation"] = "In degrees. On a circle it moves where the buttons start around it, on an arc, square or diamond it turns the whole shape."
+L["BarDesc_rotation"] = "In degrees. On a circle it moves where the buttons start around it, on an arc, square, diamond or rectangle it turns the whole shape."
 L["BarDesc_circleLocked"] = "Keeps a circle round: the vertical padding follows the horizontal padding."
 L["BarDesc_arcSpan"] = "How far around a circle the arc goes, in degrees: 180 is a half circle. It bulges up, the rotation turns it."
 L["BarDesc_flatten"] = "Squeezes the circle towards a corner-to-corner line of the bar, keeping it inside the bar. Above 0 it leans from bottom left to top right, below 0 the other way."
@@ -726,14 +731,21 @@ L["WhatsNew_Text"] = [[
 Welcome to the beta release of Photon!
 Please help out by posting any bugs and suggestions on Curse or github.com/rhean/Photon
 
-New in 0.5.1:
-- Skyriding abilities can be rearranged on Photon bars by dragging them.
-- Skyriding, Vehicle, Possess and Override now always take over the bar, even when another condition is on at the same time.
+New in 0.5.2:
+- A new shape has been added: Rectangle
+- Copy Profile and Copy Layout can both copy into the current profile or into a new one.
+- Copying a profile made by another class empties its stance and form pages.
+- Flyout shows above unit frames and other action bars.
+- Fixed an error when opening the button editor after the selected button was removed from its bar.
 ]]
 L["WhatsNew_ShowOlder"] = "Show Older Changes"
 L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
 L["WhatsNew_Older"] = [[
+New in 0.5.1:
+- Skyriding abilities can be rearranged on Photon bars by dragging them.
+- Skyriding, Vehicle, Possess and Override now always take over the bar, even when another condition is on at the same time.
+
 New in 0.5:
 - A new shape has been added: Arc
 - In bar edit mode you can drag the handles on the selected bar's corners and edges to change its padding.
