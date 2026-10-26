@@ -165,6 +165,20 @@ function Photon:OnInitialize()
 		preferredIndex = 3,
 	}
 
+	StaticPopupDialogs["PhotonCopyLayout"] = {
+		text = L["Copy the layout of \"%s\" into the current profile? The current profile will be overwritten with empty buttons, and the UI will reload."],
+		button1 = YES,
+		button2 = NO,
+		OnAccept = function(_, source)
+			Photon:CopyLayout(source)
+			ReloadUI()
+		end,
+		timeout = 0,
+		whileDead = true,
+		hideOnEscape = true,
+		preferredIndex = 3,
+	}
+
 	--Initialize the Minimap Icon
 	Photon:Minimap_IconInitialize()
 
@@ -360,19 +374,39 @@ end
 --an action button's macros, by spec and the default tree. the rest of a button, its look and keybinds, is layout
 local MACRO_TREES = {1, 2, 3, 4, "default"}
 
----makes a new profile with all of source's bars, settings and keybinds, but empty buttons. switching to it is up to the caller
-function Photon:NewProfileFromLayout(source, name)
-	local layout = CopyTable(Photon.db.profiles[source])
-	layout.PhotonItemCache = nil
-	layout.PhotonSpellCache = nil
-	for _, bar in pairs(layout.ActionBar or {}) do
-		for _, button in pairs(bar.buttons or {}) do
+---empties every button of a profile, what is left is its layout
+local function removeMacros(profile)
+	profile.PhotonItemCache = nil
+	profile.PhotonSpellCache = nil
+	for _, bar in pairs(rawget(profile, "ActionBar") or {}) do
+		for _, button in pairs(rawget(bar, "buttons") or {}) do
 			for _, tree in ipairs(MACRO_TREES) do
 				button[tree] = nil
 			end
 		end
 	end
+end
+
+---makes a new profile with all of source's bars, settings and keybinds, but empty buttons. switching to it is up to the caller
+function Photon:NewProfileFromLayout(source, name)
+	local layout = CopyTable(Photon.db.profiles[source])
+	removeMacros(layout)
 	Photon.db.profiles[name] = layout
+end
+
+---overwrites the current profile with source's bars, settings and keybinds, but empty buttons. reloading is up to the caller
+function Photon:CopyLayout(source)
+	Photon.db:CopyProfile(source)
+	removeMacros(Photon.db.profile)
+end
+
+---makes a new profile that is a copy of source. switching to it is up to the caller
+function Photon:NewProfileFromCopy(source, name)
+	local copy = CopyTable(Photon.db.profiles[source])
+	if copy.class and copy.class ~= Photon.class then
+		Photon:RemoveStanceMacros(copy)
+	end
+	Photon.db.profiles[name] = copy
 end
 
 ---removes the macros of every stance and form state, they belong to the class that made them.

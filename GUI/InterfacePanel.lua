@@ -35,8 +35,8 @@ local function profileOptions()
 		return option
 	end
 
-	local newName, layoutName
-	local layoutSource
+	local newName, layoutName, copyName
+	local layoutSource, copySource
 
 	local NAME_WIDTH = 2 - 0.5 - Style.gap / 180
 
@@ -57,6 +57,11 @@ local function profileOptions()
 		return true
 	end
 
+	--a profile can't be copied into itself
+	local function notIntoCurrent(source)
+		return not source or source == Photon.db:GetCurrentProfile()
+	end
+
 	--the intro stays at the top, the rest each get a box of their own
 	options.args = {
 		desc = take("desc"),
@@ -74,8 +79,55 @@ local function profileOptions()
 			type = "group",
 			name = L["Copy Profile"],
 			args = {
-				copydesc = take("copydesc"),
-				copyfrom = take("copyfrom"),
+				copydesc = {
+					order = 1,
+					type = "description",
+					name = L["Copy an existing profile into the current profile, or into a new profile."],
+				},
+				copyfrom = {
+					order = 2,
+					type = "select",
+					name = shared.copyfrom.name,
+					get = function() return copySource end,
+					set = function(_, value) copySource = value end,
+					values = "ListProfiles",
+					width = 2,
+				},
+				--copying overwrites the current profile, so it asks first and reloads right after
+				copycurrent = {
+					order = 3,
+					type = "execute",
+					name = L["Copy to Current"],
+					func = function()
+						StaticPopup_Show("PhotonCopyProfile", copySource, nil, copySource)
+					end,
+					disabled = function() return notIntoCurrent(copySource) end,
+				},
+				copycreate = {
+					order = 5,
+					type = "execute",
+					name = L["Create"],
+					func = function()
+						if validName(copyName) then
+							Photon:NewProfileFromCopy(copySource, copyName)
+							Photon.db:SetProfile(copyName)
+							copySource, copyName = nil, nil
+						end
+					end,
+					disabled = function() return not copySource end,
+					width = "half",
+				},
+				copynew = {
+					order = 4,
+					type = "input",
+					name = L["New Profile Name"],
+					live = true,
+					get = function() return copyName end,
+					set = function(_, text) copyName = text end,
+					--a line of its own under the dropdown
+					spaceBefore = Style.padding,
+					width = NAME_WIDTH,
+				},
 			},
 		},
 		new = {
@@ -120,7 +172,7 @@ local function profileOptions()
 				layoutdesc = {
 					order = 1,
 					type = "description",
-					name = L["Make a new profile with the bars, settings and keybinds of an existing profile, but with empty buttons."],
+					name = L["Copy the bars, settings and keybinds of an existing profile into the current profile, or into a new profile. The buttons are left empty."],
 				},
 				layoutfrom = {
 					order = 2,
@@ -130,6 +182,15 @@ local function profileOptions()
 					set = function(_, value) layoutSource = value end,
 					values = "ListProfiles",
 					width = 2,
+				},
+				layoutcurrent = {
+					order = 3,
+					type = "execute",
+					name = L["Copy to Current"],
+					func = function()
+						StaticPopup_Show("PhotonCopyLayout", layoutSource, nil, layoutSource)
+					end,
+					disabled = function() return notIntoCurrent(layoutSource) end,
 				},
 				layoutcreate = {
 					order = 5,
@@ -190,11 +251,6 @@ local function profileOptions()
 
 	--the reset button's tooltip, said the same way as the text above it
 	options.args.reset.args.reset.desc = L["Reset the current profile to its default values."]
-
-	--copying overwrites the current profile, so it asks first and reloads right after
-	options.args.copy.args.copyfrom.set = function(_, source)
-		StaticPopup_Show("PhotonCopyProfile", source, nil, source)
-	end
 	return options
 end
 
