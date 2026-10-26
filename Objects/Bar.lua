@@ -324,6 +324,11 @@ function Bar:RemoveObjectFromBar() --called from PhotonGUI
 			object.editFrame = nil
 		end
 
+		--a removed button can't stay selected, the button editor would reopen on it
+		if Photon.currentButton == object then
+			Photon.currentButton = nil
+		end
+
 		object:SetParent(Trashcan)
 	end
 
