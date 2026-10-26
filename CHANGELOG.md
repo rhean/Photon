@@ -1,3 +1,16 @@
+## 0.5.2
+
+### New Shape
+- A new shape has been added: Rectangle
+
+### Profiles
+- Copy Profile and Copy Layout can both copy into the current profile or into a new one.
+- Copying a profile made by another class empties its stance and form pages.
+
+### Fixes and Tweaks
+- Flyout shows above unit frames and other action bars.
+- Fixed an error when opening the button editor after the selected button was removed from its bar.
+
 ## 0.5.1
 
 ### Fixes and Tweaks
