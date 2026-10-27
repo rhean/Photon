@@ -374,11 +374,26 @@ end
 --an action button's macros, by spec and the default tree. the rest of a button, its look and keybinds, is layout
 local MACRO_TREES = {1, 2, 3, 4, "default"}
 
----empties every button of a profile, what is left is its layout
+--states that bring up the game's bars, not a page of the bar's own, see GUI/Options.lua
+local GAME_BAR_STATES = {vehicle = true, dragonriding = true, possess = true, override = true}
+
+---empties every button of a profile and turns off the bars' pages, what is left is its layout
 local function removeMacros(profile)
 	profile.PhotonItemCache = nil
 	profile.PhotonSpellCache = nil
 	for _, bar in pairs(rawget(profile, "ActionBar") or {}) do
+		--the source's pages are its own: stance, action bar page, pet, modifiers and the other states
+		for state in pairs(Photon.MANAGED_HOME_STATES) do
+			bar[state] = nil
+		end
+		for state in pairs(Photon.MANAGED_SECONDARY_STATES) do
+			if not GAME_BAR_STATES[state] then
+				bar[state] = nil
+			end
+		end
+		bar.custom, bar.customNames, bar.customRange = nil, nil, nil
+		--the button editor's added modifiers, and the stance remap
+		bar.modifiers, bar.remap = nil, nil
 		for _, button in pairs(rawget(bar, "buttons") or {}) do
 			for _, tree in ipairs(MACRO_TREES) do
 				button[tree] = nil
