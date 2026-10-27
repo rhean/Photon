@@ -251,6 +251,8 @@ local function profileOptions()
 
 	--the reset button's tooltip, said the same way as the text above it
 	options.args.reset.args.reset.desc = L["Reset the current profile to its default values."]
+	--the boxes are apart a bit more than the settings in them, see createPanel
+	options.boxGap = 3 * Style.gap
 	return options
 end
 
@@ -587,6 +589,7 @@ local function createPanel(options)
 
 		local width = scroll:GetContentWidth()
 		local y = 0
+		local boxGap = options.boxGap or Style.gap
 
 		local function addBox(group, groups, path)
 			local box = boxPool:Acquire()
@@ -653,7 +656,7 @@ local function createPanel(options)
 			box:SetPoint("TOPLEFT", 0, -y)
 			box:SetWidth(width)
 			box:SetHeight(top - Style.gap + Style.padding + box.edge)
-			y = y + box:GetHeight() + Style.gap
+			y = y + box:GetHeight() + boxGap
 
 			for _, sub in ipairs(inside) do
 				addBox(sub[1], groups, sub[2])
@@ -661,7 +664,7 @@ local function createPanel(options)
 		end
 
 		addBox(options, {}, {})
-		scroll:SetContentHeight(y - Style.gap)
+		scroll:SetContentHeight(y - boxGap)
 	end
 
 	panel:SetScript("OnShow", render)
