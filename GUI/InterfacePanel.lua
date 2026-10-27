@@ -62,9 +62,8 @@ local function profileOptions()
 		return not source or source == Photon.db:GetCurrentProfile()
 	end
 
-	--the intro stays at the top, the rest each get a box of their own
+	--each gets a box of their own, the box titles say what they are
 	options.args = {
-		desc = take("desc"),
 		--the dropdown shows the current profile and switches to another
 		current = {
 			order = 40,
@@ -91,7 +90,7 @@ local function profileOptions()
 					get = function() return copySource end,
 					set = function(_, value) copySource = value end,
 					values = "ListProfiles",
-					width = 2,
+					width = NAME_WIDTH,
 				},
 				--copying overwrites the current profile, so it asks first and reloads right after
 				copycurrent = {
@@ -155,7 +154,7 @@ local function profileOptions()
 				new = {
 					order = 40,
 					type = "input",
-					name = shared.new.name,
+					name = "",
 					desc = shared.new.desc,
 					live = true,
 					get = function() return newName end,
@@ -181,7 +180,7 @@ local function profileOptions()
 					get = function() return layoutSource end,
 					set = function(_, value) layoutSource = value end,
 					values = "ListProfiles",
-					width = 2,
+					width = NAME_WIDTH,
 				},
 				layoutcurrent = {
 					order = 3,
@@ -251,8 +250,17 @@ local function profileOptions()
 
 	--the reset button's tooltip, said the same way as the text above it
 	options.args.reset.args.reset.desc = L["Reset the current profile to its default values."]
+	options.args.current.args.choose.name = ""
+	options.args.delete.args.delete.name = ""
+	options.args.delete.args.delete.width = NAME_WIDTH
+	--the popup names the profile, as the list shows it
+	options.args.delete.args.delete.confirm = function(info, value)
+		local shown = options.handler:ListProfiles(info)[value] or value
+		return L["Delete the profile \"%s\"?"]:format("|cffffd100"..shown.."|r")
+	end
 	--the boxes are apart a bit more than the settings in them, see createPanel
 	options.boxGap = 3 * Style.gap
+	options.boxColor = Style.panelLight
 	return options
 end
 
@@ -550,7 +558,11 @@ local function createPanel(options)
 	scroll:SetPoint("BOTTOMRIGHT", -10, 10)
 
 	local boxPool = UI.Pool(function()
-		return UI.Box(scroll.child)
+		local box = UI.Box(scroll.child)
+		if options.boxColor then
+			box.photonFlat.bg:SetColorTexture(unpack(options.boxColor))
+		end
+		return box
 	end)
 	local pools = {}
 	local render, renderPending
@@ -616,7 +628,7 @@ local function createPanel(options)
 				line, lineWidth = {}, 0
 			end
 
-			local inside = {}
+			local inside, placed = {}, false
 			for _, key in ipairs(sortedKeys(group)) do
 				local option = group.args[key]
 				local optionPath = {unpack(path)}
@@ -643,6 +655,7 @@ local function createPanel(options)
 						control:SetHeight(control.height)
 						control.x = lineWidth
 						table.insert(line, control)
+						placed = true
 						lineWidth = lineWidth + controlWidth + Style.gap
 						if full or option.spaceAfter then
 							endLine()
@@ -653,10 +666,15 @@ local function createPanel(options)
 			end
 			endLine()
 
-			box:SetPoint("TOPLEFT", 0, -y)
-			box:SetWidth(width)
-			box:SetHeight(top - Style.gap + Style.padding + box.edge)
-			y = y + box:GetHeight() + boxGap
+			--a group of only groups, like the profile page's own, has no box
+			if placed then
+				box:SetPoint("TOPLEFT", 0, -y)
+				box:SetWidth(width)
+				box:SetHeight(top - Style.gap + Style.padding + box.edge)
+				y = y + box:GetHeight() + boxGap
+			else
+				box:Hide()
+			end
 
 			for _, sub in ipairs(inside) do
 				addBox(sub[1], groups, sub[2])

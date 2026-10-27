@@ -280,6 +280,7 @@ L["Copy an existing profile into the current profile, or into a new profile."] =
 L["Copy the bars, settings and keybinds of an existing profile into the current profile, or into a new profile. The buttons are left empty."] = true
 L["Copy the layout of \"%s\" into the current profile? The current profile will be overwritten with empty buttons, and the UI will reload."] = true
 L["Copy to Current"] = true
+L["Delete the profile \"%s\"?"] = true
 L["Layout From"] = true
 L["New Profile Name"] = true
 L["Pick a new name, at most 50 characters."] = true
