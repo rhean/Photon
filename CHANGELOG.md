@@ -1,3 +1,10 @@
+## 0.5.3
+
+### Fixes and Tweaks
+- Copy Layout no longer brings over the bars' pages.
+- The profile page has a cleaner look.
+- Deleting a profile asks for confirmation.
+
 ## 0.5.2
 
 ### New Shape
