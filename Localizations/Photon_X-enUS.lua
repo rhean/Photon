@@ -732,17 +732,22 @@ L["WhatsNew_Text"] = [[
 Welcome to the beta release of Photon!
 Please help out by posting any bugs and suggestions on Curse or github.com/rhean/Photon
 
+New in 0.5.3:
+- Copy Layout no longer brings over the bars' pages.
+- The profile page has a cleaner look.
+- Deleting a profile asks for confirmation.
+]]
+L["WhatsNew_ShowOlder"] = "Show Older Changes"
+L["WhatsNew_HideOlder"] = "Hide Older Changes"
+
+L["WhatsNew_Older"] = [[
 New in 0.5.2:
 - A new shape has been added: Rectangle
 - Copy Profile and Copy Layout can both copy into the current profile or into a new one.
 - Copying a profile made by another class empties its stance and form pages.
 - Flyout shows above unit frames and other action bars.
 - Fixed an error when opening the button editor after the selected button was removed from its bar.
-]]
-L["WhatsNew_ShowOlder"] = "Show Older Changes"
-L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
-L["WhatsNew_Older"] = [[
 New in 0.5.1:
 - Skyriding abilities can be rearranged on Photon bars by dragging them.
 - Skyriding, Vehicle, Possess and Override now always take over the bar, even when another condition is on at the same time.

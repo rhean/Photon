@@ -23,7 +23,7 @@ local DB
 local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
 
 --the What's New popup, shown once per account when LATEST_VERSION_NUM changes, see Photon:LoginMessage
-local LATEST_VERSION_NUM = "0.5.2" --change it with WhatsNew_Text in the locale, everyone sees the new release notes once
+local LATEST_VERSION_NUM = "0.5.3" --change it with WhatsNew_Text in the locale, everyone sees the new release notes once
 local SHOW_WHATS_NEW = true --false for a version that shouldn't pop up, like a small fix
 local WHATS_NEW_TEXT = "WhatsNew_Text" --the locale key it shows. another key, like "WhatsNew_Override", shows that text instead
 
