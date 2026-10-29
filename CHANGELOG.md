@@ -1,3 +1,8 @@
+## 0.5.4
+
+### Fixes and Tweaks
+- Fixed an issue causing Photon not loading with Masque 12.1.7.
+
 ## 0.5.3
 
 ### Fixes and Tweaks

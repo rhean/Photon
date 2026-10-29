@@ -732,15 +732,18 @@ L["WhatsNew_Text"] = [[
 Welcome to the beta release of Photon!
 Please help out by posting any bugs and suggestions on Curse or github.com/rhean/Photon
 
-New in 0.5.3:
-- Copy Layout no longer brings over the bars' pages.
-- The profile page has a cleaner look.
-- Deleting a profile asks for confirmation.
+New in 0.5.4:
+- Fixed an issue causing Photon not loading with Masque 12.1.7.
 ]]
 L["WhatsNew_ShowOlder"] = "Show Older Changes"
 L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
 L["WhatsNew_Older"] = [[
+New in 0.5.3:
+- Copy Layout no longer brings over the bars' pages.
+- The profile page has a cleaner look.
+- Deleting a profile asks for confirmation.
+
 New in 0.5.2:
 - A new shape has been added: Rectangle
 - Copy Profile and Copy Layout can both copy into the current profile or into a new one.

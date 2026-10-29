@@ -543,7 +543,8 @@ function Button:SetSkinned(flyout)
 			Name = self.Name,
 			Border = self.Border,
 			Cooldown = self.Cooldown,
-			AutoCastable = self.AutoCastable,
+			--Masque 12.1.7 skins dropped AutoCastable but still skin it, and error on it. false keeps Masque from looking it up
+			AutoCastable = false,
 			Checked = self.Checked,
 			Pushed = self.Pushed,
 			Disabled = self:GetDisabledTexture(),
