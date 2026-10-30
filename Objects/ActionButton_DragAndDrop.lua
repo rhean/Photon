@@ -532,6 +532,15 @@ function ActionButton:PlaceItem(action1, action2)
 
 end
 
+local function pickedMacroIcon(index, texture)
+	local spellID = GetMacroSpell(index)
+	local _, itemLink = GetMacroItem(index)
+	local shown = (spellID and C_Spell.GetSpellTexture(spellID)) or (itemLink and C_Item.GetItemIconByID(itemLink))
+	if shown and shown == texture then
+		return nil
+	end
+	return texture
+end
 
 function ActionButton:PlaceBlizzMacro(action1)
 	if action1 == 0 then
@@ -543,7 +552,7 @@ function ActionButton:PlaceBlizzMacro(action1)
 	if body then
 		self:SetMacroText(body)
 		self:SetMacroName()
-		self:SetMacroIcon(texture)
+		self:SetMacroIcon(pickedMacroIcon(action1, texture))
 		self:SetMacroBlizzMacro(name)
 	else
 		self:SetMacroText()
