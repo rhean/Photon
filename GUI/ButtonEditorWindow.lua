@@ -955,7 +955,7 @@ local function createWindow()
 	modifierRow:SetPoint("TOPRIGHT", specRow, "BOTTOMRIGHT", 0, -Style.gap)
 	modifierRow:SetHeight(Style.rowHeight)
 
-	addButton = UI.MenuButton(modifierRow, L["Add page for condition"], function(root)
+	addButton = UI.MenuButton(modifierRow, L["Add state for condition"], function(root)
 		local lastSection
 		for _, modifier in ipairs(view.available) do
 			--a gap between the bar config's boxes
@@ -991,11 +991,11 @@ local function createWindow()
 	addButton:SetPoint("LEFT", conditionLabel, "RIGHT", Style.gap * 2, 0)
 
 	--removes the selected page's modifier
-	removeButton = UI.Button(modifierRow, L["Remove page"], function()
+	removeButton = UI.Button(modifierRow, L["Remove state"], function()
 		view.editors[selected.page].onRemove()
 	end)
 	removeButton:SetPoint("RIGHT")
-	addTooltip(removeButton, L["Remove page"], L["ButtonEditor_RemovePageDesc"])
+	addTooltip(removeButton, L["Remove state"], L["ButtonEditor_RemovePageDesc"])
 
 	--a tab like the forms' that shows default and every form side by side, open while it is on.
 	--a form's tab goes back to tabs, see the tabs' onSelect
