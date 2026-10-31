@@ -1,3 +1,8 @@
+## 0.5.5
+
+### Fixes and Tweaks
+- A macro dragged from Blizzard's macros shows the same icon as in Blizzard's macro window, so question-mark macros follow their spell or item.
+
 ## 0.5.4
 
 ### Fixes and Tweaks

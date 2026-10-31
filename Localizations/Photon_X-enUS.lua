@@ -732,13 +732,16 @@ L["WhatsNew_Text"] = [[
 Welcome to the beta release of Photon!
 Please help out by posting any bugs and suggestions on Curse or github.com/rhean/Photon
 
-New in 0.5.4:
-- Fixed an issue causing Photon not loading with Masque 12.1.7.
+New in 0.5.5:
+- A macro dragged from Blizzard's macros shows the same icon as in Blizzard's macro window, so question-mark macros follow their spell or item.
 ]]
 L["WhatsNew_ShowOlder"] = "Show Older Changes"
 L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
 L["WhatsNew_Older"] = [[
+New in 0.5.4:
+- Fixed an issue causing Photon not loading with Masque 12.1.7.
+
 New in 0.5.3:
 - Copy Layout no longer brings over the bars' pages.
 - The profile page has a cleaner look.
