@@ -2,7 +2,7 @@
 
 Photon is an action bar addon where every button holds a macro instead of a fixed action. You can type the macro yourself, or drag a spell, item, mount, pet ability or Blizzard macro onto the button and Photon writes the macro for you. You can have any number of bars, each with any number of buttons and a choice of shapes, and place them anywhere on the screen.
 
-Photon continues **Neuron** by Britt W. Yazel and **Ion** by Connor H. Chenoweth.
+Photon is based on **Neuron** by Britt W. Yazel and **Ion** by Connor H. Chenoweth.
 
 ## Bars
 
@@ -30,7 +30,7 @@ Photon continues **Neuron** by Britt W. Yazel and **Ion** by Connor H. Chenoweth
 
 ## Other bars
 
-Photon also has its own versions of most of the other default bars: pet, bag, menu, XP, reputation, cast, mirror, extra action, zone ability and vehicle exit. Each one can replace its Blizzard counterpart, or Blizzard's can be kept. On Forever, shamans also get a totem bar with Call of the Elements, the four totem slots and Totemic Recall.
+Photon also has its own versions of most of the other default bars: pet, bag, menu, XP, reputation, cast, mirror, extra action, zone ability and vehicle exit. Each one can replace its Blizzard counterpart, or Blizzard's can be kept. In Forever, shamans also get a totem bar with Call of the Elements, the four totem slots and Totemic Recall.
 
 ## Keybinds
 
