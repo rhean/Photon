@@ -150,14 +150,14 @@ L["Condition"] = true
 L["Modifiers"] = true
 L["ButtonEditor_Location"] = "Button %d - Row %d"
 L["ButtonEditor_Button"] = "Button %d"
-L["Add page for condition"] = true
-L["Remove page"] = true
+L["Add state for condition"] = true
+L["Remove state"] = true
 L["ButtonEditor_DefaultDesc"] = "Default state when no other condition is true."
--- the button editor: action bar pages (1-6) and {form} tabs at the top, each with a Default page and condition pages
+-- the button editor: action bar pages (1-6) and {form} tabs at the top, each with a Default state and condition states
 L["ButtonEditor_DefaultHelp"] = "Default shows when no condition is active.\n"..
-	"Each {form} tab and each action bar page has its own Default and condition pages, so holding Shift in a {form} shows that {form} tab's Shift page.\n"..
-	"When a page has no macro, it uses the first page that has one: the same condition on the Default tab -> the {form} tab's Default -> this action bar page's Default -> action bar page 1's Default."
-L["ButtonEditor_RemoveModifier"] = "Remove the %s page from %s? Its macros are deleted from every button in that row, on every tab and action bar page."
+	"Each {form} tab and each action bar page has its own Default and condition states, so holding Shift in a {form} shows that {form} tab's Shift state.\n"..
+	"When a state has no macro, it uses the first state that has one: the same condition on the Default tab -> the {form} tab's Default -> this action bar page's Default -> action bar page 1's Default."
+L["ButtonEditor_RemoveModifier"] = "Remove the %s state from %s? Its macros are deleted from every button in that row, on every tab and action bar page."
 L["ButtonEditor_RowOfSpec"] = "row %d of %s"
 L["ButtonEditor_Status"] = "|cffffd200%s|r|cFFFFFFFF button %d is selected. Click another button to edit it."
 L["ButtonEditor_SelectButton"] = "Click an action button to edit it."
@@ -168,18 +168,18 @@ L["VisualOverride_Own"] = "|cffffd200%s|r|cFFFFFFFF button %d has its own visual
 L["Reset Changed Buttons"] = true
 L["ClearButtonOverrides_Confirm"] = "Clear the visuals of every button on this bar that has its own."
 L["BarDesc_clearButtonOverrides"] = "Reset any changes done on individual buttons and bring them back to following these settings"
-L["ButtonEditor_Inherits"] = "No macro of its own, this page uses %s. Type a macro to give it one."
+L["ButtonEditor_Inherits"] = "No macro of its own, this state uses %s. Type a macro to give it one."
 L["ButtonEditor_Empty"] = "No macro yet. Type one below."
-L["ButtonEditor_InheritsBlank"] = "No macro of its own, this page uses %s, which is forced blank."
+L["ButtonEditor_InheritsBlank"] = "No macro of its own, this state uses %s, which is forced blank."
 L["Force Blank"] = true
-L["ButtonEditor_ForceBlankDesc"] = "Makes this page empty instead of using another page's macro. Pages that would use this one are empty too."
+L["ButtonEditor_ForceBlankDesc"] = "Makes this state empty instead of using another state's macro. States that would use this one are empty too."
 L["Icon"] = true
 L["Edit Label"] = true
 L["Reset Icon"] = true
-L["ButtonEditor_IconDesc"] = "Click to choose an icon for this page."
+L["ButtonEditor_IconDesc"] = "Click to choose an icon for this state."
 L["ButtonEditor_LabelDesc"] = "Text shown on the button when the bar's Button Label option is on."
 L["ButtonEditor_ResetIconDesc"] = "Goes back to the macro's own icon instead of the one you picked."
-L["ButtonEditor_RemovePageDesc"] = "Removes the selected condition page from this row of buttons."
+L["ButtonEditor_RemovePageDesc"] = "Removes the selected condition state from this row of buttons."
 L["ButtonEditor_AllForms"] = "Expand"
 L["ButtonEditor_AllFormsDesc"] = "Shows Default and every {form} next to each other instead of in tabs."
 
@@ -237,7 +237,7 @@ L["Timer_Limit_Invalid_Message"] = "Invalid timer limit"
 L["DragDrop_Error_Message"] = "Sorry, we were unable to place that ability or item."
 L["DragDrop_Passive_Message"] = "Passive abilities can't be cast, so they can't go on a button."
 L["DragDrop_PetBar_Message"] = "Pet abilities can only be dragged onto it directly from the pet spellbook."
-L["DragDrop_Inherited_Message"] = "This button inherits its ability from another page. You can override it in the button editor"
+L["DragDrop_Inherited_Message"] = "This button inherits its ability from another state. You can override it in the button editor"
 
 
 L["Attack"] = true
@@ -395,7 +395,7 @@ L["Toggles the minimap button."] = true
 L["Editors"] = true
 L["Fallback Order"] = true
 L["State (Modifier)"] = true
-L["FallbackOrder_Desc"] = "What an empty state in a stance (like Shift in Bear Form) shows first. State (Modifier): the state's own macro on the default page (like Shift). Stance: the stance's default macro (Bear Form default)."
+L["FallbackOrder_Desc"] = "What an empty state in a stance (like Shift in Bear Form) shows first. State (Modifier): the state's own macro on the Default tab (like Shift). Stance: the stance's default macro (Bear Form default)."
 
 L["Bar Visibility Toggles"] = true
 L["Target"] = true
@@ -625,27 +625,27 @@ L["BarDesc_tooltipText"] = "Text shown in a tooltip when you hover the bar. Uses
 L["BarDesc_castUnit"] = "Whose casts this bar shows."
 L["BarDesc_castIcon"] = "Shows the icon of the spell being cast."
 
--- Activate a page for these conditions: the bar gets a page for the state, set its abilities in the button editor
-L["BarDesc_state_shift"] = "Gives the bar a page for when Shift is held."
-L["BarDesc_state_ctrl"] = "Gives the bar a page for when Control is held."
-L["BarDesc_state_alt"] = "Gives the bar a page for when Alt is held."
-L["BarDesc_state_target"] = "Gives the bar a page for when you have a target."
-L["BarDesc_state_harm"] = "Gives the bar a page for when you can attack your target."
-L["BarDesc_state_help"] = "Gives the bar a page for when you can help your target."
-L["BarDesc_state_stealth"] = "Gives the bar a page for when you are stealthed."
-L["BarDesc_state_combat"] = "Gives the bar a page for when you are in combat."
-L["BarDesc_state_party"] = "Gives the bar a page for when you are in a party."
-L["BarDesc_state_raid"] = "Gives the bar a page for when you are in a raid."
-L["BarDesc_state_mounted"] = "Gives the bar a page for when you are mounted."
-L["BarDesc_state_swimming"] = "Gives the bar a page for when you are swimming."
+-- Activate a state for these conditions: the bar gets the state, set its abilities in the button editor
+L["BarDesc_state_shift"] = "Gives the bar a state for when Shift is held."
+L["BarDesc_state_ctrl"] = "Gives the bar a state for when Control is held."
+L["BarDesc_state_alt"] = "Gives the bar a state for when Alt is held."
+L["BarDesc_state_target"] = "Gives the bar a state for when you have a target."
+L["BarDesc_state_harm"] = "Gives the bar a state for when you can attack your target."
+L["BarDesc_state_help"] = "Gives the bar a state for when you can help your target."
+L["BarDesc_state_stealth"] = "Gives the bar a state for when you are stealthed."
+L["BarDesc_state_combat"] = "Gives the bar a state for when you are in combat."
+L["BarDesc_state_party"] = "Gives the bar a state for when you are in a party."
+L["BarDesc_state_raid"] = "Gives the bar a state for when you are in a raid."
+L["BarDesc_state_mounted"] = "Gives the bar a state for when you are mounted."
+L["BarDesc_state_swimming"] = "Gives the bar a state for when you are swimming."
 L["BarDesc_state_vehicle"] = "Shows the vehicle's abilities on the bar when you are in a vehicle."
 L["BarDesc_state_possess"] = "Shows the possessed creature's abilities on the bar when you possess something."
 L["BarDesc_state_override"] = "Shows the game's override abilities on the bar when it gives you some (special encounters and quests)."
 L["BarDesc_state_dragonriding"] = "Shows your skyriding abilities on the bar while skyriding."
-L["BarDesc_state_resting"] = "Gives the bar a page for when you are resting in a city or inn."
-L["BarDesc_state_indoors"] = "Gives the bar a page for when you are indoors."
-L["BarDesc_state_outdoors"] = "Gives the bar a page for when you are outdoors."
-L["BarDesc_state_fishing"] = "Gives the bar a page for when you have a fishing pole equipped."
+L["BarDesc_state_resting"] = "Gives the bar a state for when you are resting in a city or inn."
+L["BarDesc_state_indoors"] = "Gives the bar a state for when you are indoors."
+L["BarDesc_state_outdoors"] = "Gives the bar a state for when you are outdoors."
+L["BarDesc_state_fishing"] = "Gives the bar a state for when you have a fishing pole equipped."
 
 -- Hide bar for these conditions: checked hides the bar in that state
 L["BarDesc_visibility_paged1"] = "Hides the bar on action bar page 1."

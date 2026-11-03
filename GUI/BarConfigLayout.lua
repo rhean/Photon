@@ -239,7 +239,7 @@ addonTable.barConfigLayout = {
 					{ id = "state_dragonriding", width = "normal" },
 				},
 			}},
-			{ id = "states", name = "Activate a page for these conditions", rows = {
+			{ id = "states", name = "Activate a state for these conditions", rows = {
 				{
 					{ id = "statesBox1", box = true, name = "", light = true, width = "full", rows = {
 						{

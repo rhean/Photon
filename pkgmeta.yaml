@@ -17,5 +17,6 @@ embedded-libraries:
 
 ignore:
   - README.md
+  - DESCRIPTION.md
   - dist
   - Tools
