@@ -613,9 +613,11 @@ function ActionButton:PlaceMount(action1, action2)
 	local mountName, mountSpellID, mountIcon = C_MountJournal.GetMountInfoByID(action1)
 	local mountSpell
 
-	if action1 == 0 or not mountSpellID or mountSpellID == 0 then
-		return
-	else
+	--the random mount isn't a mount of its own, so it has no spell to check for
+	if action1 ~= 268435455 then
+		if action1 == 0 or not mountSpellID or mountSpellID == 0 then
+			return
+		end
 		mountSpell = C_Spell.GetSpellName(mountSpellID)
 	end
 
