@@ -729,16 +729,20 @@ L["BarDesc_layer_fishing"] = "Whether you have a fishing pole equipped."
 -- to show another text for a version, add it here under a new key and set WHATS_NEW_TEXT in Photon.lua to that key
 L["WhatsNew_Title"] = "Photon %s"
 L["WhatsNew_Text"] = [[
-Welcome to the beta release of Photon!
-Please help out by posting any bugs and suggestions on Curse or github.com/rhean/Photon
+Welcome to Photon 1.0!
+Please post any bugs and suggestions on Curse or github.com/rhean/Photon
 
-New in 0.5.5:
-- A macro dragged from Blizzard's macros shows the same icon as in Blizzard's macro window, so question-mark macros follow their spell or item.
+New in 1.0:
+- Photon is out of beta.
+- The bar settings and the button editor now call the conditions a bar switches "states" instead of "pages". "Page" now only means Blizzard's action bar pages 1-6.
 ]]
 L["WhatsNew_ShowOlder"] = "Show Older Changes"
 L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
 L["WhatsNew_Older"] = [[
+New in 0.5.5:
+- A macro dragged from Blizzard's macros shows the same icon as in Blizzard's macro window, so question-mark macros follow their spell or item.
+
 New in 0.5.4:
 - Fixed an issue causing Photon not loading with Masque 12.1.7.
 

@@ -1,3 +1,10 @@
+## 1.0
+
+- Photon is out of beta.
+
+### Fixes and Tweaks
+- The bar settings and the button editor now call the conditions a bar switches on "states" instead of "pages". "Page" now only means Blizzard's action bar pages 1-6.
+
 ## 0.5.5
 
 ### Fixes and Tweaks
