@@ -1048,6 +1048,10 @@ function Button:UpdateUsableSpell()
 	local isUsable, notEnoughMana = C_Spell.IsSpellUsable(spell)
 	local visuals = self:GetVisuals()
 
+	if self.STEALTH_SPELLS[self.spellID] and IsStealthed() then
+		isUsable = true
+	end
+
 	if notEnoughMana and visuals:GetManaColor() then
 		self.Icon:SetVertexColor(unpack(visuals:GetManaColor(), 1, 3))
 	elseif isUsable then
@@ -1145,9 +1149,17 @@ function Button:UpdateStatus()
 	end
 end
 
+--forms light up while they're on, but prowl and stealth don't count as the current spell.
+--they're also cast through the macro, see ActionButton.PlainCastSpellID
+Button.STEALTH_SPELLS = {
+	[5215] = true, --prowl
+	[1784] = true, --stealth
+	[115191] = true, --stealth, with subterfuge
+}
+
 function Button:UpdateSpellStatus()
 	local spell = self:GetCurrentSpell()
-	if C_Spell.IsCurrentSpell(spell) or C_Spell.IsAutoRepeatSpell(spell) then
+	if C_Spell.IsCurrentSpell(spell) or C_Spell.IsAutoRepeatSpell(spell) or (self.STEALTH_SPELLS[self.spellID] and IsStealthed()) then
 		self:SetChecked(true)
 	else
 		self:SetChecked(false)
