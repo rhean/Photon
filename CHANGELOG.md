@@ -1,3 +1,9 @@
+## 1.0.1
+
+### Fixes and Tweaks
+- Prowl and Stealth can now be cancelled by pressing the button again.
+- Summon Random Favorite Mount can be dragged onto a bar again.
+
 ## 1.0
 
 - Photon is out of beta.

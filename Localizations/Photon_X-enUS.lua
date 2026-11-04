@@ -732,14 +732,18 @@ L["WhatsNew_Text"] = [[
 Welcome to Photon 1.0!
 Please post any bugs and suggestions on Curse or github.com/rhean/Photon
 
-New in 1.0:
-- Photon is out of beta.
-- The bar settings and the button editor now call the conditions a bar switches "states" instead of "pages". "Page" now only means Blizzard's action bar pages 1-6.
+New in 1.0.1:
+- Prowl and Stealth can be cancelled by pressing the button again, and the button lights up while you're stealthed.
+- Summon Random Favorite Mount can be dragged onto a bar again.
 ]]
 L["WhatsNew_ShowOlder"] = "Show Older Changes"
 L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
 L["WhatsNew_Older"] = [[
+New in 1.0:
+- Photon is out of beta.
+- The bar settings and the button editor now call the conditions a bar switches on "states" instead of "pages". "Page" now only means Blizzard's action bar pages 1-6.
+
 New in 0.5.5:
 - A macro dragged from Blizzard's macros shows the same icon as in Blizzard's macro window, so question-mark macros follow their spell or item.
 

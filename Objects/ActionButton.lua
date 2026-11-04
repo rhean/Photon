@@ -336,6 +336,11 @@ function ActionButton:SetupEvents()
 		self:RegisterEvent("SPELL_UPDATE_ICON", "UpdateAll")
 	end
 
+	--prowl and stealth light up while you're stealthed
+	if not C_EventUtils or not C_EventUtils.IsEventValid or C_EventUtils.IsEventValid("UPDATE_STEALTH") then
+		self:RegisterEvent("UPDATE_STEALTH", "UpdateStatus")
+	end
+
 	self:RegisterEvent("UNIT_SPELLCAST_INTERRUPTED")
 	self:RegisterEvent("UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_INTERRUPTED")
 
@@ -792,6 +797,10 @@ function ActionButton.PlainCastSpellID(macro)
 	end
 
 	local spellID = ActionButton.ExtractMacroData(ActionButton.SanitizedMacro(macro)).spellID
+	--cast by ID, prowl and stealth don't take you out of stealth again. /cast does
+	if spellID and ActionButton.STEALTH_SPELLS[spellID] then
+		return nil
+	end
 	if spellID and isSpellKnown and isSpellKnown(spellID) then
 		return spellID
 	end
