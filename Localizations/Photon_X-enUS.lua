@@ -732,14 +732,18 @@ L["WhatsNew_Text"] = [[
 Welcome to Photon 1.0!
 Please post any bugs and suggestions on Curse or github.com/rhean/Photon
 
-New in 1.0.1:
-- Prowl and Stealth can be cancelled by pressing the button again, and the button lights up while you're stealthed.
-- Summon Random Favorite Mount can be dragged onto a bar again.
+New in 1.0.2:
+- Only one menu bar and one bag bar can be made.
+- The housing button is blocked on Forever.
 ]]
 L["WhatsNew_ShowOlder"] = "Show Older Changes"
 L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
 L["WhatsNew_Older"] = [[
+New in 1.0.1:
+- Prowl and Stealth can now be cancelled by pressing the button again.
+- Summon Random Favorite Mount can be dragged onto a bar again.
+
 New in 1.0:
 - Photon is out of beta.
 - The bar settings and the button editor now call the conditions a bar switches on "states" instead of "pages". "Page" now only means Blizzard's action bar pages 1-6.

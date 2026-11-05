@@ -37,6 +37,7 @@ local lastTab
 
 local render
 local renderPending
+local refreshBarTypes
 
 --a field of an AceConfig option, which may be a function
 local function resolve(field)
@@ -899,19 +900,35 @@ local function createWindow()
 	createButton:SetPoint("RIGHT")
 	createButton:SetEnabled(false)
 
-	local typeItems = {}
-	for class, info in pairs(Photon.registeredBarData) do
-		table.insert(typeItems, {value = class, text = info.barLabel})
-	end
-	table.sort(typeItems, function(a, b)
-		return a.text < b.text
-	end)
-
 	local typeDropdown = UI.Dropdown(barRow, function(class)
 		newBarType = class
 		createButton:SetEnabled(true)
 	end)
-	typeDropdown:SetItems(typeItems)
+
+	--a type that can't be made now is greyed out, see Bar.CanCreateBar
+	function refreshBarTypes()
+		local typeItems = {}
+		for class, info in pairs(Photon.registeredBarData) do
+			local canCreate, whyNot = Photon.Bar.CanCreateBar(class)
+			table.insert(typeItems, {
+				value = class,
+				text = info.barLabel,
+				disabled = not canCreate or nil,
+				tooltip = whyNot,
+			})
+		end
+		table.sort(typeItems, function(a, b)
+			return a.text < b.text
+		end)
+		typeDropdown:SetItems(typeItems)
+
+		if newBarType and not Photon.Bar.CanCreateBar(newBarType) then
+			newBarType = nil
+			typeDropdown:SetValue(nil)
+			createButton:SetEnabled(false)
+		end
+	end
+	refreshBarTypes()
 	typeDropdown:SetValue(nil)
 	typeDropdown:SetPoint("RIGHT", createButton, "LEFT", -Style.gap, 0)
 	typeDropdown:SetWidth(160)
@@ -992,6 +1009,7 @@ function render()
 
 	barDropdown:SetItems(barItems())
 	barDropdown:SetValue(bar)
+	refreshBarTypes()
 
 	if not bar or not defs then
 		window:SetStatus("Select a bar to begin.")
