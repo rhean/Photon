@@ -219,8 +219,6 @@ function MenuButton:InitializeButton()
 end
 
 ---put the blizzard micro button back inside this button
---TEMP DEBUG: find the menu bar freeze, remove once fixed
-local debugCalls, debugTime = 0, 0
 function MenuButton:AnchorHookedButton()
 	if not self.hookedButton then
 		return
@@ -233,15 +231,6 @@ function MenuButton:AnchorHookedButton()
 	local _, relativeTo = self.hookedButton:GetPoint()
 	if self.hookedButton:GetParent() == self and relativeTo == self and self.hookedButton:GetNumPoints() == 1 and self.hookedButton:GetScale() == 1 then
 		return
-	end
-
-	if debugTime ~= GetTime() then
-		debugTime, debugCalls = GetTime(), 0
-	end
-	debugCalls = debugCalls + 1
-	if debugCalls >= 500 then
-		activeMenuButtons = {} --stop reclaiming so the client doesn't hang after the error
-		error("MenuButton freeze: AnchorHookedButton called 500 times in one frame")
 	end
 
 	self.hookedButton:SetParent(self)

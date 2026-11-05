@@ -158,11 +158,30 @@ end
 -----Bar Add/Remove Functions------
 -----------------------------------
 
+--the game has one set of menu and bag buttons and each can only be on one bar
+local ONE_BAR_ONLY = {
+	MenuBar = "There is already a menu bar. The game has one set of menu buttons, and each can only be on one bar.",
+	BagBar = "There is already a bag bar. The game has one set of bag buttons, and each can only be on one bar.",
+}
+
+---whether a new bar of this type can be made, a menu or bag bar only while there isn't one
+---@return boolean, string? @and why not
+function Bar.CanCreateBar(class)
+	if ONE_BAR_ONLY[class] and #Photon.registeredBarData[class].barDB > 0 then
+		return false, ONE_BAR_ONLY[class]
+	end
+	return true
+end
+
 ---This function is used for creating brand new bars, and it is really just a wrapper for the Bar constructor with a couple of assumptions and checks
 function Bar:CreateNewBar(class)
 
 	if not class and Photon.registeredBarData[class] then --if the class isn't registered, go ahead and bail out.
 		Photon.PrintBarTypes()
+		return
+	end
+
+	if not Bar.CanCreateBar(class) then
 		return
 	end
 
