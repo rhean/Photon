@@ -91,6 +91,8 @@ end
 --and its MicroMenu:GetEdgeButton errors comparing them. parked with help they're out of its menu
 local UNUSED_BUTTON_NAMES = Photon.isWoWClassicEra and {"GuildMicroButton"}
 	or (Photon.isWoWMists or Photon.isWoWTBC) and {useClassicGuildUI and "GuildMicroButton" or "SocialsMicroButton"}
+	--forever has the housing button, but its default menu doesn't show it
+	or Photon.isWoWForever and {"HousingMicroButton"}
 	or {}
 
 local function ParkUnusedButtons()
