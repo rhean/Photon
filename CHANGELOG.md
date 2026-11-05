@@ -1,3 +1,9 @@
+## 1.0.2
+
+### Fixes and Tweaks
+- Only one menu bar and one bag bar can be made. 
+- The housing button is blocked on Forever.
+
 ## 1.0.1
 
 ### Fixes and Tweaks
