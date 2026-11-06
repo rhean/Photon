@@ -1,3 +1,8 @@
+## 1.0.3
+
+### Fixes and Tweaks
+- Arc Length on circles has been reimplemented as it was in Neuron. The buttons go only part of the way around the circle and leave a gap.
+
 ## 1.0.2
 
 ### Fixes and Tweaks
