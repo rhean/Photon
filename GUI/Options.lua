@@ -423,7 +423,20 @@ local function barDefinitions()
 	end
 
 	definitions.arcSpan.disabled = function()
-		return bar():GetBarShape() ~= "arc"
+		return bar():GetBarShape() ~= "arc" and not isCircle()
+	end
+	definitions.arcSpan.get = function()
+		if isCircle() then
+			return bar():GetArcLength()
+		end
+		return bar():GetArcSpan()
+	end
+	definitions.arcSpan.set = function(_, value)
+		if isCircle() then
+			bar():SetArcLength(value)
+		else
+			bar():SetArcSpan(value)
+		end
 	end
 
 	definitions.circleLocked.disabled = function()
