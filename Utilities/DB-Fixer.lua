@@ -7,7 +7,7 @@
 local _, addonTable = ...
 addonTable.utilities = addonTable.utilities or {}
 
-local LATEST_DB_VERSION = 1.7
+local LATEST_DB_VERSION = 1.8
 
 ------------------------------------------------------------
 --------------------Data Fixing Functions-------------------
@@ -278,6 +278,17 @@ local function migrate1_6To1_7(profile)
 	return newProfile
 end
 
+-- forms were named by their place on the stance bar (stance2), now by their spell (stance768).
+local function migrate1_7To1_8(profile)
+	local newProfile = CopyTable(profile)
+	for _, bar in pairs(newProfile.ActionBar or {}) do
+		bar.stanceByIndex = true
+	end
+
+	newProfile.DBVersion = 1.8
+	return newProfile
+end
+
 local function profileMigrate(profileDatabase)
 	if profileDatabase.DBVersion < 1.3 then
 		-- we need to copy the table for the og fixer, since it modifies in place
@@ -290,6 +301,8 @@ local function profileMigrate(profileDatabase)
 		return profileMigrate(migrate1_5To1_6(profileDatabase))
 	elseif profileDatabase.DBVersion == 1.6 then
 		return profileMigrate(migrate1_6To1_7(profileDatabase))
+	elseif profileDatabase.DBVersion == 1.7 then
+		return profileMigrate(migrate1_7To1_8(profileDatabase))
 	else
 		return profileDatabase
 	end
@@ -320,7 +333,8 @@ local function databaseMigration(DB)
 	elseif currentVersion < LATEST_DB_VERSION then
 		local success, newProfile = pcall(profileMigrate, DB.profile)
 		if success then
-			DB.profile = newProfile
+			--DB.profile is only AceDB's shortcut to the saved profile, the copy has to replace the saved one
+			DB.profiles[DB:GetCurrentProfile()] = newProfile
 		else
 			loadingDatabaseFailed(DB)
 		end
