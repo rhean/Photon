@@ -1,3 +1,9 @@
+## 1.1.0
+
+### Data Storage Changes
+- The game numbers stances and forms by their place on the stance bar, as in [stance:1] and [stance:2]. The numbers aren't fixed, they are given out at login from what the character has, so when talents or a missing form changed the order, the stance states could end up on the wrong form. Photon now stores each stance's and form's buttons by the spell's own ID instead.
+- **There is a very slim chance, mostly for Classic and Forever druids, that some form states shift to another form.**
+
 ## 1.0.3
 
 ### Fixes and Tweaks
