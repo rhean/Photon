@@ -134,7 +134,7 @@ local function getStateList(bar)
 					and Photon.STATES[state]
 				then
 					seen[state] = true
-					table.insert(stateList, {state = state, barState = barState, num = tonumber(state:match("%d+$"))})
+					table.insert(stateList, {state = state, barState = barState, num = #stateList})
 				end
 			end
 		end

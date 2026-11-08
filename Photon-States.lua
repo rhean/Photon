@@ -84,9 +84,21 @@ function Photon.UpdateStanceStrings()
 
 	--- this is actually a lot of classes. rogues stealth, paladins have
 	--- devo aura, priests have shadowform, etc
+	local formNames = {}
 	for i=1,GetNumShapeshiftForms() do
 		local _, _, _, spellID = GetShapeshiftFormInfo(i)
-		Photon.STATES["stance"..i] = C_Spell.GetSpellName(spellID) --Get the string name of the shapeshift form (now that shapeshifts are considered spells)
+		formNames[i] = spellID and C_Spell.GetSpellName(spellID) --Get the string name of the shapeshift form (now that shapeshifts are considered spells)
+		Photon.STATES["stance"..((Photon.class == "ROGUE" or not spellID) and i or spellID)] = formNames[i]
+	end
+
+	--a bar can keep a form's pages under an older spell, stance5487 for dire bear form
+	for _, bar in pairs(Photon.bars or {}) do
+		for index, state in gmatch(bar.data and bar.data.remap or "", "(%d+):(%d+)") do
+			local name = formNames[tonumber(index)]
+			if name and state ~= "0" then
+				Photon.STATES["stance"..state] = name
+			end
+		end
 	end
 
 	-- out of form is a page too, see Bar.FormsArePages

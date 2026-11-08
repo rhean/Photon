@@ -1289,14 +1289,89 @@ function Bar:SetDefaults(defaults)
 end
 
 
+--forms that become another spell as you level, the new one keeps the old one's pages
+local FORM_UPGRADES = {
+	[9634] = 5487, --dire bear form, bear form
+	[40120] = 33943, --swift flight form, flight form
+}
+
+---the same form under another spell: another rank (devotion aura), an upgrade (dire bear form) or a variant (moonkin form)
+---@param a number
+---@param b number
+---@return boolean
+local function isSameForm(a, b)
+	if (FORM_UPGRADES[a] or a) == (FORM_UPGRADES[b] or b) then
+		return true
+	end
+	local name = C_Spell.GetSpellName(a)
+	return name ~= nil and name == C_Spell.GetSpellName(b)
+end
+
+---each button's pages, by spec and in the default tree
+local function forEachButtonStates(barData, func)
+	for _, button in pairs(barData.buttons or {}) do
+		for key, states in pairs(button) do
+			if key ~= "config" and key ~= "keys" and key ~= "data" and type(states) == "table" then
+				func(states)
+			end
+		end
+	end
+end
+
+---the spells of the forms the bar already has pages for, in its remap and its buttons
+---@return table<number, boolean>
+function Bar:GetStanceSpellsInUse()
+	local spells = {}
+	for spellID in gmatch(self.data.remap or "", ":(%d+)") do
+		spells[tonumber(spellID)] = true
+	end
+	forEachButtonStates(self.data, function(states)
+		for state in pairs(states) do
+			if type(state) == "string" then
+				for spellID in gmatch(state, "stance(%d+)") do
+					spells[tonumber(spellID)] = true
+				end
+			end
+		end
+	end)
+	spells[0] = nil
+	return spells
+end
+
+---a form's state is named by its spell.
+---@param spellID number @the form's spell
+---@param inUse table<number, boolean> @see Bar:GetStanceSpellsInUse
+---@return number
+local function stanceStateNumber(spellID, inUse)
+	if inUse[spellID] then
+		return spellID
+	end
+	for other in pairs(inUse) do
+		if isSameForm(spellID, other) then
+			return other
+		end
+	end
+	return spellID
+end
+
 function Bar:SetRemap_Stance()
 	local start = tonumber(Photon.MANAGED_BAR_STATES.stance.homestate:match("%d+"))
 
 	if start then
+		--rogues keep the stance bar's order, their vanish and shadow dance are stance2 and stance3
+		local inUse = Photon.class ~= "ROGUE" and self:GetStanceSpellsInUse()
 		self.data.remap = ""
 
 		for i=start,GetNumShapeshiftForms() do
-			self.data.remap = self.data.remap..i..":"..i..";"
+			local state = i
+			--out of form is 0, which isn't a form to ask about. Forever errors on it
+			local spellID = inUse and i > 0 and select(4, GetShapeshiftFormInfo(i))
+			if spellID then
+				state = stanceStateNumber(spellID, inUse)
+				--named after the form it is now, see Photon.UpdateStanceStrings
+				Photon.STATES["stance"..state] = C_Spell.GetSpellName(spellID)
+			end
+			self.data.remap = self.data.remap..i..":"..state..";"
 		end
 
 		self.data.remap = gsub(self.data.remap, ";$", "")
@@ -1308,9 +1383,64 @@ function Bar:SetRemap_Stance()
 	end
 end
 
+---stance states used to be named by their place on the stance bar (stance2), this migrates them to the new states.
+---@return boolean @whether it renamed them
+function Bar:MigrateStanceStates()
+	if not self.data.stanceByIndex or Photon.class == "ROGUE" or GetNumShapeshiftForms() == 0 then
+		return false
+	end
+
+	local spells = {}
+	for i=1,GetNumShapeshiftForms() do
+		local _, _, _, spellID = GetShapeshiftFormInfo(i)
+		spells[i] = spellID
+	end
+
+	--stance2, stance2_alt1 and paged2_stance2_alt1. a place this character doesn't have stays as it was
+	local function newName(state)
+		return (state:gsub("stance(%d+)", function(index)
+			local spellID = spells[tonumber(index)]
+			return spellID and "stance"..spellID
+		end))
+	end
+
+	local function holdsSomething(data)
+		return type(data) == "table" and (data.forceBlank or not not data.actionID or data.macro_Icon
+			or (data.macro_Text or "") ~= "" or (data.macro_Name or "") ~= "")
+	end
+
+	forEachButtonStates(self.data, function(states)
+		local renames = {}
+		for state in pairs(states) do
+			if type(state) == "string" then
+				local newState = newName(state)
+				if newState ~= state and not holdsSomething(rawget(states, newState)) then
+					renames[state] = newState
+				end
+			end
+		end
+		for state, newState in pairs(renames) do
+			states[newState] = states[state]
+			states[state] = nil
+		end
+	end)
+
+	--rebuilt from the new names by the caller, the old one would keep the places
+	self.data.remap = false
+	self.data.stanceByIndex = nil
+	return true
+end
+
 ---the remap is saved when stance is turned on, so a form learned later has no page until it's rebuilt.
 ---not in combat
 function Bar:UpdateStanceRemap()
+	local migrated = self:MigrateStanceStates()
+	if migrated then
+		for _, button in ipairs(self.buttons) do
+			button:RefreshStateData()
+		end
+	end
+
 	if not self.data.stance then
 		return
 	end
@@ -1318,7 +1448,7 @@ function Bar:UpdateStanceRemap()
 	local oldRemap = self.data.remap
 	self:SetRemap_Stance()
 
-	if self.data.remap ~= oldRemap and self.stance and self.stance.registered then
+	if (migrated or self.data.remap ~= oldRemap) and self.stance and self.stance.registered then
 		self:ClearStates(self.handler, "stance")
 		self:UpdateStates(self.handler)
 	end
