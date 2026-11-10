@@ -1,3 +1,8 @@
+## 1.1.1
+
+### Fixes and Tweaks
+- A copied profile's bar outlines in bar edit mode are in the right place and size on the first load, without another reload.
+
 ## 1.1.0
 
 ### Data Storage Changes

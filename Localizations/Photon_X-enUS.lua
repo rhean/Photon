@@ -732,14 +732,17 @@ L["WhatsNew_Text"] = [[
 Welcome to Photon 1.1!
 Please post any bugs and suggestions on Curse or github.com/rhean/Photon
 
-New in 1.1.0:
-- Data storage changes: the game numbers stances and forms by their place on the stance bar, as in [stance:1] and [stance:2]. The numbers aren't fixed, they are given out at login from what the character has, so when talents or a missing form changed the order, the stance states could end up on the wrong form. Photon now stores each stance's and form's buttons by the spell's own ID instead.
-- |cffffd100There is a very slim chance, mostly for Classic and Forever druids, that some form states shift to another form.|r
+New in 1.1.1:
+- A copied profile's bar outlines in bar edit mode are in the right place and size on the first load, without another reload.
 ]]
 L["WhatsNew_ShowOlder"] = "Show Older Changes"
 L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
 L["WhatsNew_Older"] = [[
+New in 1.1.0:
+- Data storage changes: the game numbers stances and forms by their place on the stance bar, as in [stance:1] and [stance:2]. The numbers aren't fixed, they are given out at login from what the character has, so when talents or a missing form changed the order, the stance states could end up on the wrong form. Photon now stores each stance's and form's buttons by the spell's own ID instead.
+- |cffffd100There is a very slim chance, mostly for Classic and Forever druids, that some form states shift to another form.|r
+
 New in 1.0.3:
 - Arc Length on circles has been reimplemented as it was in Neuron. The buttons go only part of the way around the circle and leave a gap.
 
