@@ -345,7 +345,7 @@ function ActionButton:SetupEvents()
 	self:RegisterEvent("UNIT_SPELLCAST_FAILED", "UNIT_SPELLCAST_INTERRUPTED")
 
 	self:RegisterEvent("BAG_UPDATE_COOLDOWN", "UpdateStatus")
-	self:RegisterEvent("BAG_UPDATE", "UpdateStatus")
+	self:RegisterEvent("BAG_UPDATE")
 
 	self:RegisterEvent("PLAYER_STARTED_MOVING", "UpdateUsable")
 	self:RegisterEvent("PLAYER_STOPPED_MOVING", "UpdateUsable")
@@ -465,6 +465,7 @@ function ActionButton:ClearButton(clearAttributes)
 	self.item = nil
 	self.unit = nil
 	self.flyoutID = nil
+	self.bagSlot = nil
 
 	if not InCombatLockdown() and clearAttributes then
 		self:SetAttribute("unit", nil)
@@ -766,12 +767,13 @@ local spellByName = {}
 local isSpellKnown = C_SpellBook and C_SpellBook.IsSpellKnown or IsPlayerSpell
 local function steadySpellID(spell, spellID)
 	local key = spell:lower()
+	local base = FindBaseSpellByID and FindBaseSpellByID(spellID) or spellID
 	local kept = spellByName[key]
-	if kept and isSpellKnown and isSpellKnown(kept) then
+	if kept and kept ~= base and isSpellKnown and isSpellKnown(kept) and not isSpellKnown(base) then
 		return kept
 	end
-	spellByName[key] = FindBaseSpellByID and FindBaseSpellByID(spellID) or spellID
-	return spellByName[key]
+	spellByName[key] = base
+	return base
 end
 
 ---the spell a macro casts when it is nothing but one plain /cast of a known spell, nil otherwise.
@@ -852,6 +854,15 @@ function ActionButton:SPELLS_CHANGED()
 	self:UpdateAll()
 end
 
+--a "/use 0 1" button shows whatever lies in that bag slot, so it looks again when the bags change
+function ActionButton:BAG_UPDATE()
+	if self.bagSlot then
+		self:UpdateAll()
+	else
+		self:UpdateStatus()
+	end
+end
+
 ---@return {}|{spell: string, spellID: number, unit:string}|{item:string, unit:string}|{flyoutID:number}
 function ActionButton.ExtractMacroData(macro)
 	if not macro then
@@ -867,6 +878,8 @@ function ActionButton.ExtractMacroData(macro)
 	local item
 	---@type string
 	local unit
+	---@type boolean|nil
+	local bagSlot
 
 	--extract the parsed contents of a macro and assign them for further processing
 	local command, abilityOrItem, target
@@ -903,6 +916,10 @@ function ActionButton.ExtractMacroData(macro)
 				item = abilityOrItem
 			elseif tonumber(abilityOrItem) and GetInventoryItemLink("player", abilityOrItem) then --in case abilityOrItem is a number and corresponds to a valid inventory item
 				item = GetInventoryItemLink("player", abilityOrItem)
+			elseif abilityOrItem:match("^%d+%s+%d+$") then --"/use 0 1" is bag and slot, the item is whatever lies there
+				local bag, slot = abilityOrItem:match("^(%d+)%s+(%d+)$")
+				item = C_Container.GetContainerItemLink(tonumber(bag), tonumber(slot))
+				bagSlot = true
 			elseif Photon.spellCache[abilityOrItem:lower()] then
 				spell = abilityOrItem
 				spellID = Photon.spellCache[abilityOrItem:lower()].spellID
@@ -920,7 +937,7 @@ function ActionButton.ExtractMacroData(macro)
 	--a Blizzard flyout, see ActionButton_Flyout.lua
 	local flyoutID = tonumber(macro:match(ActionButton.FLYOUT_PATTERN))
 
-	return {spell = spell, spellID = spellID, unit = unit, item = item, flyoutID = flyoutID}
+	return {spell = spell, spellID = spellID, unit = unit, item = item, flyoutID = flyoutID, bagSlot = bagSlot}
 end
 
 --overwrite function in parent class Button
@@ -942,6 +959,7 @@ function ActionButton:UpdateData()
 	self.item = spellItemUnit.item
 	self.unit = spellItemUnit.unit
 	self.flyoutID = spellItemUnit.flyoutID
+	self.bagSlot = spellItemUnit.bagSlot
 end
 
 --overwrite function in parent class Button

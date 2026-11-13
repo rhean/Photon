@@ -707,6 +707,11 @@ function Button:UpdateAll()
 	self:UpdateStatus()
 	self:UpdateCooldown()
 	self:UpdateUsable()
+
+	--the tooltip is drawn on mouseover, so one that is up still shows what the button had before it changed
+	if GameTooltip:IsOwned(self) then
+		self:UpdateTooltip()
+	end
 end
 
 function Button:UpdateData()
