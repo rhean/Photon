@@ -1,3 +1,10 @@
+## 1.1.2
+
+### Fixes and Tweaks
+- A spell's tooltip shows the new rank as soon as you learn it.
+- A tooltip that is open updates when the button changes, like when you change form.
+- Macros that use an item from your bags by bag and slot show the correct content.
+
 ## 1.1.1
 
 ### Fixes and Tweaks

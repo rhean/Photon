@@ -732,13 +732,18 @@ L["WhatsNew_Text"] = [[
 Welcome to Photon 1.1!
 Please post any bugs and suggestions on Curse or github.com/rhean/Photon
 
-New in 1.1.1:
-- A copied profile's bar outlines in bar edit mode are in the right place and size on the first load, without another reload.
+New in 1.1.2:
+- A spell's tooltip shows the new rank as soon as you learn it.
+- A tooltip that is open updates when the button changes, like when you change form.
+- Macros that use an item from your bags by bag and slot show the correct content.
 ]]
 L["WhatsNew_ShowOlder"] = "Show Older Changes"
 L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
 L["WhatsNew_Older"] = [[
+New in 1.1.1:
+- A copied profile's bar outlines in bar edit mode are in the right place and size on the first load, without another reload.
+
 New in 1.1.0:
 - Data storage changes: the game numbers stances and forms by their place on the stance bar, as in [stance:1] and [stance:2]. The numbers aren't fixed, they are given out at login from what the character has, so when talents or a missing form changed the order, the stance states could end up on the wrong form. Photon now stores each stance's and form's buttons by the spell's own ID instead.
 - |cffffd100There is a very slim chance, mostly for Classic and Forever druids, that some form states shift to another form.|r
