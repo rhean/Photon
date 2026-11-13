@@ -766,12 +766,13 @@ local spellByName = {}
 local isSpellKnown = C_SpellBook and C_SpellBook.IsSpellKnown or IsPlayerSpell
 local function steadySpellID(spell, spellID)
 	local key = spell:lower()
+	local base = FindBaseSpellByID and FindBaseSpellByID(spellID) or spellID
 	local kept = spellByName[key]
-	if kept and isSpellKnown and isSpellKnown(kept) then
+	if kept and kept ~= base and isSpellKnown and isSpellKnown(kept) and not isSpellKnown(base) then
 		return kept
 	end
-	spellByName[key] = FindBaseSpellByID and FindBaseSpellByID(spellID) or spellID
-	return spellByName[key]
+	spellByName[key] = base
+	return base
 end
 
 ---the spell a macro casts when it is nothing but one plain /cast of a known spell, nil otherwise.
