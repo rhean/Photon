@@ -1,3 +1,8 @@
+## 1.1.3
+
+### Fixes and Tweaks
+- Action buttons with a round Masque skin show round icons again.
+
 ## 1.1.2
 
 ### Fixes and Tweaks

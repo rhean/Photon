@@ -732,15 +732,18 @@ L["WhatsNew_Text"] = [[
 Welcome to Photon 1.1!
 Please post any bugs and suggestions on Curse or github.com/rhean/Photon
 
-New in 1.1.2:
-- A spell's tooltip shows the new rank as soon as you learn it.
-- A tooltip that is open updates when the button changes, like when you change form.
-- Macros that use an item from your bags by bag and slot show the correct content.
+New in 1.1.3:
+- Action buttons with a round Masque skin show round icons again.
 ]]
 L["WhatsNew_ShowOlder"] = "Show Older Changes"
 L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
 L["WhatsNew_Older"] = [[
+New in 1.1.2:
+- A spell's tooltip shows the new rank as soon as you learn it.
+- A tooltip that is open updates when the button changes, like when you change form.
+- Macros that use an item from your bags by bag and slot show the correct content.
+
 New in 1.1.1:
 - A copied profile's bar outlines in bar edit mode are in the right place and size on the first load, without another reload.
 
