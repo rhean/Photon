@@ -785,12 +785,22 @@ function Button:RefreshVisuals()
 	self:UpdateUsable()
 end
 
+---the Normal part of the button's Masque skin, nil without one. Masque 12 keeps it in _MSQ_CFG, older Masque in __MSQ_NormalSkin
+function Button:GetMasqueNormalSkin()
+	local cfg = self._MSQ_CFG
+	if cfg then
+		return cfg.Skin_Normal
+	end
+	return self.__MSQ_NormalSkin
+end
+
 function Button:UpdateNormalTexture()
 	local actionTexture, noactionTexture
+	local masqueSkin = self:GetMasqueNormalSkin()
 
-	if self.__MSQ_NormalSkin and self.__MSQ_NormalSkin.Texture then
-		actionTexture = self.__MSQ_NormalSkin.Texture
-		noactionTexture = self.__MSQ_NormalSkin.Texture.EmptyTexture
+	if masqueSkin and masqueSkin.Texture then
+		actionTexture = masqueSkin.Texture
+		noactionTexture = masqueSkin.EmptyTexture
 	else
 		actionTexture = "Interface\\Buttons\\UI-Quickslot2"
 		noactionTexture = "Interface\\Buttons\\UI-Quickslot"
@@ -807,7 +817,7 @@ function Button:UpdateNormalTexture()
 
 	--the thicker inner border, over the icon. not with a Masque skin, that draws its own
 	if self.SlotInner then
-		self.SlotInner:SetShown(self:HasAction() and not self.__MSQ_NormalSkin)
+		self.SlotInner:SetShown(self:HasAction() and not masqueSkin)
 		self.SlotInner:SetVertexColor(color[1],color[2],color[3],1)
 	end
 
