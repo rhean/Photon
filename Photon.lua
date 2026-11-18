@@ -533,10 +533,14 @@ function Photon:UpdateSpellCache()
 	local sIndexMax = 0
 	local numSkillLines = C_SpellBook.GetNumSpellBookSkillLines()
 
+	--the end of the last tab, not the tabs' spells added up. the numbers can skip, and the spells past the sum
+	--were never read, like Convoke the Spirits behind the old covenant one of the same name (issue #69)
 	for i=1,numSkillLines do
 		local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(i)
 
-		sIndexMax = sIndexMax + skillLineInfo.numSpellBookItems
+		if skillLineInfo then
+			sIndexMax = math.max(sIndexMax, skillLineInfo.itemIndexOffset + skillLineInfo.numSpellBookItems)
+		end
 	end
 
 	for i = 1,sIndexMax do
