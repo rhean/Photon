@@ -803,6 +803,10 @@ function ActionButton.PlainCastSpellID(macro)
 	if spellID and ActionButton.STEALTH_SPELLS[spellID] then
 		return nil
 	end
+	--a mount cast by ID does nothing, /cast summons it
+	if spellID and C_MountJournal and C_MountJournal.GetMountFromSpell and C_MountJournal.GetMountFromSpell(spellID) then
+		return nil
+	end
 	if spellID and isSpellKnown and isSpellKnown(spellID) then
 		return spellID
 	end

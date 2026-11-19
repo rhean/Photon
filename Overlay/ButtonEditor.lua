@@ -105,6 +105,8 @@ local ButtonEditor= {
 		overlay.frame:EnableMouseWheel(true)
 		overlay.frame:RegisterForClicks("AnyDown")
 		overlay.frame:SetAllPoints(button)
+		--a bar at the highest strata puts its buttons at DIALOG, the template's own, and the buttons would take the clicks
+		overlay.frame:SetFrameStrata(button:GetFrameStrata() == "DIALOG" and "TOOLTIP" or "DIALOG")
 		overlay.frame:SetScript("OnEnter", function() onEnter(overlay) end)
 		overlay.frame:SetScript("OnLeave", function() onLeave(overlay) end)
 		overlay.frame:SetScript("OnClick", function() onClick(overlay) end)

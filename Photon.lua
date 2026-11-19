@@ -23,7 +23,7 @@ local DB
 local L = LibStub("AceLocale-3.0"):GetLocale("Photon")
 
 --the What's New popup, shown once per account when LATEST_VERSION_NUM changes, see Photon:LoginMessage
-local LATEST_VERSION_NUM = "1.1.3" --change it with WhatsNew_Text in the locale, everyone sees the new release notes once
+local LATEST_VERSION_NUM = "1.1.4" --change it with WhatsNew_Text in the locale, everyone sees the new release notes once
 local SHOW_WHATS_NEW = true --false for a version that shouldn't pop up, like a small fix
 local WHATS_NEW_TEXT = "WhatsNew_Text" --the locale key it shows. another key, like "WhatsNew_Override", shows that text instead
 
@@ -294,8 +294,8 @@ function Photon:PLAYER_ENTERING_WORLD()
 	Photon:UpdateSpellCache()
 	Photon:UPDATE_SHAPESHIFT_FORMS() --catches up bars saved before a form was learned
 
-	--Fix for Titan causing the Main Bar to not be hidden
-	if C_AddOns.IsAddOnLoaded("Titan") then
+	--Fix for Titan causing the Main Bar to not be hidden.
+	if C_AddOns.IsAddOnLoaded("Titan") and TitanUtils_AddonAdjust then
 		TitanUtils_AddonAdjust("MainMenuBar", true)
 	end
 
@@ -533,10 +533,14 @@ function Photon:UpdateSpellCache()
 	local sIndexMax = 0
 	local numSkillLines = C_SpellBook.GetNumSpellBookSkillLines()
 
+	--the end of the last tab, not the tabs' spells added up. the numbers can skip, and the spells past the sum
+	--were never read, like Convoke the Spirits behind the old covenant one of the same name (issue #69)
 	for i=1,numSkillLines do
 		local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(i)
 
-		sIndexMax = sIndexMax + skillLineInfo.numSpellBookItems
+		if skillLineInfo then
+			sIndexMax = math.max(sIndexMax, skillLineInfo.itemIndexOffset + skillLineInfo.numSpellBookItems)
+		end
 	end
 
 	for i = 1,sIndexMax do

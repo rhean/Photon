@@ -1,3 +1,11 @@
+## 1.1.4
+
+### Fixes and Tweaks
+- Buttons on bars set to the Tooltip layer can be selected in button edit mode and keybind mode.
+- Convoke the Spirits no longer turns into the old Shadowlands version on the bars.
+- Updated compatibility with newer versions of Titan Panel.
+- Class mounts can be summoned from a button again.
+
 ## 1.1.3
 
 ### Fixes and Tweaks

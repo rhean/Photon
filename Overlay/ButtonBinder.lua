@@ -166,6 +166,7 @@ local ButtonBinder = {
 		}
 
 		overlay.frame:SetAllPoints(button)
+		overlay.frame:SetFrameStrata(button:GetFrameStrata() == "DIALOG" and "TOOLTIP" or "DIALOG")
 		overlay.frame:SetScript("OnEnter", function() onEnter(overlay) end)
 		overlay.frame:SetScript("OnLeave", function() onLeave(overlay) end)
 		overlay.frame:SetScript("OnClick", function(_, mousebutton, down) onClick(overlay, mousebutton, down) end)
