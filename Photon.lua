@@ -294,8 +294,8 @@ function Photon:PLAYER_ENTERING_WORLD()
 	Photon:UpdateSpellCache()
 	Photon:UPDATE_SHAPESHIFT_FORMS() --catches up bars saved before a form was learned
 
-	--Fix for Titan causing the Main Bar to not be hidden
-	if C_AddOns.IsAddOnLoaded("Titan") then
+	--Fix for Titan causing the Main Bar to not be hidden.
+	if C_AddOns.IsAddOnLoaded("Titan") and TitanUtils_AddonAdjust then
 		TitanUtils_AddonAdjust("MainMenuBar", true)
 	end
 
