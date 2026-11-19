@@ -732,13 +732,19 @@ L["WhatsNew_Text"] = [[
 Welcome to Photon 1.1!
 Please post any bugs and suggestions on Curse or github.com/rhean/Photon
 
-New in 1.1.3:
-- Action buttons with a round Masque skin show round icons again.
+New in 1.1.4:
+- Buttons on bars set to the Tooltip layer can be selected in button edit mode and keybind mode.
+- Convoke the Spirits no longer turns into the old Shadowlands version on the bars.
+- Updated compatibility with newer versions of Titan Panel.
+- Class mounts can be summoned from a button again.
 ]]
 L["WhatsNew_ShowOlder"] = "Show Older Changes"
 L["WhatsNew_HideOlder"] = "Hide Older Changes"
 
 L["WhatsNew_Older"] = [[
+New in 1.1.3:
+- Action buttons with a round Masque skin show round icons again.
+
 New in 1.1.2:
 - A spell's tooltip shows the new rank as soon as you learn it.
 - A tooltip that is open updates when the button changes, like when you change form.
